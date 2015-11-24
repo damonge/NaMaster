@@ -129,23 +129,25 @@ void he_map2alm(int nside,int lmax,int ntrans,flouble **maps,fcomplex **alms)
   sharp_destroy_alm_info(alm_info);
 }
 
-void he_anafast(flouble **maps,flouble **cls,int nside,int lmax,int nmaps,int pol)
+void he_anafast(flouble **maps_1,flouble **maps_2,
+		int nmaps_1,int nmaps_2,
+		int pol_1,int pol_2,
+		flouble **cls,int nside,int lmax)
 {
-  fcomplex **alms;
+  double time;
+  sharp_alm_info *alm_info;
+  sharp_geom_info *geom_info;
+  fcomplex **alms_1,**alms_2;
   int i1,index_cl;
   int lmax_here=3*nside-1;
 
-  alms=(fcomplex **)dam_malloc(nmaps*sizeof(fcomplex *));
-  for(i1=0;i1<nmaps;i1++)
-    alms[i1]=(fcomplex *)dam_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
 
-  if(pol) {
-    if(nmaps!=3)
-      dam_report_error(1,"Must provide 3 maps for polarization\n");
-
-    double time;
-    sharp_alm_info *alm_info;
-    sharp_geom_info *geom_info;
+  alms_1=my_malloc(nmaps_1*sizeof(fcomplex *));
+  for(i1=0;i1<nmaps_1;i1++)
+    alms_1[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
+  if(pol_1) {
+    if(nmaps_1!=3)
+      report_error(1,"Must provide 3 maps for polarization\n");
 
     sharp_make_triangular_alm_info(lmax,lmax,1,&alm_info);
     sharp_make_weighted_healpix_geom_info(nside,1,NULL,&geom_info);
@@ -153,19 +155,19 @@ void he_anafast(flouble **maps,flouble **cls,int nside,int lmax,int nmaps,int po
     //Transform T
     time=0;
 #ifdef _SPREC
-    sharp_execute(SHARP_MAP2ALM,0,&(alms[0]),&(maps[0]),geom_info,
+    sharp_execute(SHARP_MAP2ALM,0,&(alms_1[0]),&(maps_1[0]),geom_info,
 		  alm_info,1,0,&time,NULL);
 #else //_SPREC
-    sharp_execute(SHARP_MAP2ALM,0,&(alms[0]),&(maps[0]),geom_info,
+    sharp_execute(SHARP_MAP2ALM,0,&(alms_1[0]),&(maps_1[0]),geom_info,
 		  alm_info,1,SHARP_DP,&time,NULL);
 #endif //_SPREC
 
     //Transform Q,U
 #ifdef _SPREC
-    sharp_execute(SHARP_MAP2ALM,2,&(alms[1]),&(maps[1]),geom_info,
+    sharp_execute(SHARP_MAP2ALM,2,&(alms_1[1]),&(maps_1[1]),geom_info,
 		  alm_info,1,0,&time,NULL);
 #else //_SPREC
-    sharp_execute(SHARP_MAP2ALM,2,&(alms[1]),&(maps[1]),geom_info,
+    sharp_execute(SHARP_MAP2ALM,2,&(alms_1[1]),&(maps_1[1]),geom_info,
 		  alm_info,1,SHARP_DP,&time,NULL);
 #endif //_SPREC
 
@@ -173,16 +175,56 @@ void he_anafast(flouble **maps,flouble **cls,int nside,int lmax,int nmaps,int po
     sharp_destroy_alm_info(alm_info);
   }
   else {
-    he_map2alm(nside,lmax,nmaps,maps,alms);
+    he_map2alm(nside,lmax,nmaps_1,maps_1,alms_1);
+  }
+
+  if(maps_1==maps_2)
+    alms_2=alms_1;
+  else {
+    alms_2=my_malloc(nmaps_2*sizeof(fcomplex *));
+    for(i1=0;i1<nmaps_2;i1++)
+      alms_2[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
+    if(pol_2) {
+      if(nmaps_2!=3)
+	report_error(1,"Must provide 3 maps for polarization\n");
+      
+      sharp_make_triangular_alm_info(lmax,lmax,1,&alm_info);
+      sharp_make_weighted_healpix_geom_info(nside,1,NULL,&geom_info);
+      
+      //Transform T
+      time=0;
+#ifdef _SPREC
+      sharp_execute(SHARP_MAP2ALM,0,&(alms_2[0]),&(maps_2[0]),geom_info,
+		    alm_info,1,0,&time,NULL);
+#else //_SPREC
+      sharp_execute(SHARP_MAP2ALM,0,&(alms_2[0]),&(maps_2[0]),geom_info,
+		    alm_info,1,SHARP_DP,&time,NULL);
+#endif //_SPREC
+      
+      //Transform Q,U
+#ifdef _SPREC
+      sharp_execute(SHARP_MAP2ALM,2,&(alms_2[1]),&(maps_2[1]),geom_info,
+		    alm_info,1,0,&time,NULL);
+#else //_SPREC
+      sharp_execute(SHARP_MAP2ALM,2,&(alms_2[1]),&(maps_2[1]),geom_info,
+		    alm_info,1,SHARP_DP,&time,NULL);
+#endif //_SPREC
+      
+      sharp_destroy_geom_info(geom_info);
+      sharp_destroy_alm_info(alm_info);
+    }
+    else {
+      he_map2alm(nside,lmax,nmaps_2,maps_2,alms_2);
+    }
   }
 
   index_cl=0;
-  for(i1=0;i1<nmaps;i1++) {
+  for(i1=0;i1<nmaps_1;i1++) {
     int i2;
-    fcomplex *alm1=alms[i1];
-    for(i2=i1;i2<nmaps;i2++) {
+    fcomplex *alm1=alms_1[i1];
+    for(i2=0;i2<nmaps_2;i2++) {
       int l;
-      fcomplex *alm2=alms[i2];
+      fcomplex *alm2=alms_2[i2];
       for(l=0;l<=lmax;l++) {
 	int m;
 	cls[index_cl][l]=creal(alm1[he_indexlm(l,0,lmax)])*creal(alm2[he_indexlm(l,0,lmax)]);
@@ -198,11 +240,15 @@ void he_anafast(flouble **maps,flouble **cls,int nside,int lmax,int nmaps,int po
     }
   }
   
-  for(i1=0;i1<nmaps;i1++)
-    free(alms[i1]);
-  free(alms);
+  for(i1=0;i1<nmaps_1;i1++)
+    free(alms_1[i1]);
+  free(alms_1);
+  if(alms_1!=alms_2) {
+    for(i1=0;i1<nmaps_2;i1++)
+      free(alms_2[i1]);
+    free(alms_2);
+  }
 }
-
 
 void he_write_healpix_map(flouble **tmap,int nfields,long nside,char *fname)
 {
@@ -211,7 +257,7 @@ void he_write_healpix_map(flouble **tmap,int nfields,long nside,char *fname)
   char *ttype[]={"T","Q","U"};
   char *tform[]={"1E","1E","1E"};
   char *tunit[]={"mK","mK","mK"};
-  float *map_dum=(float *)dam_malloc(nside2npix(nside)*sizeof(float));
+  float *map_dum=my_malloc(nside2npix(nside)*sizeof(float));
 
   if((nfields!=1)&&(nfields!=3)) {
     fprintf(stderr,"CRIME: nfields must be 1 or 3\n");
@@ -257,7 +303,7 @@ flouble *he_read_healpix_map(char *fname,long *nside,int nfield)
   fits_open_file(&fptr,fname,READONLY,&status);
   fits_movabs_hdu(fptr,2,&hdutype,&status);
   fits_read_key_lng(fptr,"NAXIS",&naxes,NULL,&status);
-  naxis=(long *)malloc(naxes*sizeof(long));
+  naxis=my_malloc(naxes*sizeof(long));
   fits_read_keys_lng(fptr,"NAXIS",1,naxes,naxis,&nfound,&status);
   fits_read_key_lng(fptr,"NSIDE",nside,NULL,&status);
   npix=12*(*nside)*(*nside);
@@ -274,7 +320,7 @@ flouble *he_read_healpix_map(char *fname,long *nside,int nfield)
   if(!strncmp(order_in_file,"NEST",4))
     nested_in_file=1;
 
-  map=(flouble *)dam_malloc(npix*sizeof(flouble));
+  map=my_malloc(npix*sizeof(flouble));
 #ifdef _SPREC
   fits_read_col(fptr,TFLOAT,nfield+1,1,1,npix,&nulval,map,&anynul,&status);
 #else //_SPREC
@@ -289,7 +335,7 @@ flouble *he_read_healpix_map(char *fname,long *nside,int nfield)
     long ipring,ipnest;
 
     printf("read_healpix_map: input is nested. Transforming to ring.\n");
-    map_ring=(flouble *)dam_malloc(npix*sizeof(flouble));
+    map_ring=my_malloc(npix*sizeof(flouble));
     for(ipnest=0;ipnest<npix;ipnest++) {
       nest2ring(*nside,ipnest,&ipring);
       map_ring[ipring]=map[ipnest];
@@ -378,7 +424,7 @@ long *he_query_strip(long nside,double theta1,double theta2,
     npix_in_strip+=ipix2-ipix1+1;
   }
   *npix_strip=npix_in_strip;
-  pixlist=(long *)dam_malloc(npix_in_strip*sizeof(long));
+  pixlist=my_malloc(npix_in_strip*sizeof(long));
 
   //Count number of pixels in strip
   long i_list=0;
@@ -397,7 +443,7 @@ long *he_query_strip(long nside,double theta1,double theta2,
 void he_ring2nest_inplace(flouble *map_in,long nside)
 {
   long npix=12*nside*nside;
-  flouble *map_out=(flouble *)dam_malloc(npix*sizeof(flouble));
+  flouble *map_out=my_malloc(npix*sizeof(flouble));
 
 #pragma omp parallel default(none)		\
   shared(map_in,nside,npix,map_out)
@@ -420,7 +466,7 @@ void he_ring2nest_inplace(flouble *map_in,long nside)
 void he_nest2ring_inplace(flouble *map_in,long nside)
 {
   long npix=12*nside*nside;
-  flouble *map_out=(flouble *)dam_malloc(npix*sizeof(flouble));
+  flouble *map_out=my_malloc(npix*sizeof(flouble));
 
 #pragma omp parallel default(none)		\
   shared(map_in,nside,npix,map_out)
@@ -510,7 +556,7 @@ double *he_generate_beam_window(int lmax,double fwhm_amin)
 {
   long l;
   double sigma=FWHM2SIGMA*fwhm_amin;
-  double *beam=(double *)dam_malloc((lmax+1)*sizeof(double));
+  double *beam=my_malloc((lmax+1)*sizeof(double));
 
   for(l=0;l<=lmax;l++)
     beam[l]=exp(-0.5*l*(l+1)*sigma*sigma);
@@ -539,17 +585,18 @@ void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alms,double *window)
     free(beam);
 }
 
+/*
 flouble *he_synfast(flouble *cl,int nside,int lmax,unsigned int seed)
 {
   fcomplex *alms;
   int lmax_here=lmax;
   long npix=12*((long)nside)*nside;
-  flouble *map=(flouble *)dam_malloc(npix*sizeof(flouble));
+  flouble *map=my_malloc(npix*sizeof(flouble));
   dam_rng_state *rng=dam_init_rng(seed);
 
   if(lmax>3*nside-1)
     lmax_here=3*nside-1;
-  alms=(fcomplex *)dam_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
+  alms=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
 
   int ll;
   for(ll=0;ll<=lmax_here;ll++) {
@@ -571,3 +618,4 @@ flouble *he_synfast(flouble *cl,int nside,int lmax,unsigned int seed)
 
   return map;
 }
+*/

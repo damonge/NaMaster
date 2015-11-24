@@ -31,16 +31,16 @@ static int drc3jj(int il2,int il3,int im2, int im3,int *l1min_out,
     sign2=-1;
   
   if((il2-abs(im2)<0)||(il3-abs(im3)<0))
-    dam_report_error(1,"Wrong arguments: %d %d %d %d\n",il2,il3,im2,im3);
+    report_error(1,"Wrong arguments: %d %d %d %d\n",il2,il3,im2,im3);
   
   //l1 bounds
   l1max=il2+il3;
-  l1min=DAM_MAX((abs(il2-il3)),(abs(im1)));
+  l1min=COM_MAX((abs(il2-il3)),(abs(im1)));
   *l1max_out=l1max;
   *l1min_out=l1min;
   
   if(l1max-l1min<0) //Check for meaningful values
-    dam_report_error(0,"WTF?\n");
+    report_error(0,"WTF?\n");
   
   if(l1max==l1min) { //If it's only one value:
     thrcof[0]=sign2/sqrt(l1min+l2+l3+1);
@@ -49,7 +49,7 @@ static int drc3jj(int il2,int il3,int im2, int im3,int *l1min_out,
   else {
     nfin=l1max-l1min+1;
     if(nfin>size) //Check there's enough space
-      dam_report_error(1,"Output array is too small %d\n",nfin);
+      report_error(1,"Output array is too small %d\n",nfin);
     else {
       l1=l1min;
       newfac=0.;
@@ -215,12 +215,12 @@ void read_coupling_matrix(char *fname_in,int nbins_in,
 			  gsl_permutation **perm_out)
 {
   int sig;
-  FILE *fi=dam_fopen(fname_in,"rb");
+  FILE *fi=my_fopen(fname_in,"rb");
   gsl_permutation *perm=gsl_permutation_alloc(nbins_in);
   gsl_matrix *coupling_matrix_b=gsl_matrix_alloc(nbins_in,nbins_in);
   int stat=gsl_matrix_fread(fi,coupling_matrix_b);
   if(stat==GSL_EFAILED)
-    dam_report_error(1,"Error reading matrix from file %s\n",fname_in);
+    report_error(1,"Error reading matrix from file %s\n",fname_in);
   fclose(fi);
   gsl_linalg_LU_decomp(coupling_matrix_b,perm,&sig);
   *coupling_matrix_b_out=coupling_matrix_b;
@@ -246,21 +246,21 @@ void compute_coupling_matrix(flouble *cl_mask,int n_lbin,
   gsl_matrix *coupling_matrix_b;
   gsl_permutation *perm;
 
-  cl_mask_bad_ub=(double *)dam_malloc((lmax_in+1)*sizeof(double));
+  cl_mask_bad_ub=my_malloc((lmax_in+1)*sizeof(double));
   for(l2=0;l2<=lmax_in;l2++)
     cl_mask_bad_ub[l2]=cl_mask[l2]*(2*l2+1.);
 
   //Compute coupling matrix
-  coupling_matrix_ub=(double **)dam_malloc((lmax_in+1)*(sizeof(double *)));
+  coupling_matrix_ub=my_malloc((lmax_in+1)*(sizeof(double *)));
   for(l2=0;l2<=lmax_in;l2++)
-    coupling_matrix_ub[l2]=(double *)dam_malloc((lmax_in+1)*(sizeof(double)));
+    coupling_matrix_ub[l2]=my_malloc((lmax_in+1)*(sizeof(double)));
 
   printf("Computing unbinned coupling matrix\n");
 #pragma omp parallel default(none)			\
   shared(lmax_in,cl_mask_bad_ub,coupling_matrix_ub)
   {
     int ll2,ll3;
-    double *wigner_dum=(double *)dam_malloc(2*(lmax_in+1)*sizeof(double));
+    double *wigner_dum=my_malloc(2*(lmax_in+1)*sizeof(double));
 
 #pragma omp for schedule(dynamic)
     for(ll2=0;ll2<=lmax_in;ll2++) {
@@ -305,7 +305,7 @@ void compute_coupling_matrix(flouble *cl_mask,int n_lbin,
 
   //Write matrix if required
   if(strcmp(write_matrix,"none")) {
-    FILE *fo=dam_fopen(write_matrix,"wb");
+    FILE *fo=my_fopen(write_matrix,"wb");
     gsl_matrix_fwrite(fo,coupling_matrix_b);
     fclose(fo);
   }
@@ -330,7 +330,7 @@ flouble *decouple_cl_l(flouble *cl_in,flouble *cl_noise_in,int nbins,int n_lbin,
   int ib2,l2;
   gsl_vector *dl_map_bad_b=gsl_vector_alloc(nbins);
   gsl_vector *dl_map_good_b=gsl_vector_alloc(nbins);
-  flouble *dl_out=(flouble *)dam_malloc(nbins*sizeof(flouble));
+  flouble *dl_out=my_malloc(nbins*sizeof(flouble));
 
   //Bin coupled power spectrum
   for(ib2=0;ib2<nbins;ib2++) {

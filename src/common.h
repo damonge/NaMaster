@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <math.h>
 #include <time.h>
@@ -13,6 +14,8 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_blas.h>
+
+#define COM_MAX(a,b)  (((a)>(b)) ? (a) : (b)) // maximum
 
 #ifdef _LONGIDS
 typedef long lint;
@@ -27,6 +30,13 @@ typedef float complex fcomplex;
 typedef double flouble;
 typedef double complex fcomplex;
 #endif //_SPREC
+
+//Defined in common.c
+int my_linecount(FILE *f);
+void report_error(int level,char *fmt,...);
+void *my_malloc(size_t size);
+void *my_calloc(size_t nmemb,size_t size);
+FILE *my_fopen(const char *path,const char *mode);
 
 //Defined in master.c
 void read_coupling_matrix(char *fname_in,int nbins_in,
@@ -54,9 +64,11 @@ void he_udgrade(flouble *map_in,long nside_in,
 		int nest);
 double *he_generate_beam_window(int lmax,double fwhm_amin);
 void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alms,double *window);
-void he_anafast(flouble **maps,flouble **cls,int nside,int lmax,int nmaps,int pol);
+void he_anafast(flouble **maps_1,flouble **maps_2,
+		int nmaps_1,int nmaps_2,int pol_1,int pol_2,
+		flouble **cls,int nside,int lmax);
 void he_ring2nest_inplace(flouble *map_in,long nside);
 void he_nest2ring_inplace(flouble *map_in,long nside);
-flouble *he_synfast(flouble *cl,int nside,int lmax,unsigned int seed);
+//flouble *he_synfast(flouble *cl,int nside,int lmax,unsigned int seed);
 
 #endif //_COMMON_FGRM
