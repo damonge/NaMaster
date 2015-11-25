@@ -16,6 +16,7 @@
 #include <gsl/gsl_blas.h>
 
 #define COM_MAX(a,b)  (((a)>(b)) ? (a) : (b)) // maximum
+#define COM_MIN(a,b)  (((a)<(b)) ? (a) : (b)) // minimum
 
 #ifdef _LONGIDS
 typedef long lint;
@@ -41,12 +42,15 @@ FILE *my_fopen(const char *path,const char *mode);
 //Defined in master.c
 void read_coupling_matrix(char *fname_in,int nbins_in,
 			  gsl_matrix **coupling_matrix_b_out,
-			  gsl_permutation **perm_out);
+			  gsl_permutation **perm_out,
+			  int pol1,int pol2);
 void compute_coupling_matrix(flouble *cl_mask,int n_lbin,
 			     long nside_in,int lmax_in,int nbins_in,
 			     gsl_matrix **coupling_matrix_b_out,
-			     gsl_permutation **perm_out,char *write_matrix);
-flouble *decouple_cl_l(flouble *cl_in,flouble *cl_noise_in,int nbins,int n_lbin,
+			     gsl_permutation **perm_out,char *write_matrix,
+			     int pol1,int pol2);
+flouble **decouple_cl_l(flouble **cl_in,flouble **cl_noise_in,
+		       int n_cl,int nbins,int n_lbin,
 		       gsl_matrix *coupling_matrix_b,gsl_permutation *perm);
 
 //Defined in healpix_extra.c

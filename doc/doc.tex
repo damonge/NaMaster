@@ -1,0 +1,153 @@
+\documentclass[a4paper,10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\newcommand{\nv}{\hat{\bf n}}
+\newcommand{\wtj}[6]{\left(\begin{array}{ccc} #1 & #2 & #3\\#4 & #5 & #6\end{array} \right)}
+
+
+%opening
+\title{Notes}
+\author{Dr. Frankenstein}
+
+\begin{document}
+
+\maketitle
+
+\section{MASTER algorithm}
+
+Let $_{s_a}\mathbf{I}^a(\nv)$ be a spin-$s_a$ field, where $s_a$ can be 0 (i.e. 1 single component - e.g. $T$) or
+2 (i.e. 2 components - e.g. $(Q,U)$). The observed map is:
+\begin{equation}
+  _{s_a}\tilde{\mathbf{I}}^a(\nv)=w^a(\nv)\,\left[_{s_a}\mathbf{I}^a(\nv)+N^a(\nv)\right],
+\end{equation}
+where $w(\nv)$ is the weights map. The harmonic coefficients of the observed map
+can be written as:
+\begin{equation}
+  _{s_a}\tilde{\mathbf{I}}^a_{\ell_1 m_1}=\sum_{\ell_2,m_2}\,_{s_a}\mathsf{W}^{a}_{\ell_1\ell_2,m_1m_2}\,\cdot\,_{s_a}\mathbf{I}^a_{\ell_2m_2},
+\end{equation}
+where the mixing matrix is
+\begin{equation}
+  _{s_a}\mathsf{W}^a_{\ell_1\ell_2,m_1m_2}\equiv(-1)^m\sum_{\ell_3,m_3}w^a_{\ell_3m_3}\left[\frac{(2\ell_1+1)(2\ell_2+1)(2\ell_3+1)}{4\pi}\right]^{1/2}
+  \wtj{\ell_1}{\ell_2}{\ell_3}{-m_1}{m_2}{m_3}\,_{s_a}\mathsf{J}_{\ell_1\ell_2\ell_3}
+\end{equation}
+with
+\begin{align}
+ &_0\mathsf{J}_{\ell_1\ell_2\ell_3}=\wtj{\ell_1}{\ell_2}{\ell_3}{0}{0}{0},\\
+ &_2\mathsf{J}_{\ell_1\ell_2\ell_3}=\wtj{\ell_1}{\ell_2}{\ell_3}{2}{-2}{0}\frac{1}{2}
+ \left(\begin{array}{ll}
+   1+(-1)^{\ell_1+\ell_2+\ell_3} & i\,[(-1)^{\ell_1+\ell_2+\ell_3}-1]\\
+   -i\,[(-1)^{\ell_1+\ell_2+\ell_3}-1] & 1+(-1)^{\ell_1+\ell_2+\ell_3}
+ \end{array}\right)
+\end{align}
+
+Let us define the pseudo-power-spectrum $\tilde{\mathsf{C}}^{ab}_\ell$
+\begin{equation}
+ \tilde{\mathsf{C}}^{ab}_\ell\equiv\frac{1}{2\ell+1}\sum_m\,_{s_a}\mathbf{I}^a_{\ell m}\cdot\left(_{s_b}\mathbf{I}^b_{\ell m}\right)^\dag
+\end{equation}
+The relation between the pseudo-power-spectrum and the true power spectrum $\mathsf{C}^{ab}_\ell$ can be derived to be of the form
+\begin{equation}\label{eq:pcl_gen}
+  \langle\tilde{\mathbf{C}}^{ab}_\ell\rangle=\sum_{\ell'}\mathsf{M}^{s_as_b}_{\ell\ell'}\cdot\mathbf{C}^{ab}_{\ell'},
+\end{equation}
+where the mode-coupling matrix $\mathsf{M}^{s_as_b}_{\ell\ell'}$ takes the form:
+\begin{itemize}
+ \item Case $s_a=s_b=0$:
+ \begin{equation}
+   \langle\tilde{C}^{T_aT_b}_\ell\rangle=\sum_{\ell'}M^{00}_{\ell\ell'}C^{T_aT_b}_{\ell'}
+ \end{equation}
+ with
+ \begin{equation}
+  M^{00}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}W^{ab}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{0}{0}{0}^2
+ \end{equation}
+ \item Case $s_a=0,\,s_b=2$:
+ \begin{equation}
+   \left\langle\left(\begin{array}{c}
+                \tilde{C}^{T_aE_b}_\ell \\ \tilde{C}^{T_aB_b}_\ell
+               \end{array}\right)\right\rangle
+   =\sum_{\ell'}\left(
+   \begin{array}{ll}
+    M^{0+}_{\ell\ell'} & 0 \\
+    0 & M^{0+}_{\ell\ell'}
+   \end{array}\right)\cdot\left(
+   \begin{array}{c}
+    C^{T_aE_b}_{\ell'}\\ C^{T_aB_b}_{\ell'}
+   \end{array}\right)
+ \end{equation}
+ with
+ \begin{equation}
+  M^{0+}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}W^{ab}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{0}{0}{0}\wtj{\ell}{\ell'}{\ell''}{2}{-2}{0}
+ \end{equation}
+ \item Case $s_a=2,\,s_b=2$:
+ \begin{equation}
+   \left\langle\left(\begin{array}{c}
+                \tilde{C}^{E_aE_b}_\ell \\ \tilde{C}^{E_aB_b}_\ell \\ \tilde{C}^{B_aE_b}_\ell \\ \tilde{C}^{B_aB_b}_\ell
+               \end{array}\right)\right\rangle
+   =\sum_{\ell'}\left(
+   \begin{array}{llll}
+    M^{++}_{\ell\ell'} & 0 & 0 & M^{--}_{\ell\ell'}\\
+    0 & M^{++}_{\ell\ell'} & -M^{--}_{\ell\ell'} & 0\\
+    0 & -M^{--}_{\ell\ell'} & M^{++}_{\ell\ell'} & 0\\
+    M^{--}_{\ell\ell'} & 0 & 0 & M^{++}_{\ell\ell'}
+   \end{array}\right)\cdot\left(
+   \begin{array}{c}
+    C^{E_aE_b}_{\ell'}\\ C^{E_aB_b}_{\ell'} \\ C^{B_aE_b}_{\ell'}\\ C^{B_aB_b}_{\ell'}
+   \end{array}\right)
+ \end{equation}
+ with
+ \begin{align}
+  &M^{++}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}W^{ab}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{2}{-2}{0}^2\frac{1+(-1)^{\ell+\ell'+\ell''}}{2}\\
+  &M^{--}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}W^{ab}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{2}{-2}{0}^2\frac{1-(-1)^{\ell+\ell'+\ell''}}{2},
+ \end{align}
+\end{itemize}
+where in all these equations $W^{ab}_{\ell''}$ is the cross-spectrum of the weights map (without the $(2\ell+1)$ normalization):
+\begin{equation}
+ W^{ab}_\ell\equiv\sum_m w^a_{\ell m}(w^b_{\ell m})^*.
+\end{equation}
+Note that, in Eq. \ref{eq:pcl_gen} one should add, on the right-hand side, the noise cross-power-spectrum:
+\begin{equation}
+\langle\tilde{\mathsf{N}}^{ab}_\ell\rangle\equiv\frac{1}{2\ell+1}\sum_m\langle\mathbf{N}^a_{\ell m}\cdot(\mathbf{N}^b_{\ell m})^\dag\rangle 
+\end{equation}
+
+
+\subsection{Beam}
+Adding the effect of a beam amounts to redefining:
+\begin{equation}
+  \mathsf{M}^{s_as_b}_{\ell_1\ell_2}\rightarrow\mathsf{M}^{s_as_b}_{\ell_1\ell_2}\,b^{ab}_{\ell_2},
+\end{equation}
+where $b^{ab}_\ell$ is the product of the harmonic transform of the beams for maps $a$ and $b$.
+
+\subsection{Bandpowers}
+Consider the case where you want to compute the power spectrum in band-powers given by
+\begin{equation}
+  \mathbf{B}^{ab}_k\equiv\frac{1}{N_k}\sum_{\ell=\ell_k}^{\ell_k+N_k-1} f(\ell)\,\mathbf{C}^{ab}_\ell,
+\end{equation}
+then Eq. \ref{eq:pcl_gen} above becomes
+\begin{equation}\label{eq:pcl_bin}
+  \langle\tilde{\mathbf{B}}^{ab}_k\rangle=\sum_{k'}\mathsf{M}^{B,s_as_b}_{k k'}\cdot\mathbf{B}^{ab}_{k'}+
+  \langle\tilde{\mathsf{N}}^{B,ab}_k\rangle
+\end{equation}
+where the binned coupling matrix $\mathsf{M}^{B,s_as_b}$ is
+\begin{equation}
+  \mathsf{M}^{B,s_as_b}_{k_1,k_2}\equiv\frac{1}{N_{k_1}}\sum_{\ell_1=\ell_{k_1}}^{\ell_{k_1}+N_{k_1}-1}\sum_{\ell_2=\ell_{k_2}}^{\ell_{k_2}+N_{k_2}-1}\frac{f(\ell_1)}{f(\ell_2)}
+  \mathsf{M}^{s_as_b}_{\ell_1\ell_2}
+\end{equation}
+
+%\subsection{Computing $\langle\tilde{C}^N_l\rangle$}
+%Consider the case where the window function is just a flat top-hat multiplied by the inverse variance of the noise:
+%\begin{equation}
+%  W(\nv)\equiv\Theta(\nv)\frac{\bar{\sigma}_N^2}{\sigma_N^2(\nv)},
+%\end{equation}
+%where $\sigma_N^2(\nv)$ is the variance per sterad at each point and $\bar{\sigma}^2_N$ is its sky-averaged value.
+%
+%For uncorrelated noise, we can write $N(\nv)$ as
+%\begin{equation}
+% N(\nv)=u(\nv)\,\sigma_N(\nv)
+%\end{equation}
+%where $u(\nv)$ is a white GRF with power spectrum $C^u_l=1$. In this case, the noise pseudo-$C_l$ can be estimated theoretically:
+%\begin{equation}
+% \langle\tilde{C}_l^N\rangle=\frac{1}{4\pi}\int d\Omega\,\sigma_N^2(\nv)W^2(\nv)=
+% \frac{\bar{\sigma}_N^2}{4\pi}\int d\Omega\, \Theta(\nv)\frac{\bar{\sigma}_N^2}{\sigma_N^2(\nv)}=
+% f_{\rm sky}\,\bar{\sigma}_N^2\overline{\left(\frac{\bar{\sigma}_N^2}{\sigma^2_N}\right)}
+%\end{equation}
+
+\end{document}

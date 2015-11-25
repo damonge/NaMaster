@@ -146,12 +146,13 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
   for(i1=0;i1<nmaps_1;i1++)
     alms_1[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
   if(pol_1) {
-    if(nmaps_1!=3)
-      report_error(1,"Must provide 3 maps for polarization\n");
+    if(nmaps_1!=2)
+      report_error(1,"Must provide 2 maps for polarization\n");
 
     sharp_make_triangular_alm_info(lmax,lmax,1,&alm_info);
     sharp_make_weighted_healpix_geom_info(nside,1,NULL,&geom_info);
 
+    /*
     //Transform T
     time=0;
 #ifdef _SPREC
@@ -161,13 +162,13 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
     sharp_execute(SHARP_MAP2ALM,0,&(alms_1[0]),&(maps_1[0]),geom_info,
 		  alm_info,1,SHARP_DP,&time,NULL);
 #endif //_SPREC
-
+    */
     //Transform Q,U
 #ifdef _SPREC
-    sharp_execute(SHARP_MAP2ALM,2,&(alms_1[1]),&(maps_1[1]),geom_info,
+    sharp_execute(SHARP_MAP2ALM,2,&(alms_1[0]),&(maps_1[0]),geom_info,
 		  alm_info,1,0,&time,NULL);
 #else //_SPREC
-    sharp_execute(SHARP_MAP2ALM,2,&(alms_1[1]),&(maps_1[1]),geom_info,
+    sharp_execute(SHARP_MAP2ALM,2,&(alms_1[0]),&(maps_1[0]),geom_info,
 		  alm_info,1,SHARP_DP,&time,NULL);
 #endif //_SPREC
 
@@ -185,12 +186,13 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
     for(i1=0;i1<nmaps_2;i1++)
       alms_2[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
     if(pol_2) {
-      if(nmaps_2!=3)
-	report_error(1,"Must provide 3 maps for polarization\n");
+      if(nmaps_2!=2)
+	report_error(1,"Must provide 2 maps for polarization\n");
       
       sharp_make_triangular_alm_info(lmax,lmax,1,&alm_info);
       sharp_make_weighted_healpix_geom_info(nside,1,NULL,&geom_info);
-      
+
+      /*      
       //Transform T
       time=0;
 #ifdef _SPREC
@@ -200,16 +202,16 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
       sharp_execute(SHARP_MAP2ALM,0,&(alms_2[0]),&(maps_2[0]),geom_info,
 		    alm_info,1,SHARP_DP,&time,NULL);
 #endif //_SPREC
-      
+      */
       //Transform Q,U
 #ifdef _SPREC
-      sharp_execute(SHARP_MAP2ALM,2,&(alms_2[1]),&(maps_2[1]),geom_info,
+      sharp_execute(SHARP_MAP2ALM,2,&(alms_2[0]),&(maps_2[0]),geom_info,
 		    alm_info,1,0,&time,NULL);
 #else //_SPREC
-      sharp_execute(SHARP_MAP2ALM,2,&(alms_2[1]),&(maps_2[1]),geom_info,
+      sharp_execute(SHARP_MAP2ALM,2,&(alms_2[0]),&(maps_2[0]),geom_info,
 		    alm_info,1,SHARP_DP,&time,NULL);
 #endif //_SPREC
-      
+
       sharp_destroy_geom_info(geom_info);
       sharp_destroy_alm_info(alm_info);
     }
@@ -239,7 +241,7 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
       index_cl++;
     }
   }
-  
+
   for(i1=0;i1<nmaps_1;i1++)
     free(alms_1[i1]);
   free(alms_1);

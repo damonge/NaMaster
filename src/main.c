@@ -1,11 +1,9 @@
 #include "common.h"
 #include <unistd.h>
 
-void run_master(char *fname_maps_1,
-		char *fname_maps_2,
-		int nmaps_1,int nmaps_2,
-		char *fname_mask_1,
-		char *fname_mask_2,
+void run_master(char *fname_maps_1,char *fname_maps_2,
+		char *fname_mask_1,char *fname_mask_2,
+		int pol_1,int pol_2,
 		char *fname_cl_noise,
 		char *coupling_fname,
 		char *prefix_out,
@@ -13,11 +11,14 @@ void run_master(char *fname_maps_1,
 {
   long ip,nside_in,npix,nside_dum;
   int ii,nspec,lmax,nbins;
-  flouble **cl_noise_bad_ub,**cl_maps_bad_ub,*cl_masks_bad_ub,**dl_maps_good_b;
+  flouble **cl_noise_bad_ub,**cl_maps_bad_ub,**dl_maps_good_b;
   flouble *mask_1,*mask_2,**maps_1,**maps_2;
   gsl_matrix *coupling_matrix_b;
   gsl_permutation *perm;
   char fname[256];
+  int nmaps_1=1,nmaps_2=1;
+  if(pol_1) nmaps_1=2;
+  if(pol_2) nmaps_2=2;
 
   //Mask
   printf("Reading masks\n");
@@ -60,12 +61,10 @@ void run_master(char *fname_maps_1,
   nspec=nmaps_1*nmaps_2;
   cl_noise_bad_ub=my_malloc(nspec*sizeof(flouble *));
   cl_maps_bad_ub=my_malloc(nspec*sizeof(flouble *));
-  dl_maps_good_b=my_malloc(nspec*sizeof(flouble *));
   for(ii=0;ii<nspec;ii++) {
     cl_noise_bad_ub[ii]=my_malloc((lmax+1)*sizeof(flouble));
     cl_maps_bad_ub[ii]=my_malloc((lmax+1)*sizeof(flouble));
   }
-  cl_masks_bad_ub=my_malloc((lmax+1)*sizeof(flouble));
 
   //Noise
   printf("Reading noise pseudo-cl\n");
@@ -89,29 +88,29 @@ void run_master(char *fname_maps_1,
 
   //Pseudo-cl
   printf("Computing data pseudo-cl\n");
-  he_anafast(maps_1,maps_2,nmaps_1,nmaps_2,0,0,cl_maps_bad_ub,nside_in,lmax);
-
-  printf("Computing mask pseudo-cl\n");
-  he_anafast(&mask_1,&mask_2,1,1,0,0,&cl_masks_bad_ub,nside_in,lmax);
+  he_anafast(maps_1,maps_2,nmaps_1,nmaps_2,pol_1,pol_2,cl_maps_bad_ub,nside_in,lmax);
 
   //Coupling matrix
   if(access(coupling_fname,F_OK)!=-1) { //If file exists just read matrix
     printf("Reading coupling matrix\n");
     read_coupling_matrix(coupling_fname,nbins,
-			 &coupling_matrix_b,&perm);
+			 &coupling_matrix_b,&perm,0,0);
   }
   else { //Else, compute it
+    flouble *cl_masks_bad_ub;
+    cl_masks_bad_ub=my_malloc((lmax+1)*sizeof(flouble));
+    printf("Computing mask pseudo-cl\n");
+    he_anafast(&mask_1,&mask_2,1,1,0,0,&cl_masks_bad_ub,nside_in,lmax);
     printf("Computing coupling matrix \n");
-    compute_coupling_matrix(cl_masks_bad_ub,n_lbin,nside_in,lmax,
-			    nbins,&coupling_matrix_b,&perm,coupling_fname);
+    compute_coupling_matrix(cl_masks_bad_ub,n_lbin,nside_in,lmax,nbins,
+			    &coupling_matrix_b,&perm,coupling_fname,pol_1,pol_2);
+    free(cl_masks_bad_ub);
   }
 
   //Decouple cls
   printf("Decoupling cls\n");
-  for(ii=0;ii<nspec;ii++) {
-    dl_maps_good_b[ii]=decouple_cl_l(cl_maps_bad_ub[ii],cl_noise_bad_ub[ii],
-				     nbins,n_lbin,coupling_matrix_b,perm);
-  }
+  dl_maps_good_b=decouple_cl_l(cl_maps_bad_ub,cl_noise_bad_ub,nspec,
+			       nbins,n_lbin,coupling_matrix_b,perm);
 
   //Write output
   printf("Writing output\n");
@@ -132,7 +131,6 @@ void run_master(char *fname_maps_1,
     free(cl_maps_bad_ub[ii]);
     free(dl_maps_good_b[ii]);
   }
-  free(cl_masks_bad_ub);
   free(cl_noise_bad_ub);
   free(cl_maps_bad_ub);
   free(dl_maps_good_b);
@@ -153,10 +151,9 @@ void run_master(char *fname_maps_1,
 
 int main(int argc,char **argv)
 {
-  int nmaps_1=0,nmaps_2=0;
-  int n_lbin=0;
-  char fname_maps_1[256]="none";
-  char fname_maps_2[256]="none";
+  int n_lbin=0,pol_1=0,pol_2=0;
+  char fname_map_1[256]="none";
+  char fname_map_2[256]="none";
   char fname_mask_1[256]="none";
   char fname_mask_2[256]="none";
   char fname_cl_noise[256]="none";
@@ -165,40 +162,40 @@ int main(int argc,char **argv)
 
   char **c;
   for(c=argv+1;*c;c++) {
-    if(!strcmp(*c,"-maps"))
-      sprintf(fname_maps_1,"%s",*++c);
-    else if(!strcmp(*c,"-maps_2"))
-      sprintf(fname_maps_2,"%s",*++c);
+    if(!strcmp(*c,"-map"))
+      sprintf(fname_map_1,"%s",*++c);
+    else if(!strcmp(*c,"-map_2"))
+      sprintf(fname_map_2,"%s",*++c);
     else if(!strcmp(*c,"-mask"))
       sprintf(fname_mask_1,"%s",*++c);
     else if(!strcmp(*c,"-mask_2"))
       sprintf(fname_mask_2,"%s",*++c);
+    else if(!strcmp(*c,"-pol"))
+      pol_1=atoi(*++c);
+    else if(!strcmp(*c,"-pol_2"))
+      pol_2=atoi(*++c);
     else if(!strcmp(*c,"-cl_noise"))
       sprintf(fname_cl_noise,"%s",*++c);
     else if(!strcmp(*c,"-coupling"))
       sprintf(coupling_fname,"%s",*++c);
     else if(!strcmp(*c,"-out"))
       sprintf(prefix_out,"%s",*++c);
-    else if(!strcmp(*c,"-nmaps"))
-      nmaps_1=atoi(*++c);
-    else if(!strcmp(*c,"-nmaps_2"))
-      nmaps_2=atoi(*++c);
     else if(!strcmp(*c,"-nlb"))
       n_lbin=atoi(*++c);
     else if(!strcmp(*c,"-h")) {
       fprintf(stderr,"Usage: NaMaster -<opt-name> <option>\n");
       fprintf(stderr,"Options:\n");
-      fprintf(stderr,"  -maps     -> path to file containing map(s)\n");
-      fprintf(stderr,"  -maps_2   -> path to file containing 2nd map(s) (optional)\n");
+      fprintf(stderr,"  -map      -> path to file containing map(s)\n");
+      fprintf(stderr,"  -map_2    -> path to file containing 2nd map(s) (optional)\n");
       fprintf(stderr,"  -mask     -> path to file containing mask\n");
       fprintf(stderr,"  -mask_2   -> path to file containing mask for 2nd map(s) (optional)\n");
+      fprintf(stderr,"  -pol      -> spin-0 (0) or spin-2 (1) input map(s)\n");
+      fprintf(stderr,"  -pol_2    -> spin-0 (0) or spin-2 (1) 2nd input map(s)\n");
       fprintf(stderr,"  -cl_noise -> path to file containing noise Cl(s)\n");
       fprintf(stderr,"  -coupling -> path to file containing coupling matrix (optional)\n");
       fprintf(stderr,"               If non-existing, it will be computed and\n");
       fprintf(stderr,"               written there\n");
       fprintf(stderr,"  -out      -> output prefix\n");
-      fprintf(stderr,"  -nmaps    -> number of maps to correlate\n");
-      fprintf(stderr,"  -nmaps_2  -> number of 2nd maps to correlate (optional)\n");
       fprintf(stderr,"  -nlb      -> number of ells per bin\n");
       fprintf(stderr,"  -h        -> this help\n\n");
       return 0;
@@ -209,29 +206,27 @@ int main(int argc,char **argv)
     }
   }
 
-  if(!strcmp(fname_maps_1,"none"))
-    report_error(1,"Must provide maps to correlate!\n");
+  if(!strcmp(fname_map_1,"none"))
+    report_error(1,"Must provide map to correlate!\n");
   if(!strcmp(fname_mask_1,"none"))
     report_error(1,"Must provide mask\n");
   if(!strcmp(fname_cl_noise,"none"))
     report_error(1,"Must provide noise power spectra\n");
   if(!strcmp(prefix_out,"none"))
     report_error(1,"Must provide output prefix\n");
-  if(nmaps_1<=0)
-    report_error(1,"#maps must be positive\n");
   if(n_lbin<=0)
     report_error(1,"#ell per bin must be positive\n");
 
-  if(!strcmp(fname_maps_2,"none"))
-    sprintf(fname_maps_2,"%s",fname_maps_1);
+  if(!strcmp(fname_map_2,"none")) {
+    sprintf(fname_map_2,"%s",fname_map_1);
+    pol_2=pol_1;
+  }
   if(!strcmp(fname_mask_2,"none"))
     sprintf(fname_mask_2,"%s",fname_mask_1);
-  if(nmaps_2<=0)
-    nmaps_2=nmaps_1;
 
-  run_master(fname_maps_1,fname_maps_2,
-	     nmaps_1,nmaps_2,
+  run_master(fname_map_1,fname_map_2,
 	     fname_mask_1,fname_mask_2,
+	     pol_1,pol_2,
 	     fname_cl_noise,
 	     coupling_fname,
 	     prefix_out,n_lbin);
