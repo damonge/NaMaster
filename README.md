@@ -10,7 +10,8 @@ Dependencies:
             only.
  - GSL: used for linear algebra operations.
  
-Usage: NaMaster -<opt-name> <option>
+Usage: ./NaMaster -< opt-name > < option >
+
 Options:
   - map      -> path to file containing HEALPix map
   - map_2    -> path to file containing 2nd map (optional).
