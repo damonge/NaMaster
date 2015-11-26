@@ -9,6 +9,8 @@ Dependencies:
  - HEALPix: NaMaster uses this pixelization scheme
             only.
  - GSL: used for linear algebra operations.
+ - FITSIO: used to read the input maps.
+ - libsharp: used for SHTs
  
 Usage: ./NaMaster -< opt-name > < option >
 
