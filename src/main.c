@@ -6,7 +6,7 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
 		int pol_1,int pol_2,
 		char *fname_cl_noise,
 		char *coupling_fname,
-		char *prefix_out,
+		char *fname_out,
 		int n_lbin)
 {
   long ip,nside_in,npix,nside_dum;
@@ -15,7 +15,6 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
   flouble *mask_1,*mask_2,**maps_1,**maps_2;
   gsl_matrix *coupling_matrix_b;
   gsl_permutation *perm;
-  char fname[256];
   int nmaps_1=1,nmaps_2=1;
   if(pol_1) nmaps_1=2;
   if(pol_2) nmaps_2=2;
@@ -114,8 +113,7 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
 
   //Write output
   printf("Writing output\n");
-  sprintf(fname,"%s_dl_decoupled.dat",prefix_out);
-  fi=my_fopen(fname,"w");
+  fi=my_fopen(fname_out,"w");
   for(ii=0;ii<nbins;ii++) {
     int jj;
     double l_here=2+ii*n_lbin+0.5*(n_lbin-1.);
@@ -158,7 +156,7 @@ int main(int argc,char **argv)
   char fname_mask_2[256]="none";
   char fname_cl_noise[256]="none";
   char coupling_fname[256]="none";
-  char prefix_out[256]="none";
+  char fname_out[256]="none";
 
   char **c;
   for(c=argv+1;*c;c++) {
@@ -179,7 +177,7 @@ int main(int argc,char **argv)
     else if(!strcmp(*c,"-coupling"))
       sprintf(coupling_fname,"%s",*++c);
     else if(!strcmp(*c,"-out"))
-      sprintf(prefix_out,"%s",*++c);
+      sprintf(fname_out,"%s",*++c);
     else if(!strcmp(*c,"-nlb"))
       n_lbin=atoi(*++c);
     else if(!strcmp(*c,"-h")) {
@@ -195,7 +193,7 @@ int main(int argc,char **argv)
       fprintf(stderr,"  -coupling -> path to file containing coupling matrix (optional)\n");
       fprintf(stderr,"               If non-existing, it will be computed and\n");
       fprintf(stderr,"               written there\n");
-      fprintf(stderr,"  -out      -> output prefix\n");
+      fprintf(stderr,"  -out      -> output filename\n");
       fprintf(stderr,"  -nlb      -> number of ells per bin\n");
       fprintf(stderr,"  -h        -> this help\n\n");
       return 0;
@@ -212,8 +210,8 @@ int main(int argc,char **argv)
     report_error(1,"Must provide mask\n");
   if(!strcmp(fname_cl_noise,"none"))
     report_error(1,"Must provide noise power spectra\n");
-  if(!strcmp(prefix_out,"none"))
-    report_error(1,"Must provide output prefix\n");
+  if(!strcmp(fname_out,"none"))
+    report_error(1,"Must provide output filename\n");
   if(n_lbin<=0)
     report_error(1,"#ell per bin must be positive\n");
 
@@ -229,7 +227,7 @@ int main(int argc,char **argv)
 	     pol_1,pol_2,
 	     fname_cl_noise,
 	     coupling_fname,
-	     prefix_out,n_lbin);
+	     fname_out,n_lbin);
 
   return 0;
 }

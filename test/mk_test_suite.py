@@ -44,16 +44,16 @@ plt.plot(l[:len(l_d)],dl_eb[:len(l_d)],'k-'); plt.plot(l_d,l_d*(l_d+1)*cl_eb_a/(
 plt.plot(l[:len(l_d)],dl_tb[:len(l_d)],'k-'); plt.plot(l_d,l_d*(l_d+1)*cl_tb_a/(2*np.pi),'r-'); plt.plot(l_d,l_d*(l_d+1)*cl_tb_b/(2*np.pi),'b-'); plt.gca().set_xscale('log'); plt.show()
 
 mask=np.ones(hp.nside2npix(nside))
-#th,phi=hp.pix2ang(nside,np.arange(hp.nside2npix(nside)))
-#dec=90-180*th/np.pi
-#mask[np.where(np.fabs(dec)<10.)]=0
-hp.mollview(mask); plt.show()
+hp.write_map("mask_full.fits",mask);
+th,phi=hp.pix2ang(nside,np.arange(hp.nside2npix(nside)))
+dec=90-180*th/np.pi
+mask[np.where(np.fabs(dec)<10.)]=0
+hp.write_map("mask_cut.fits",mask);
 
 hp.write_map("map_t.fits",map_t,column_names=["t"])
 hp.write_map("map_e.fits",map_e,column_names=["e"])
 hp.write_map("map_b.fits",map_b,column_names=["b"])
 hp.write_map("map_qu.fits",[map_q,map_u],column_names=["q","u"]);
-hp.write_map("mask.fits",mask);
 noise=np.zeros_like(l_d)
 np.savetxt("cl_noise_1.dat",np.transpose([l_d,noise]))
 np.savetxt("cl_noise_2.dat",np.transpose([l_d,noise,noise]))

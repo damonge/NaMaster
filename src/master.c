@@ -1,5 +1,14 @@
 #include "common.h"
 
+static flouble weigh_l(int l)
+{
+#ifdef _WEIGH_L2
+  return (flouble)(l*(l+1))/(2*M_PI);
+#else //_WEIGH_L2
+  return 1.;
+#endif //_WEIGH_L2
+}
+
 //Returns all non-zero wigner-3j symbols
 // il2 (in) : l2
 // il3 (in) : l3
@@ -370,8 +379,7 @@ void compute_coupling_matrix(flouble *cl_mask,int n_lbin,
 	  double coupling_b=0;
 	  for(l2=l20;l2<l20+n_lbin;l2++) {
 	    for(l3=l30;l3<l30+n_lbin;l3++) {
-	      coupling_b+=coupling_matrix_ub[n_cl*l2+icl_a][n_cl*l3+icl_b]*
-		((double)(l2*(l2+1))/(l3*(l3+1)));
+	      coupling_b+=coupling_matrix_ub[n_cl*l2+icl_a][n_cl*l3+icl_b]*weigh_l(l2)/weigh_l(l3);
 	    }
 	  }
 	  coupling_b/=n_lbin;
@@ -423,7 +431,7 @@ flouble **decouple_cl_l(flouble **cl_in,flouble **cl_noise_in,
       int l20=2+ib2*n_lbin;
       double dl_b=0;
       for(l2=l20;l2<l20+n_lbin;l2++)
-	dl_b+=(cl_in[icl][l2]-cl_noise_in[icl][l2])*((double)(l2*(l2+1))/(2*M_PI));;
+	dl_b+=(cl_in[icl][l2]-cl_noise_in[icl][l2])*weigh_l(l2);
       dl_b/=n_lbin;
       gsl_vector_set(dl_map_bad_b,n_cl*ib2+icl,dl_b);
     }
