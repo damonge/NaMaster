@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage{fullpage}
 \usepackage{amsmath}
+\newcommand{\Tr}{{\rm Tr}}
 \newcommand{\nv}{\hat{\bf n}}
 \newcommand{\wtj}[6]{\left(\begin{array}{ccc} #1 & #2 & #3\\#4 & #5 & #6\end{array} \right)}
 
@@ -131,6 +132,74 @@ where the binned coupling matrix $\mathsf{M}^{B,s_as_b}$ is
   \mathsf{M}^{B,s_as_b}_{k_1,k_2}\equiv\frac{1}{N_{k_1}}\sum_{\ell_1=\ell_{k_1}}^{\ell_{k_1}+N_{k_1}-1}\sum_{\ell_2=\ell_{k_2}}^{\ell_{k_2}+N_{k_2}-1}\frac{f(\ell_1)}{f(\ell_2)}
   \mathsf{M}^{s_as_b}_{\ell_1\ell_2}
 \end{equation}
+
+\section{Minimum variance quadratic estimator}
+
+Let ${\bf d}$ be the data, given as a pixelized full-sky map, with covariance matrix
+\begin{equation}
+ \langle{\bf d}\,{\bf d}^T\rangle\equiv C(\hat{\mu})\equiv S(\hat{\mu})+N(\hat{\mu})=
+ \sum_\ell C_\ell\,P_\ell(\hat{\mu})+N(\hat{\mu}),
+\end{equation}
+where $\hat{\mu}={\bf n}\,{\bf n}^T$, ${\bf n}$ is the vector of unit vectors containing the angular coordinates to each pixel
+and $P_\ell(x)\equiv (2\ell+1) L_\ell(x)/(4\pi)$, where $L_\ell$ are the Legendre polynomials. Note that we can expand
+$P_\ell$ as
+\begin{equation}
+  P_\ell(\hat{\mu})\equiv\sum_{m=-\ell}^\ell Y_{\ell m}({\bf n})\cdot Y^\dag_{\ell m}({\bf n}).
+\end{equation}
+
+We will parametrize the power spectrum with a set of step functions, such that
+\begin{equation}
+ C_\ell=\sum_b c_b\,\Theta_b(\ell),\hspace{12pt}\leftarrow\hspace{12pt}
+ \Theta_b(\ell)=1\,{\rm if}\,\ell\in[\ell^b_{\rm min},\ell^b_{\rm max}),\,\,0\,{\rm otherwise},
+\end{equation}
+thus we can write
+\begin{equation}
+  C(\hat{\mu})=\sum_b\,c_b\,Q_b(\hat{\mu})+N(\hat{\mu}),\hspace{6pt}{\rm with}\hspace{6pt}
+  Q_b(\mu)=\sum_\ell\Theta_b(\ell)P_\ell(\mu).
+\end{equation}
+
+Let us write the most general quadratic estimator for the coefficients $c_b$:
+\begin{equation}
+ \tilde{c}_b\equiv {\bf d}^T\hat{E}_b{\bf d}-B_b.
+\end{equation}
+The mean value of $\tilde{c}_b$ is:
+\begin{equation}
+ \langle\tilde{c}_b\rangle=\sum_a c_a\Tr(\hat{E}_b\,\hat{Q}_a)+\Tr(\hat{E_b}\hat{N})-B_b,
+\end{equation}
+and therefore we can remove the noise bias by defining
+\begin{equation}
+  B_b\equiv\Tr(\hat{E_b}\hat{N}).
+\end{equation}
+
+The covariance matrix of this estimator is:
+\begin{equation}
+ \left\langle(\tilde{c}_a-\langle\tilde{c}_a\rangle)\,(\tilde{c}_b-\langle\tilde{c}_b\rangle)\right\rangle=2\Tr(\hat{C}\hat{E}_a\hat{C}\hat{E}_b).
+\end{equation}
+Minimizing the variance of $\tilde{c}_a$ under the constrain that the coupling matrix $W_{ab}\equiv\Tr(\hat{E}_b\,\hat{Q}_a)$ have unit
+diagonal, we find the following minimization problem:
+\begin{equation}
+  L=\Tr\left[\hat{E}_b\hat{C}\hat{E}_b\hat{C}-2(\lambda\hat{E}_b\hat{Q}_b-1)\right],
+\end{equation}
+where $\lambda$ is the lagrange multiplier related to the constraint. The solution to this problem is:
+\begin{equation}
+ \hat{E}_b=\frac{\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}}{\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_b)}.
+\end{equation}
+
+Thus, a decoupled, unbiased and minimum-variance estimator, $\hat{c}_b$, for $c_b$ can be found as:
+\begin{equation}
+ \frac{{\bf d}^T\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}{\bf d}-\Tr(\hat{C}^{-1}\hat{Q}_b^{-1}\hat{C}^{-1}\hat{N})}
+ {\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_b)}
+ =\sum_a \hat{c}_a\frac{\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_a)}
+ {\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_b)}.
+\end{equation}
+Note that this estimator requires a guess for the covariance matrix of the data $C(\hat{\mu})$, and exact
+minimum variance will only be attained for the true covariance (which itself depends on the power spectrum coefficients $c_b$).
+The choice of prior covariance will define the type of estimator. Note that this formalism immediately encompasses cut-skies by
+setting to zero all elements of the full covariance matrix involving unobserved pixels (this would correspond to the limit of
+infinite uncorrelated noise for those pixels).
+
+
+
 
 %\subsection{Computing $\langle\tilde{C}^N_l\rangle$}
 %Consider the case where the window function is just a flat top-hat multiplied by the inverse variance of the noise:
