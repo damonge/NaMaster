@@ -187,7 +187,7 @@ where $\lambda$ is the lagrange multiplier related to the constraint. The soluti
 
 Thus, a decoupled, unbiased and minimum-variance estimator, $\hat{c}_b$, for $c_b$ can be found as:
 \begin{equation}
- \frac{{\bf d}^T\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}{\bf d}-\Tr(\hat{C}^{-1}\hat{Q}_b^{-1}\hat{C}^{-1}\hat{N})}
+ \frac{{\bf d}^T\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}{\bf d}-\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{N})}
  {\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_b)}
  =\sum_a \hat{c}_a\frac{\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_a)}
  {\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_b)}.
@@ -198,8 +198,31 @@ The choice of prior covariance will define the type of estimator. Note that this
 setting to zero all elements of the full covariance matrix involving unobserved pixels (this would correspond to the limit of
 infinite uncorrelated noise for those pixels).
 
+\subsection{Strategies for the different terms}
+\begin{itemize}
+\item $\hat{C}^{-1}\,{\bf d}$. This term can be computed by solving the linear system:
+\begin{equation}
+  \hat{C}{\bf z}={\bf d}
+\end{equation}
+via conjugate gradients. The action of $\hat{C}=\hat{S}+\hat{N}$ can be computed as follows:
+\begin{align}
+ [\hat{S}{\bf z}](\nv_1)&\equiv\sum_{\nv_2}S(\nv_1\cdot\nv_2)z(\nv_2)\\
+                        &=\frac{1}{\Delta\Omega}\int d\nv_2\sum_{\ell m}C_\ell
+                          Y^*_{\ell m}(\nv_1)Y^*_{\ell m}(\nv_1)\,\tilde{z}(\nv_2)\\
+                        &=\frac{1}{\Delta\Omega}\sum_{\ell m} Y^*_{\ell m}(\nv_1)C_\ell \tilde{z}_{\ell m}\\
+                        &=\frac{1}{\Delta\Omega}
+{\rm SHT}^{-1}\left[C_\ell\,{\rm SHT}[\tilde{z}(\nv)]_{\ell m}\right],
+\end{align}
+where $\tilde{z}$ is the extension of $z$ to the whole sphere, with $\tilde{z}=0$ in all unobserved pixels.
 
+In most cases the noise power spectrum will be white, in which case $\hat{N}{\bf z}$ is just
+$\sum_{\nv}\sigma_N^2(\nv)z(\nv)$, with $\sigma^2(\nv)$ the per-pixel variance.
 
+\item ${\bf d}^T\hat{C}^-1\hat{Q}_b\hat{C}^{-1}{\bf d}$. With ${\bf z}$ defined as above, this is just:
+\begin{align}
+ {\bf z}^T\hat{Q}_b{\bf z}=\frac{1}{(\Delta\Omega)^2}\sum_\ell\Theta_b(\ell)\sum_m|\tilde{z}_{\ell m}|^2
+\end{align}
+\end{itemize}
 
 %\subsection{Computing $\langle\tilde{C}^N_l\rangle$}
 %Consider the case where the window function is just a flat top-hat multiplied by the inverse variance of the noise:
