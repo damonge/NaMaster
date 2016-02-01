@@ -218,10 +218,27 @@ where $\tilde{z}$ is the extension of $z$ to the whole sphere, with $\tilde{z}=0
 In most cases the noise power spectrum will be white, in which case $\hat{N}{\bf z}$ is just
 $\sum_{\nv}\sigma_N^2(\nv)z(\nv)$, with $\sigma^2(\nv)$ the per-pixel variance.
 
+Note that this procedure works for any $\hat{C}^{-1}{\bf v}$-type operation (see below).
+
+
 \item ${\bf d}^T\hat{C}^-1\hat{Q}_b\hat{C}^{-1}{\bf d}$. With ${\bf z}$ defined as above, this is just:
 \begin{align}
  {\bf z}^T\hat{Q}_b{\bf z}=\frac{1}{(\Delta\Omega)^2}\sum_\ell\Theta_b(\ell)\sum_m|\tilde{z}_{\ell m}|^2
 \end{align}
+\item $\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_a)$. Let ${\bf v}$ be a random vector with covariance
+ $\langle {\bf v}{\bf v}^T\rangle=\hat{1}$, then one can calculate traces by averaging over realizations of such
+ vectors:
+ \begin{equation}
+   \Tr{\hat{A}}=\left\langle {\bf v}^T\hat{A}{\bf v}\right\rangle.
+ \end{equation}
+ Then, the only thing to bear in mind in order to compute the trace above is that the action of the
+ $\hat{Q}_a$ operator is:
+ \begin{equation}
+   \left(\hat{Q}_a{\bf v}\right)_{\nv}=\frac{1}{\Delta\Omega}{\rm SHT}^{-1}\left[\Theta_b(\ell){\rm SHT}\left[\tilde{v}\right]\right]_{\nv},
+ \end{equation}
+ where, as before $\tilde{v}$ is the extension of $v$ with zeros in all unobserved pixels.
+
+
 \end{itemize}
 
 %\subsection{Computing $\langle\tilde{C}^N_l\rangle$}
