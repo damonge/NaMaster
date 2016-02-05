@@ -49,5 +49,12 @@ res_limit=np.sqrt(np.sum(res_map**2)/np.sum((map_s+map_n)**2))
 print res_limit
 hp.mollview(res_map); plt.show()
 
-inv.invert_covar(map_d,ipix_seen,sl_arr,sigma_noise,nside,lcut,1E-3,True)
+nbl=4
+nb=(lmax-2)/nbl
+bins=2+np.arange(nb+1)*nbl
+print bins
+
+corr_cb=inv.correlated_cl(map_d,ipix_seen,sl_arr,sigma_noise,nside,lcut,1E-3,True,bins)
+fisher=inv.fisher_avg(10,ipix_seen,sl_arr,sigma_noise,nside,lcut,1E-3,False,bins)
+#inv.invert_covar(map_d,ipix_seen,sl_arr,sigma_noise,nside,lcut,1E-3,True)
 #inv.invert_covar(map_d,ipix_seen,sl_arr,sigma_noise,nside,isl_prop_arr,res_limit*0.001,True)
