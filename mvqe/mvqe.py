@@ -2,8 +2,9 @@ import numpy as np
 import healpy as hp
 import matplotlib.pyplot as plt
 import cg_invert as inv
+import scipy.linalg as llg
 
-nside=64
+nside=64#
 lmax=3*nside-1
 npix=hp.nside2npix(nside)
 sigma_n=0.3
@@ -54,7 +55,19 @@ nb=(lmax-2)/nbl
 bins=2+np.arange(nb+1)*nbl
 print bins
 
-corr_cb=inv.correlated_cl(map_d,ipix_seen,sl_arr,sigma_noise,nside,lcut,1E-3,True,bins)
-fisher=inv.fisher_avg(10,ipix_seen,sl_arr,sigma_noise,nside,lcut,1E-3,False,bins)
+pars=inv.ParamMVQE(ipix_seen,sl_arr,sigma_noise,nside,lcut,1E-3,True,bins)
+corr_cb=inv.correlated_cl(pars,map_d)
+pars.plot_stuff=False
+fisher=inv.fisher_avg(pars,100)
+uncorr_cb=llg.solve(fisher,corr_cb)
+lbin=0.5*(bins[:-1]+bins[1:])
+np.savetxt("uncorrs.txt",np.transpose([lbin,uncorr_cb,corr_cb]))
+lbin,uncorr_cb,corr_cb=np.loadtxt("uncorrs.txt",unpack=True)
+plt.plot(lbin,uncorr_cb)
+plt.plot(l_arr,sl_arr+nl_arr)
+plt.gca().set_xscale('log')
+plt.gca().set_yscale('log')
+plt.show()
+
 #inv.invert_covar(map_d,ipix_seen,sl_arr,sigma_noise,nside,lcut,1E-3,True)
 #inv.invert_covar(map_d,ipix_seen,sl_arr,sigma_noise,nside,isl_prop_arr,res_limit*0.001,True)

@@ -135,109 +135,142 @@ where the binned coupling matrix $\mathsf{M}^{B,s_as_b}$ is
 
 \section{Minimum variance quadratic estimator}
 
-Let ${\bf d}$ be the data, given as a pixelized full-sky map, with covariance matrix
+Let ${\bf d}_1$ and ${\bf d}_2$ be the data, given as a pixelized full-sky maps,
+with covariance matrix
 \begin{equation}
- \langle{\bf d}\,{\bf d}^T\rangle\equiv C(\hat{\mu})\equiv S(\hat{\mu})+N(\hat{\mu})=
- \sum_\ell C_\ell\,P_\ell(\hat{\mu})+N(\hat{\mu}),
+ \langle{\bf d}_1\,{\bf d}^T_1\rangle\equiv C^{12}(\hat{\mu})\equiv
+ S^{12}(\hat{\mu})+N^{12}(\hat{\mu})=
+ \sum_\ell C^{12}_\ell\,P_\ell(\hat{\mu})+N^{12}(\hat{\mu}),
 \end{equation}
-where $\hat{\mu}={\bf n}\,{\bf n}^T$, ${\bf n}$ is the vector of unit vectors containing the angular coordinates to each pixel
-and $P_\ell(x)\equiv (2\ell+1) L_\ell(x)/(4\pi)$, where $L_\ell$ are the Legendre polynomials. Note that we can expand
-$P_\ell$ as
+where $\hat{\mu}={\bf n}\,{\bf n}^T$, ${\bf n}$ is the vector of unit vectors
+containing the angular coordinates to each pixel and $P_\ell(x)\equiv (2\ell+1)
+L_\ell(x)/(4\pi)$, where $L_\ell$ are the Legendre polynomials. Note that we can
+expand $P_\ell$ as
 \begin{equation}
-  P_\ell(\hat{\mu})\equiv\sum_{m=-\ell}^\ell Y_{\ell m}({\bf n})\cdot Y^\dag_{\ell m}({\bf n}).
+  P_\ell(\hat{\mu})\equiv\sum_{m=-\ell}^\ell
+  Y_{\ell m}({\bf n})\cdot Y^\dag_{\ell m}({\bf n}).
 \end{equation}
 
 We will parametrize the power spectrum with a set of step functions, such that
 \begin{equation}
- C_\ell=\sum_b c_b\,\Theta_b(\ell),\hspace{12pt}\leftarrow\hspace{12pt}
- \Theta_b(\ell)=1\,{\rm if}\,\ell\in[\ell^b_{\rm min},\ell^b_{\rm max}),\,\,0\,{\rm otherwise},
+ C^{12}_\ell=\sum_b c_b\,\Theta_b(\ell),\hspace{12pt}\leftarrow\hspace{12pt}
+ \Theta_b(\ell)=1\,{\rm if}\,\ell\in[\ell^b_{\rm min},\ell^b_{\rm max}),
+ \,\,0\,{\rm otherwise},
 \end{equation}
 thus we can write
 \begin{equation}
-  C(\hat{\mu})=\sum_b\,c_b\,Q_b(\hat{\mu})+N(\hat{\mu}),\hspace{6pt}{\rm with}\hspace{6pt}
+  C^{12}(\hat{\mu})=\sum_b\,c_b\,Q_b(\hat{\mu})+N^{12}(\hat{\mu}),
+  \hspace{6pt}{\rm with}\hspace{6pt}
   Q_b(\mu)=\sum_\ell\Theta_b(\ell)P_\ell(\mu).
 \end{equation}
 
 Let us write the most general quadratic estimator for the coefficients $c_b$:
 \begin{equation}
- \tilde{c}_b\equiv {\bf d}^T\hat{E}_b{\bf d}-B_b.
+ \tilde{c}_b\equiv {\bf d}^T_1\hat{E}_b{\bf d}_2-B_b.
 \end{equation}
 The mean value of $\tilde{c}_b$ is:
 \begin{equation}
- \langle\tilde{c}_b\rangle=\sum_a c_a\Tr(\hat{E}_b\,\hat{Q}_a)+\Tr(\hat{E_b}\hat{N})-B_b,
+ \langle\tilde{c}_b\rangle=\sum_a c_a\Tr(\hat{E}_b\,\hat{Q}_a)+
+ \Tr(\hat{E_b}\hat{N}^{12})-B_b,
 \end{equation}
 and therefore we can remove the noise bias by defining
 \begin{equation}
-  B_b\equiv\Tr(\hat{E_b}\hat{N}).
+  B_b\equiv\Tr(\hat{E_b}\hat{N}^{12}).
 \end{equation}
 
 The covariance matrix of this estimator is:
 \begin{equation}
- \left\langle(\tilde{c}_a-\langle\tilde{c}_a\rangle)\,(\tilde{c}_b-\langle\tilde{c}_b\rangle)\right\rangle=2\Tr(\hat{C}\hat{E}_a\hat{C}\hat{E}_b).
+ \left\langle(\tilde{c}_a-\langle\tilde{c}_a\rangle)\,
+ (\tilde{c}_b-\langle\tilde{c}_b\rangle)\right\rangle=
+ \Tr(\hat{C}^{11}\hat{E}_a\hat{C}^{22}\hat{E}_b),
 \end{equation}
-Minimizing the variance of $\tilde{c}_a$ under the constrain that the coupling matrix $W_{ab}\equiv\Tr(\hat{E}_b\,\hat{Q}_a)$ have unit
-diagonal, we find the following minimization problem:
+where we have approximated $C_\ell^{12}\ll[C_\ell^{11},C_\ell^{22}]$. Minimizing
+the variance of $\tilde{c}_a$ under the constrain that the coupling matrix
+$W_{ab}\equiv\Tr(\hat{E}_b\,\hat{Q}_a)$ have unit diagonal, we find the following
+minimization problem:
 \begin{equation}
-  L=\Tr\left[\hat{E}_b\hat{C}\hat{E}_b\hat{C}-2(\lambda\hat{E}_b\hat{Q}_b-1)\right],
+  L=\Tr\left[\hat{E}_b\hat{C}^{11}\hat{E}_b\hat{C}^{22}-
+  2(\lambda\hat{E}_b\hat{Q}_b-1)\right],
 \end{equation}
-where $\lambda$ is the lagrange multiplier related to the constraint. The solution to this problem is:
+where $\lambda$ is the lagrange multiplier related to the constraint. The solution
+to this problem is:
 \begin{equation}
- \hat{E}_b=\frac{\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}}{\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_b)}.
+ \hat{E}_b=\frac{\hat{C}_{11}^{-1}\hat{Q}_b\hat{C}_{22}^{-1}}
+ {\Tr(\hat{C}^{-1}_{11}\hat{Q}_b\hat{C}^{-1}_{22}\hat{Q}_b)}.
 \end{equation}
 
-Thus, a decoupled, unbiased and minimum-variance estimator, $\hat{c}_b$, for $c_b$ can be found as:
+Thus, a decoupled, unbiased and minimum-variance estimator, $\hat{c}_b$, for
+$c_b$ can be found as:
 \begin{equation}
- \frac{{\bf d}^T\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}{\bf d}-\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{N})}
- {\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_b)}
- =\sum_a \hat{c}_a\frac{\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_a)}
- {\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_b)}.
+ {\bf d}^T_1\hat{C}^{-1}_{11}\hat{Q}_b\hat{C}^{-1}_{22}{\bf d}_2-
+ \Tr(\hat{C}^{-1}_{11}\hat{Q}_b\hat{C}^{-1}_{22}\hat{N})
+ =\sum_a \hat{c}_a\Tr(\hat{C}^{-1}_{11}\hat{Q}_b\hat{C}^{-1}_{22}\hat{Q}_a).
 \end{equation}
-Note that this estimator requires a guess for the covariance matrix of the data $C(\hat{\mu})$, and exact
-minimum variance will only be attained for the true covariance (which itself depends on the power spectrum coefficients $c_b$).
-The choice of prior covariance will define the type of estimator. Note that this formalism immediately encompasses cut-skies by
-setting to zero all elements of the full covariance matrix involving unobserved pixels (this would correspond to the limit of
-infinite uncorrelated noise for those pixels).
+Note that this estimator requires a guess for the covariance matrix of the data
+$C^{ij}(\hat{\mu})$, and exact minimum variance will only be attained for the true
+covariance (which itself depends on the power spectrum coefficients $c_b$).
+The choice of prior covariance will define the type of estimator. Note that this
+formalism immediately encompasses cut-skies by setting to zero all elements of the
+full covariance matrix involving unobserved pixels (this would correspond to the
+limit of infinite uncorrelated noise for those pixels).
 
 \subsection{Strategies for the different terms}
 \begin{itemize}
-\item $\hat{C}^{-1}\,{\bf d}$. This term can be computed by solving the linear system:
+\item $\hat{C}^{-1}_{ii}\,{\bf d}_i$. This term can be computed by solving the
+linear system:
 \begin{equation}
-  \hat{C}{\bf z}={\bf d}
+  \hat{C}_{ii}{\bf z}_i={\bf d}_i
 \end{equation}
-via conjugate gradients. The action of $\hat{C}=\hat{S}+\hat{N}$ can be computed as follows:
+via conjugate gradients. The action of $\hat{C}=\hat{S}+\hat{N}$ can be computed as
+follows:
 \begin{align}
  [\hat{S}{\bf z}](\nv_1)&\equiv\sum_{\nv_2}S(\nv_1\cdot\nv_2)z(\nv_2)\\
                         &=\frac{1}{\Delta\Omega}\int d\nv_2\sum_{\ell m}C_\ell
                           Y^*_{\ell m}(\nv_1)Y^*_{\ell m}(\nv_1)\,\tilde{z}(\nv_2)\\
-                        &=\frac{1}{\Delta\Omega}\sum_{\ell m} Y^*_{\ell m}(\nv_1)C_\ell \tilde{z}_{\ell m}\\
+                        &=\frac{1}{\Delta\Omega}\sum_{\ell m} Y^*_{\ell m}(\nv_1)
+                        C_\ell \tilde{z}_{\ell m}\\
                         &=\frac{1}{\Delta\Omega}
 {\rm SHT}^{-1}\left[C_\ell\,{\rm SHT}[\tilde{z}(\nv)]_{\ell m}\right],
 \end{align}
-where $\tilde{z}$ is the extension of $z$ to the whole sphere, with $\tilde{z}=0$ in all unobserved pixels.
+where $\tilde{z}$ is the extension of $z$ to the whole sphere, with $\tilde{z}=0$ in
+all unobserved pixels.
 
-In most cases the noise power spectrum will be white, in which case $\hat{N}{\bf z}$ is just
-$\sum_{\nv}\sigma_N^2(\nv)z(\nv)$, with $\sigma^2(\nv)$ the per-pixel variance.
+In most cases the noise power spectrum will be white, in which case $\hat{N}{\bf z}$
+is just $\sum_{\nv}\sigma_N^2(\nv)z(\nv)$, with $\sigma^2(\nv)$ the per-pixel
+variance.
 
-Note that this procedure works for any $\hat{C}^{-1}{\bf v}$-type operation (see below).
+Note that this procedure works for any $\hat{C}^{-1}{\bf v}$-type operation
+(see below).
 
 
-\item ${\bf d}^T\hat{C}^-1\hat{Q}_b\hat{C}^{-1}{\bf d}$. With ${\bf z}$ defined as above, this is just:
+\item ${\bf d}^T_1\hat{C}^{-1}_{11}\hat{Q}_b\hat{C}^{-1}_{22}{\bf d}_2$. With
+${\bf z}_i$ defined as above, this is just:
 \begin{align}
- {\bf z}^T\hat{Q}_b{\bf z}=\frac{1}{(\Delta\Omega)^2}\sum_\ell\Theta_b(\ell)\sum_m|\tilde{z}_{\ell m}|^2
+ {\bf z}^T_i\hat{Q}_b{\bf z}_j=
+ \frac{1}{(\Delta\Omega)^2}\sum_\ell\Theta_b(\ell)
+ \sum_m(\tilde{z}^{i}_{\ell m})^*\tilde{z}^{i}_{\ell m}
 \end{align}
-\item $\Tr(\hat{C}^{-1}\hat{Q}_b\hat{C}^{-1}\hat{Q}_a)$. Let ${\bf v}$ be a random vector with covariance
- $\langle {\bf v}{\bf v}^T\rangle=\hat{1}$, then one can calculate traces by averaging over realizations of such
- vectors:
+\item $\Tr(\hat{C}^{-1}_{11}\hat{Q}_b\hat{C}^{-1}_{22}\hat{Q}_a)$. Let ${\bf v}$ be a random
+vector with covariance $\langle {\bf v}{\bf v}^T\rangle=\hat{1}$, then one can
+calculate traces by averaging over realizations of such
+vectors:
  \begin{equation}
    \Tr{\hat{A}}=\left\langle {\bf v}^T\hat{A}{\bf v}\right\rangle.
  \end{equation}
  Then, the only thing to bear in mind in order to compute the trace above is that the action of the
  $\hat{Q}_a$ operator is:
  \begin{equation}
-   \left(\hat{Q}_a{\bf v}\right)_{\nv}=\frac{1}{\Delta\Omega}{\rm SHT}^{-1}\left[\Theta_b(\ell){\rm SHT}\left[\tilde{v}\right]\right]_{\nv},
+   \left(\hat{Q}_a{\bf v}\right)_{\nv}=\frac{1}{\Delta\Omega}{\rm SHT}^{-1}
+   \left[\Theta_b(\ell){\rm SHT}\left[\tilde{v}\right]\right]_{\nv},
  \end{equation}
  where, as before $\tilde{v}$ is the extension of $v$ with zeros in all unobserved pixels.
 
+ In order to minimize the number of operations needed to compute this trace we can compute
+ it as:
+ \begin{equation}
+   \Tr(\hat{C}^{-1}_{11}\hat{Q}_b\hat{C}^{-1}_{22}\hat{Q}_a)=
+   \left\langle(\hat{C}^{-1}_{11}\,{\bf v})^T\hat{Q}_b(\hat{C}^{-1}_{22}\hat{Q}_a\,{\bf v})\right\rangle
+ \end{equation}
 
 \end{itemize}
 
