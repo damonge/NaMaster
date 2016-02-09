@@ -1,5 +1,5 @@
-#ifndef _COMMON_FGRM
-#define _COMMON_FGRM
+#ifndef _COMMON_
+#define _COMMON_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,4 +75,4 @@ void he_ring2nest_inplace(flouble *map_in,long nside);
 void he_nest2ring_inplace(flouble *map_in,long nside);
 //flouble *he_synfast(flouble *cl,int nside,int lmax,unsigned int seed);
 
-#endif //_COMMON_FGRM
+#endif //_COMMON_
