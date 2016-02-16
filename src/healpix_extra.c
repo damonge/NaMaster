@@ -129,6 +129,36 @@ void he_map2alm(int nside,int lmax,int ntrans,flouble **maps,fcomplex **alms)
   sharp_destroy_alm_info(alm_info);
 }
 
+void he_alm2cl(fcomplex **alms_1,fcomplex **alms_2,
+	       int nmaps_1,int nmaps_2,
+	       int pol_1,int pol_2,
+	       flouble **cls,int lmax)
+{
+  int i1,index_cl;
+
+  index_cl=0;
+  for(i1=0;i1<nmaps_1;i1++) {
+    int i2;
+    fcomplex *alm1=alms_1[i1];
+    for(i2=0;i2<nmaps_2;i2++) {
+      int l;
+      fcomplex *alm2=alms_2[i2];
+      for(l=0;l<=lmax;l++) {
+	int m;
+	cls[index_cl][l]=creal(alm1[he_indexlm(l,0,lmax)])*creal(alm2[he_indexlm(l,0,lmax)]);
+
+	for(m=1;m<=l;m++) {
+	  long index_lm=he_indexlm(l,m,lmax);
+	  cls[index_cl][l]+=2*(creal(alm1[index_lm])*creal(alm2[index_lm])+
+			       cimag(alm1[index_lm])*cimag(alm2[index_lm]));
+	}
+	cls[index_cl][l]/=(2*l+1.);
+      }
+      index_cl++;
+    }
+  }
+}
+
 void he_anafast(flouble **maps_1,flouble **maps_2,
 		int nmaps_1,int nmaps_2,
 		int pol_1,int pol_2,
@@ -138,8 +168,7 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
   sharp_alm_info *alm_info;
   sharp_geom_info *geom_info;
   fcomplex **alms_1,**alms_2;
-  int i1,index_cl;
-  int lmax_here=3*nside-1;
+  int i1,lmax_here=3*nside-1;
 
 
   alms_1=my_malloc(nmaps_1*sizeof(fcomplex *));
@@ -220,27 +249,7 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
     }
   }
 
-  index_cl=0;
-  for(i1=0;i1<nmaps_1;i1++) {
-    int i2;
-    fcomplex *alm1=alms_1[i1];
-    for(i2=0;i2<nmaps_2;i2++) {
-      int l;
-      fcomplex *alm2=alms_2[i2];
-      for(l=0;l<=lmax;l++) {
-	int m;
-	cls[index_cl][l]=creal(alm1[he_indexlm(l,0,lmax)])*creal(alm2[he_indexlm(l,0,lmax)]);
-
-	for(m=1;m<=l;m++) {
-	  long index_lm=he_indexlm(l,m,lmax);
-	  cls[index_cl][l]+=2*(creal(alm1[index_lm])*creal(alm2[index_lm])+
-			       cimag(alm1[index_lm])*cimag(alm2[index_lm]));
-	}
-	cls[index_cl][l]/=(2*l+1.);
-      }
-      index_cl++;
-    }
-  }
+  he_alm2cl(alms_1,alms_2,nmaps_1,nmaps_2,pol_1,pol_2,cls,lmax);
 
   for(i1=0;i1<nmaps_1;i1++)
     free(alms_1[i1]);
@@ -566,7 +575,7 @@ double *he_generate_beam_window(int lmax,double fwhm_amin)
   return beam;
 }
 
-void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alms,double *window)
+void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,double *window)
 {
   double *beam;
   int mm;
@@ -579,7 +588,7 @@ void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alms,double *window)
     for(ll=mm;ll<=lmax;ll++) {
       long index=he_indexlm(ll,mm,lmax);
 
-      alms[index]*=beam[ll];
+      alm_out[index]=alm_in[index]*beam[ll];
     }
   }
 

@@ -67,7 +67,11 @@ void he_udgrade(flouble *map_in,long nside_in,
 		flouble *map_out,long nside_out,
 		int nest);
 double *he_generate_beam_window(int lmax,double fwhm_amin);
-void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alms,double *window);
+void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,double *window);
+void he_alm2cl(fcomplex **alms_1,fcomplex **alms_2,
+	       int nmaps_1,int nmaps_2,
+	       int pol_1,int pol_2,
+	       flouble **cls,int lmax);
 void he_anafast(flouble **maps_1,flouble **maps_2,
 		int nmaps_1,int nmaps_2,int pol_1,int pol_2,
 		flouble **cls,int nside,int lmax);
