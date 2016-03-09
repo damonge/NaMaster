@@ -402,9 +402,9 @@ static void fisher_single(ParamMVQE *par,flouble *fisher)
       for(ii=par->bins[ib2];ii<par->bins[ib2+1];ii++)
 	fish_here+=(2*ii+1.)*cl[ii];
       fish_here/=(par->pixsize*par->pixsize);
-      fisher[ib2+par->nbins*ib1]+=fish_here;
+      fisher[ib2+par->nbins*ib1]=fish_here;
       if(ib2!=ib1)
-	fisher[ib1+par->nbins*ib2]+=fish_here;
+	fisher[ib1+par->nbins*ib2]=fish_here;
     }
   }
 
@@ -412,22 +412,47 @@ static void fisher_single(ParamMVQE *par,flouble *fisher)
   free(cl);
 }
 
-#define NAVG 10
+#define NAVG_START 10
+#define REQ_PREC 1E-3
 void fisher_avg(ParamMVQE *par,flouble *fisher)
 {
-  int isam;
-  memset(fisher,0,par->nbins*par->nbins*sizeof(flouble));
-  
-  for(isam=0;isam<NAVG;isam++) {
-    int jj;
-    flouble mean_here=0;
+  int isam,jj,nsam_needed;
+  flouble avg_rms,avg_mean;
+  flouble *fish_single=my_calloc(par->nbins*par->nbins,sizeof(fisher));
+  flouble *fish_mean=my_calloc(par->nbins*par->nbins,sizeof(fisher));
+  flouble *fish_rms=my_calloc(par->nbins*par->nbins,sizeof(fisher));
+
+  for(isam=0;isam<NAVG_START;isam++) {
     create_unit_variance(par,par->map_v);
-    fisher_single(par,fisher);
-    for(jj=0;jj<par->nbins*par->nbins;jj++)
-      mean_here+=fisher[jj]/(isam+1);
-    printf("Sample %d, mean %lE\n",isam,mean_here);
+    fisher_single(par,fish_single);
+    for(jj=0;jj<par->nbins*par->nbins;jj++) {
+      fish_mean[jj]+=fish_single[jj];
+      fish_rms[jj]+=fish_single[jj]*fish_single[jj];
+    }
+    printf("Sample %d\n",isam);
   }
- 
-  for(isam=0;isam<par->nbins*par->nbins;isam++)
-    fisher[isam]/=NAVG;
+
+  //Estimate variance on single sample
+  for(jj=0;jj<par->nbins*par->nbins;jj++) {
+    fish_mean[jj]/=NAVG_START;
+    fish_rms[jj]=sqrt(fish_rms[jj]/NAVG_START-fish_mean[jj]*fish_mean[jj]);
+  }
+  avg_rms=0;
+  avg_mean=0;
+  for(jj=0;jj<par->nbins;jj++) {
+    avg_rms+=fish_rms[jj+par->nbins*jj];
+    avg_mean+=fish_mean[jj+par->nbins*jj];
+  }
+  avg_rms/=par->nbins;
+  avg_mean/=par->nbins;
+  printf(" After %d samples, rms/mean = %lE\n",NAVG_START,avg_rms/avg_mean);
+  nsam_needed=(int)(pow(avg_rms/(avg_mean*REQ_PREC),2));
+  printf(" %d samples will be required\n",nsam_needed);
+
+  for(jj=0;jj<par->nbins*par->nbins;jj++)
+    fisher[jj]=fish_mean[jj];
+
+  free(fish_single);
+  free(fish_mean);
+  free(fish_rms);
 }
