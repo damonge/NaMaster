@@ -9,7 +9,6 @@
 #include <time.h>
 #include <complex.h>
 #include <omp.h>
-#include <dam_utils.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_linalg.h>
