@@ -93,7 +93,7 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
   if(access(coupling_fname,F_OK)!=-1) { //If file exists just read matrix
     printf("Reading coupling matrix\n");
     read_coupling_matrix(coupling_fname,nbins,
-			 &coupling_matrix_b,&perm,0,0);
+			 &coupling_matrix_b,&perm,pol_1,pol_2);
   }
   else { //Else, compute it
     flouble *cl_masks_bad_ub;
