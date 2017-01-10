@@ -295,8 +295,8 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
   for(l2=0;l2<=lmax_in;l2++) {
     cl_mask_bad_ub[l2]=cl_mask[l2]*(2*l2+1.);
     if(flag_do_cov) {
-      cl_mask_a_bad_ub[l2]=cl_mask[l2]*(2*l2+1.);
-      cl_mask_b_bad_ub[l2]=cl_mask[l2]*(2*l2+1.);
+      cl_mask_a_bad_ub[l2]=cl_mask_a[l2]*(2*l2+1.);
+      cl_mask_b_bad_ub[l2]=cl_mask_b[l2]*(2*l2+1.);
     }
   }
 
@@ -313,7 +313,7 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
       coupling_matrix_b_ub[l2]=my_calloc((lmax_in+1),(sizeof(double)));
   }
 
-  if((strcmp(write_matrix,"none")) && (access(write_matrix,F_OK))) {
+  if((strcmp(write_matrix,"none")) && (access(write_matrix,F_OK)!=-1)) {
     FILE *fo=my_fopen(write_matrix,"rb");
     for(l2=0;l2<n_cl*(lmax_in+1);l2++)
       my_fread(coupling_matrix_ub[l2],sizeof(double),n_cl*(lmax_in+1),fo);
@@ -373,9 +373,11 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
 		coupling_matrix_ub[2*ll2+0][2*ll3+0]+=wfac; //TE,TE
 		coupling_matrix_ub[2*ll2+1][2*ll3+1]+=wfac; //TB,TB
 		if(flag_do_cov) {
+		  int suml=l1+ll2+ll3;
 		  wfac=cl_mask_a_bad_ub[l1]*wigner_00[j00]*wigner_22[j22];
-		  coupling_matrix_a_ub[ll2][ll3]+=wfac; //TE,TE
-		  wfac=cl_mask_b_bad_ub[l1]*wigner_00[j00]*wigner_22[j22];
+		  if(!(suml & 1))
+		    coupling_matrix_a_ub[ll2][ll3]+=wfac; //TE,TE
+		  wfac=cl_mask_b_bad_ub[l1]*wigner_00[j00]*wigner_00[j00];
 		  coupling_matrix_b_ub[ll2][ll3]+=wfac; //TE,TE
 		}
 	      }
@@ -394,7 +396,7 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
 		  coupling_matrix_ub[4*ll2+2][4*ll3+2]+=wfac; //BE,BE
 		  coupling_matrix_ub[4*ll2+3][4*ll3+3]+=wfac; //BB,BB
 		}
-		if(flag_do_cov) {
+		if(flag_do_cov) { //This is wrong
 		  wfac=cl_mask_a_bad_ub[l1]*wigner_22[j22]*wigner_22[j22];
 		  coupling_matrix_a_ub[ll2][ll3]+=wfac; //TE,TE
 		  wfac=cl_mask_b_bad_ub[l1]*wigner_22[j22]*wigner_22[j22];
@@ -408,8 +410,8 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
 	    for(kk=0;kk<n_cl;kk++)
 	      coupling_matrix_ub[n_cl*ll2+jj][n_cl*ll3+kk]*=(2*ll3+1.)/(4*M_PI);
 	    if(flag_do_cov) {
-	      coupling_matrix_a_ub[ll2][ll3]*=(2*ll3+1.)/(4*M_PI);
-	      coupling_matrix_b_ub[ll2][ll3]*=(2*ll3+1.)/(4*M_PI);
+	      coupling_matrix_a_ub[ll2][ll3]/=(4*M_PI);
+	      coupling_matrix_b_ub[ll2][ll3]/=(4*M_PI);
 	    }
 	  }
 	}
@@ -419,7 +421,12 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
       if((n_cl==2) || (n_cl==4))
 	free(wigner_22);
     } //end omp parallel
-    free(cl_mask_bad_ub);
+  }
+
+  free(cl_mask_bad_ub);
+  if(flag_do_cov) {
+    free(cl_mask_a_bad_ub);
+    free(cl_mask_b_bad_ub);
   }
 
   int nbins_in=bins->n_bands;
