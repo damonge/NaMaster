@@ -1,5 +1,4 @@
 CC= gcc
-
 WOPT= -Wall -fopenmp
 #WOPT+= -D_WEIGH_L2
 LIB_GSL= -L/opt/local/lib
