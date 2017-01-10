@@ -313,7 +313,7 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
       coupling_matrix_b_ub[l2]=my_calloc((lmax_in+1),(sizeof(double)));
   }
 
-  if(strcmp(write_matrix,"none")) {
+  if((strcmp(write_matrix,"none")) && (access(write_matrix,F_OK))) {
     FILE *fo=my_fopen(write_matrix,"rb");
     for(l2=0;l2<n_cl*(lmax_in+1);l2++)
       my_fread(coupling_matrix_ub[l2],sizeof(double),n_cl*(lmax_in+1),fo);
@@ -468,7 +468,7 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
 
   //Write matrix if required
   if(strcmp(write_matrix_b,"none")) {
-    FILE *fo=my_fopen(write_matrix,"wb");
+    FILE *fo=my_fopen(write_matrix_b,"wb");
     gsl_matrix_fwrite(fo,coupling_matrix_b);
     fclose(fo);
   }

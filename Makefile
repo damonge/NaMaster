@@ -1,14 +1,14 @@
 CC= gcc
 WOPT= -Wall -fopenmp
 #WOPT+= -D_WEIGH_L2
-LIB_GSL= -L/opt/local/lib
-INC_GSL= -I/opt/local/include/gsl
-LIB_HP= -L/opt/local/lib
-INC_HP= -I/opt/local/include
-LIB_FITS= -L/opt/local/lib
-INC_FITS= -I/opt/local/include
-LIB_SHARP= -L/Users/allisonradmin/Documents/Cambridge/computing/libsharp-code/auto/lib
-INC_SHARP= -I/Users/allisonradmin/Documents/Cambridge/computing/libsharp-code/auto/include
+LIB_GSL= -L/home/damonge/lib
+INC_GSL= -I/home/damonge/include
+LIB_HP=
+INC_HP=
+LIB_FITS=
+INC_FITS= 
+LIB_SHARP=
+INC_SHARP=
 
 CFLAGS= $(WOPT) -I./src $(INC_GSL) $(INC_HP) $(INC_FITS) $(INC_SHARP)
 LIBS= $(LIB_GSL) $(LIB_HP) $(LIB_FITS) $(LIB_SHARP)

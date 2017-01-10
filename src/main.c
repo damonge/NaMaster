@@ -1,5 +1,4 @@
 #include "common.h"
-#include <unistd.h>
 
 void run_master(char *fname_maps_1,char *fname_maps_2,
 		char *fname_mask_1,char *fname_mask_2,
@@ -186,7 +185,7 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
 
 int main(int argc,char **argv)
 {
-  int n_lbin=0,pol_1=0,pol_2=0;
+  int n_lbin=1,pol_1=0,pol_2=0;
   char fname_map_1[256]="none";
   char fname_map_2[256]="none";
   char fname_mask_1[256]="none";
