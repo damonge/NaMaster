@@ -108,7 +108,8 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
 			 &coupling_matrix_b,&perm,pol_1,pol_2);
   }
   else { //Else, compute it
-    flouble *cl_masks_bad_ub,*cl_mask_a_bad_ub,*cl_mask_b_bad_ub;
+    flouble *cl_masks_bad_ub;
+    flouble *cl_mask_a_bad_ub=NULL,*cl_mask_b_bad_ub=NULL;
     cl_masks_bad_ub=my_malloc((lmax+1)*sizeof(flouble));
     printf("Computing mask pseudo-cl\n");
     he_anafast(&mask_1,&mask_2,1,1,0,0,&cl_masks_bad_ub,nside_in,lmax);
@@ -116,6 +117,8 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
       flouble *mask11=my_malloc(npix*sizeof(flouble));
       flouble *mask12=my_malloc(npix*sizeof(flouble));
       flouble *mask22=my_malloc(npix*sizeof(flouble));
+      cl_mask_a_bad_ub=my_malloc((lmax+1)*sizeof(flouble));
+      cl_mask_b_bad_ub=my_malloc((lmax+1)*sizeof(flouble));
       for(ip=0;ip<npix;ip++) {
 	mask11[ip]=mask_1[ip]*mask_1[ip];
 	mask12[ip]=mask_1[ip]*mask_2[ip];
@@ -124,6 +127,9 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
       printf("Computing mask pseudo-cl for covariance\n");
       he_anafast(&mask11,&mask22,1,1,0,0,&cl_mask_a_bad_ub,nside_in,lmax);
       he_anafast(&mask12,&mask12,1,1,0,0,&cl_mask_b_bad_ub,nside_in,lmax);
+      free(mask11);
+      free(mask12);
+      free(mask22);
     }
 
     printf("Computing coupling matrix \n");
@@ -131,6 +137,8 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
 			    &coupling_matrix_b,&perm,coupling_fname,coupling_b_fname,coupling_cov_fname,
 			    pol_1,pol_2);
     free(cl_masks_bad_ub);
+    free(cl_mask_a_bad_ub);
+    free(cl_mask_b_bad_ub);
   }
 
   //Decouple cls
