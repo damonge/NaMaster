@@ -453,9 +453,6 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
       }
     }
   }
-  for(l2=0;l2<n_cl*(lmax_in+1);l2++)
-    free(coupling_matrix_ub[l2]);
-  free(coupling_matrix_ub);
 
   if(strcmp(write_matrix,"none")) {
     FILE *fo=my_fopen(write_matrix,"wb");
@@ -478,6 +475,19 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
     FILE *fo=my_fopen(write_matrix_b,"wb");
     gsl_matrix_fwrite(fo,coupling_matrix_b);
     fclose(fo);
+  }
+
+  for(l2=0;l2<n_cl*(lmax_in+1);l2++)
+    free(coupling_matrix_ub[l2]);
+  free(coupling_matrix_ub);
+
+  if(flag_do_cov) {
+    for(l2=0;l2<(lmax_in+1);l2++) {
+      free(coupling_matrix_a_ub[l2]);
+      free(coupling_matrix_b_ub[l2]);
+    }
+    free(coupling_matrix_a_ub);
+    free(coupling_matrix_b_ub);
   }
 
   //Get LU decomposition
