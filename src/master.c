@@ -292,7 +292,14 @@ void compute_coupling_matrix(flouble *cl_mask,long nside_in,int lmax_in,BinSchm 
     coupling_matrix_ub[l2]=my_calloc(n_cl*(lmax_in+1),(sizeof(double)));
 
   if((strcmp(write_matrix,"none")) && (access(write_matrix,F_OK)!=-1)) {
+    int dum_n_cl,dum_lmax_in;
     FILE *fo=my_fopen(write_matrix,"rb");
+    my_fread(&dum_n_cl,sizeof(int),1,fo);
+    if(dum_n_cl!=n_cl)
+      report_error(1,"Input covariance matrix has a wrong number of power spectra\n");
+    my_fread(&dum_lmax_in,sizeof(int),1,fo);
+    if(dum_lmax_in!=lmax_in)
+      report_error(1,"Input covariance matrix has a wrong lmax\n");
     for(l2=0;l2<n_cl*(lmax_in+1);l2++)
       my_fread(coupling_matrix_ub[l2],sizeof(double),n_cl*(lmax_in+1),fo);
     fclose(fo);
@@ -407,6 +414,8 @@ void compute_coupling_matrix(flouble *cl_mask,long nside_in,int lmax_in,BinSchm 
 
   if((strcmp(write_matrix,"none")) && (access(write_matrix,F_OK)!=-1)) {
     FILE *fo=my_fopen(write_matrix,"wb");
+    my_fwrite(&n_cl,sizeof(int),1,fo);
+    my_fwrite(&lmax_in,sizeof(int),1,fo);
     for(l2=0;l2<n_cl*(lmax_in+1);l2++)
       my_fwrite(coupling_matrix_ub[l2],sizeof(double),n_cl*(lmax_in+1),fo);
     fclose(fo);
