@@ -20,22 +20,13 @@ MASTERO= src/master.o
 MAINO= src/main.o
 OBJ= $(COMMONO) $(HEO) $(MASTERO) $(MAINO)
 
-COMMVQEO= src/common_mvqe.o
-CGO= src/cg.o
-RNGO= src/rng.o
-MAINMVQEO= src/main_mvqe.o
-OBJMVQE= $(COMMONO) $(HEO) $(COMMVQEO) $(RNGO) $(CGO) $(MAINMVQEO)
-
-EXEC= NaMaster MVQE
+EXEC= NaMaster
 all: $(EXEC)
 
 NaMaster : $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) $(LIBS) -o $@
 
-MVQE : $(OBJMVQE)
-	$(CC) $(CFLAGS) $(OBJMVQE) $(LIBS) -o $@
-
 clean :
-	rm -f $(EXEC) $(OBJ) $(OBJMVQE)
+	rm -f $(EXEC) $(OBJ)
 cleaner :
-	rm -f $(EXEC) $(OBJ) $(OBJMVQE) *~ src/*~
+	rm -f $(EXEC) $(OBJ) *~ src/*~
