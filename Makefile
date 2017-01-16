@@ -6,7 +6,7 @@ INC_GSL= -I/home/damonge/include
 LIB_HP=
 INC_HP=
 LIB_FITS=
-INC_FITS=
+INC_FITS= 
 LIB_SHARP=
 INC_SHARP=
 
