@@ -260,23 +260,18 @@ void read_coupling_matrix(char *fname_in,int nbins_in,
 // coupling_matrix_b_out (out) : LU decomposition of the coupling matrix
 // perm (out) : permutation used in the LU decomposition
 // mask_out (out) : mask map
-void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mask_b,
-			     long nside_in,int lmax_in,BinSchm *bins,
+void compute_coupling_matrix(flouble *cl_mask,long nside_in,int lmax_in,BinSchm *bins,
 			     gsl_matrix **coupling_matrix_b_out,
 			     gsl_permutation **perm_out,
-			     char *write_matrix,char *write_matrix_b,char *write_matrix_cov,
+			     char *write_matrix,char *write_matrix_b,
 			     int pol1,int pol2)
 {
   int sig,ib2,ib3,l2,l3;
-  double *cl_mask_bad_ub,*cl_mask_a_bad_ub,*cl_mask_b_bad_ub;
-  double **coupling_matrix_ub,**coupling_matrix_a_ub,**coupling_matrix_b_ub;
+  double *cl_mask_bad_ub;
+  double **coupling_matrix_ub;
   gsl_matrix *coupling_matrix_b;
   gsl_permutation *perm;
   int n_cl;
-  int flag_do_cov=0;
-
-  if(strcmp(write_matrix_cov,"none"))
-    flag_do_cov=1;
 
   if(pol1) {
     if(pol2) n_cl=4;
@@ -288,30 +283,13 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
   }
 
   cl_mask_bad_ub=my_malloc((lmax_in+1)*sizeof(double));
-  if(flag_do_cov) {
-    cl_mask_a_bad_ub=my_malloc((lmax_in+1)*sizeof(double));
-    cl_mask_b_bad_ub=my_malloc((lmax_in+1)*sizeof(double));
-  }
-  for(l2=0;l2<=lmax_in;l2++) {
+  for(l2=0;l2<=lmax_in;l2++)
     cl_mask_bad_ub[l2]=cl_mask[l2]*(2*l2+1.);
-    if(flag_do_cov) {
-      cl_mask_a_bad_ub[l2]=cl_mask_a[l2]*(2*l2+1.);
-      cl_mask_b_bad_ub[l2]=cl_mask_b[l2]*(2*l2+1.);
-    }
-  }
 
   //Compute coupling matrix
   coupling_matrix_ub=my_malloc(n_cl*(lmax_in+1)*(sizeof(double *)));
   for(l2=0;l2<n_cl*(lmax_in+1);l2++)
     coupling_matrix_ub[l2]=my_calloc(n_cl*(lmax_in+1),(sizeof(double)));
-  if(flag_do_cov) {
-    coupling_matrix_a_ub=my_malloc((lmax_in+1)*(sizeof(double *)));
-    for(l2=0;l2<(lmax_in+1);l2++)
-      coupling_matrix_a_ub[l2]=my_calloc((lmax_in+1),(sizeof(double)));
-    coupling_matrix_b_ub=my_malloc((lmax_in+1)*(sizeof(double *)));
-    for(l2=0;l2<(lmax_in+1);l2++)
-      coupling_matrix_b_ub[l2]=my_calloc((lmax_in+1),(sizeof(double)));
-  }
 
   if((strcmp(write_matrix,"none")) && (access(write_matrix,F_OK)!=-1)) {
     FILE *fo=my_fopen(write_matrix,"rb");
@@ -322,9 +300,7 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
   else {
     printf("Computing unbinned coupling matrix\n");
 #pragma omp parallel default(none)				\
-  shared(lmax_in,cl_mask_bad_ub,coupling_matrix_ub,n_cl)	\
-  shared(flag_do_cov,cl_mask_a_bad_ub,cl_mask_b_bad_ub)		\
-  shared(coupling_matrix_a_ub,coupling_matrix_b_ub)
+  shared(lmax_in,cl_mask_bad_ub,coupling_matrix_ub,n_cl)
     {
       int ll2,ll3;
       double *wigner_00,*wigner_22;
@@ -361,25 +337,11 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
 	      if(n_cl==1) {
 		wfac=cl_mask_bad_ub[l1]*wigner_00[j00]*wigner_00[j00];
 		coupling_matrix_ub[1*ll2+0][1*ll3+0]+=wfac; //TT,TT
-		if(flag_do_cov) {
-		  wfac=cl_mask_a_bad_ub[l1]*wigner_00[j00]*wigner_00[j00];
-		  coupling_matrix_a_ub[ll2][ll3]+=wfac; //TT,TT
-		  wfac=cl_mask_b_bad_ub[l1]*wigner_00[j00]*wigner_00[j00];
-		  coupling_matrix_b_ub[ll2][ll3]+=wfac; //TT,TT
-		}
 	      }
 	      if(n_cl==2) {
 		wfac=cl_mask_bad_ub[l1]*wigner_00[j00]*wigner_22[j22];
 		coupling_matrix_ub[2*ll2+0][2*ll3+0]+=wfac; //TE,TE
 		coupling_matrix_ub[2*ll2+1][2*ll3+1]+=wfac; //TB,TB
-		if(flag_do_cov) {
-		  int suml=l1+ll2+ll3;
-		  wfac=cl_mask_a_bad_ub[l1]*wigner_00[j00]*wigner_22[j22];
-		  if(!(suml & 1))
-		    coupling_matrix_a_ub[ll2][ll3]+=wfac; //TE,TE
-		  wfac=cl_mask_b_bad_ub[l1]*wigner_00[j00]*wigner_00[j00];
-		  coupling_matrix_b_ub[ll2][ll3]+=wfac; //TE,TE
-		}
 	      }
 	      if(n_cl==4) {
 		int suml=l1+ll2+ll3;
@@ -396,12 +358,6 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
 		  coupling_matrix_ub[4*ll2+2][4*ll3+2]+=wfac; //BE,BE
 		  coupling_matrix_ub[4*ll2+3][4*ll3+3]+=wfac; //BB,BB
 		}
-		if(flag_do_cov) { //This is wrong
-		  wfac=cl_mask_a_bad_ub[l1]*wigner_22[j22]*wigner_22[j22];
-		  coupling_matrix_a_ub[ll2][ll3]+=wfac; //TE,TE
-		  wfac=cl_mask_b_bad_ub[l1]*wigner_22[j22]*wigner_22[j22];
-		  coupling_matrix_b_ub[ll2][ll3]+=wfac; //TE,TE
-		}
 	      }
 	    }
 	  }
@@ -409,10 +365,6 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
 	    int kk;
 	    for(kk=0;kk<n_cl;kk++)
 	      coupling_matrix_ub[n_cl*ll2+jj][n_cl*ll3+kk]*=(2*ll3+1.)/(4*M_PI);
-	    if(flag_do_cov) {
-	      coupling_matrix_a_ub[ll2][ll3]/=(4*M_PI);
-	      coupling_matrix_b_ub[ll2][ll3]/=(4*M_PI);
-	    }
 	  }
 	}
       } //end omp for
@@ -424,10 +376,6 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
   }
 
   free(cl_mask_bad_ub);
-  if(flag_do_cov) {
-    free(cl_mask_a_bad_ub);
-    free(cl_mask_b_bad_ub);
-  }
 
   int nbins_in=bins->n_bands;
   coupling_matrix_b=gsl_matrix_alloc(n_cl*nbins_in,n_cl*nbins_in);
@@ -457,19 +405,10 @@ void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mas
     free(coupling_matrix_ub[l2]);
   free(coupling_matrix_ub);
 
-  if(strcmp(write_matrix,"none")) {
+  if((strcmp(write_matrix,"none")) && (access(write_matrix,F_OK)!=-1)) {
     FILE *fo=my_fopen(write_matrix,"wb");
     for(l2=0;l2<n_cl*(lmax_in+1);l2++)
       my_fwrite(coupling_matrix_ub[l2],sizeof(double),n_cl*(lmax_in+1),fo);
-    fclose(fo);
-  }
-
-  if(strcmp(write_matrix_cov,"none")) {
-    FILE *fo=my_fopen(write_matrix_cov,"wb");
-    for(l2=0;l2<(lmax_in+1);l2++)
-      my_fwrite(coupling_matrix_a_ub[l2],sizeof(double),(lmax_in+1),fo);
-    for(l2=0;l2<(lmax_in+1);l2++)
-      my_fwrite(coupling_matrix_b_ub[l2],sizeof(double),(lmax_in+1),fo);
     fclose(fo);
   }
 

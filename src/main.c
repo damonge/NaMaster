@@ -6,7 +6,6 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
 		char *fname_cl_noise,
 		char *coupling_fname,
 		char *coupling_b_fname,
-		char *coupling_cov_fname,
 		char *fname_out,
 		char *fname_bins,
 		int n_lbin)
@@ -108,36 +107,15 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
   }
   else { //Else, compute it
     flouble *cl_masks_bad_ub;
-    flouble *cl_mask_a_bad_ub=NULL,*cl_mask_b_bad_ub=NULL;
     cl_masks_bad_ub=my_malloc((lmax+1)*sizeof(flouble));
     printf("Computing mask pseudo-cl\n");
     he_anafast(&mask_1,&mask_2,1,1,0,0,&cl_masks_bad_ub,nside_in,lmax);
-    if(strcmp(coupling_cov_fname,"none")) {
-      flouble *mask11=my_malloc(npix*sizeof(flouble));
-      flouble *mask12=my_malloc(npix*sizeof(flouble));
-      flouble *mask22=my_malloc(npix*sizeof(flouble));
-      cl_mask_a_bad_ub=my_malloc((lmax+1)*sizeof(flouble));
-      cl_mask_b_bad_ub=my_malloc((lmax+1)*sizeof(flouble));
-      for(ip=0;ip<npix;ip++) {
-	mask11[ip]=mask_1[ip]*mask_1[ip];
-	mask12[ip]=mask_1[ip]*mask_2[ip];
-	mask22[ip]=mask_2[ip]*mask_2[ip];
-      }
-      printf("Computing mask pseudo-cl for covariance\n");
-      he_anafast(&mask11,&mask22,1,1,0,0,&cl_mask_a_bad_ub,nside_in,lmax);
-      he_anafast(&mask12,&mask12,1,1,0,0,&cl_mask_b_bad_ub,nside_in,lmax);
-      free(mask11);
-      free(mask12);
-      free(mask22);
-    }
 
     printf("Computing coupling matrix \n");
-    compute_coupling_matrix(cl_masks_bad_ub,cl_mask_a_bad_ub,cl_mask_b_bad_ub,nside_in,lmax,bins,
-			    &coupling_matrix_b,&perm,coupling_fname,coupling_b_fname,coupling_cov_fname,
+    compute_coupling_matrix(cl_masks_bad_ub,nside_in,lmax,bins,
+			    &coupling_matrix_b,&perm,coupling_fname,coupling_b_fname,
 			    pol_1,pol_2);
     free(cl_masks_bad_ub);
-    free(cl_mask_a_bad_ub);
-    free(cl_mask_b_bad_ub);
   }
 
   //Decouple cls
@@ -193,7 +171,6 @@ int main(int argc,char **argv)
   char fname_bins[256]="none";
   char fname_cl_noise[256]="none";
   char coupling_fname[256]="none";
-  char coupling_cov_fname[256]="none";
   char coupling_b_fname[256]="none";
   char fname_out[256]="none";
 
@@ -217,8 +194,6 @@ int main(int argc,char **argv)
       sprintf(coupling_b_fname,"%s",*++c);
     else if(!strcmp(*c,"-coupling_unbinned"))
       sprintf(coupling_fname,"%s",*++c);
-    else if(!strcmp(*c,"-coupling_covariance"))
-      sprintf(coupling_cov_fname,"%s",*++c);
     else if(!strcmp(*c,"-out"))
       sprintf(fname_out,"%s",*++c);
     else if(!strcmp(*c,"-binning"))
@@ -237,8 +212,7 @@ int main(int argc,char **argv)
       fprintf(stderr,"  -cl_noise -> path to file containing noise Cl(s)\n");
       fprintf(stderr,"  -coupling -> path to file containing coupling matrix (optional)\n");
       fprintf(stderr,"  -coupling_unbinned -> path to file containing unbinned coupling matrix (optional)\n");
-      fprintf(stderr,"               If non-existing, it will be computed and\n");
-      fprintf(stderr,"               written there\n");
+      fprintf(stderr,"               If non-existing, it will be computed and written there\n");
       fprintf(stderr,"  -out      -> output filename\n");
       fprintf(stderr,"  -binning  -> path to file containing binning scheme\n");
       fprintf(stderr,"  -nlb      -> number of ells per bin (used only if -binning isn't used)\n");
@@ -273,7 +247,6 @@ int main(int argc,char **argv)
 	     fname_cl_noise,
 	     coupling_fname,
 	     coupling_b_fname,
-	     coupling_cov_fname,
 	     fname_out,fname_bins,n_lbin);
 
   return 0;

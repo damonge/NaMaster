@@ -56,11 +56,10 @@ void read_coupling_matrix(char *fname_in,int nbins_in,
 			  gsl_matrix **coupling_matrix_b_out,
 			  gsl_permutation **perm_out,
 			  int pol1,int pol2);
-void compute_coupling_matrix(flouble *cl_mask,flouble *cl_mask_a,flouble *cl_mask_b,
-			     long nside_in,int lmax_in,BinSchm *bins,
+void compute_coupling_matrix(flouble *cl_mask,long nside_in,int lmax_in,BinSchm *bins,
 			     gsl_matrix **coupling_matrix_b_out,
 			     gsl_permutation **perm_out,
-			     char *write_matrix,char *write_matrix_b,char *write_matrix_cov,
+			     char *write_matrix,char *write_matrix_b,
 			     int pol1,int pol2);
 flouble **decouple_cl_l(flouble **cl_in,flouble **cl_noise_in,
 			int n_cl,BinSchm *bins,
