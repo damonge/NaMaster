@@ -95,8 +95,9 @@ BinSchm *create_bins(int nlb,int nside)
 
   for(ii=0;ii<nband_max;ii++) {
     int jj;
+    bins->nell_list[ii]=nlb;
     bins->ell_list[ii]=my_malloc(nlb*sizeof(int));
-    bins->w_list[ii]=my_malloc(nlb*sizeof(int));
+    bins->w_list[ii]=my_malloc(nlb*sizeof(flouble));
     for(jj=0;jj<nlb;jj++) {
       bins->ell_list[ii][jj]=2+ii*nlb+jj;
       bins->w_list[ii][jj]=w0;
