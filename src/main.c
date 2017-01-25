@@ -34,13 +34,6 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
       report_error(1,"Wrong nside %d\n",nside_dum);
   }
 
-  //Binning
-  BinSchm *bins;
-  if(!strcmp(fname_bins,"none"))
-    bins=create_bins(n_lbin,nside_in);
-  else
-    bins=read_bins(fname_bins,nside_in);
-
   //Maps
   printf("Reading maps\n");
   maps_1=my_malloc(nmaps_1*sizeof(flouble *));
@@ -63,6 +56,13 @@ void run_master(char *fname_maps_1,char *fname_maps_2,
 	maps_2[ii][ip]*=mask_2[ip];
     }
   }
+
+  //Binning
+  BinSchm *bins;
+  if(!strcmp(fname_bins,"none"))
+    bins=create_bins(n_lbin,nside_in);
+  else
+    bins=read_bins(fname_bins,nside_in);
 
   //Allocate cl
   nspec=nmaps_1*nmaps_2;
