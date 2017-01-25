@@ -68,9 +68,10 @@ flouble **decouple_cl_l(flouble **cl_in,flouble **cl_noise_in,
 //Defined in healpix_extra.c
 long he_nalms(int lmax);
 long he_indexlm(int l,int m,int lmax);
-void he_alm2map(int nside,int lmax,int ntrans,flouble **maps,fcomplex **alms);
-void he_map2alm(int nside,int lmax,int ntrans,flouble **maps,fcomplex **alms);
+void he_alm2map(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms);
+void he_map2alm(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms);
 void he_write_healpix_map(flouble **tmap,int nfields,long nside,char *fname);
+void he_get_file_params(char *fname,long *nside,int *nfields,int *isnest);
 flouble *he_read_healpix_map(char *fname,long *nside,int nfield);
 int he_ring_num(long nside,double z);
 long *he_query_strip(long nside,double theta1,double theta2,

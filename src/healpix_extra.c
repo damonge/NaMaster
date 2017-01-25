@@ -41,12 +41,22 @@ long he_indexlm(int l,int m,int lmax)
     return l;
 }
 
-void he_alm2map(int nside,int lmax,int ntrans,flouble **maps,fcomplex **alms)
+void he_alm2map(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms)
 {
   int nbatches,nodd,itrans;
   double time;
   sharp_alm_info *alm_info;
   sharp_geom_info *geom_info;
+#ifdef _SPREC
+  int flag_prec=0;
+#else //_SPREC
+  int flag_prec=SHARP_DP;
+#endif //_SPREC
+  int nmaps=1,spin=0;
+  if(pol) {
+    nmaps=2;
+    spin=2;
+  }
 
   sharp_make_triangular_alm_info(lmax,lmax,1,&alm_info);
   sharp_make_weighted_healpix_geom_info(nside,1,NULL,&geom_info);
@@ -56,41 +66,37 @@ void he_alm2map(int nside,int lmax,int ntrans,flouble **maps,fcomplex **alms)
 
   for(itrans=0;itrans<nbatches;itrans++) {
     time=0;
-#ifdef _SPREC
-    sharp_execute(SHARP_ALM2MAP,0,&(alms[itrans*MAX_SHT]),
-                  &(maps[itrans*MAX_SHT]),geom_info,
-                  alm_info,MAX_SHT,0,&time,NULL);
-#else //_SPREC
-    sharp_execute(SHARP_ALM2MAP,0,&(alms[itrans*MAX_SHT]),
-                  &(maps[itrans*MAX_SHT]),geom_info,
-                  alm_info,MAX_SHT,SHARP_DP,&time,NULL);
-#endif //_SPREC
-    //  printf("  Took %lf s according to libsharp\n",time);
+    sharp_execute(SHARP_ALM2MAP,spin,&(alms[itrans*nmaps*MAX_SHT]),
+                  &(maps[itrans*nmaps*MAX_SHT]),geom_info,
+                  alm_info,MAX_SHT,flag_prec,&time,NULL);
   }
   if(nodd>0) {
     time=0;
-#ifdef _SPREC
-    sharp_execute(SHARP_ALM2MAP,0,&(alms[nbatches*MAX_SHT]),
-		  &(maps[nbatches*MAX_SHT]),geom_info,
-		  alm_info,nodd,0,&time,NULL);
-#else //_SPREC
-    sharp_execute(SHARP_ALM2MAP,0,&(alms[nbatches*MAX_SHT]),
-		  &(maps[nbatches*MAX_SHT]),geom_info,
-		  alm_info,nodd,SHARP_DP,&time,NULL);
-#endif //_SPREC
-    //  printf("  Took %lf s according to libsharp\n",time);
+    sharp_execute(SHARP_ALM2MAP,spin,&(alms[nbatches*nmaps*MAX_SHT]),
+		  &(maps[nbatches*nmaps*MAX_SHT]),geom_info,
+		  alm_info,nodd,flag_prec,&time,NULL);
   }
 
   sharp_destroy_geom_info(geom_info);
   sharp_destroy_alm_info(alm_info);
 }
 
-void he_map2alm(int nside,int lmax,int ntrans,flouble **maps,fcomplex **alms)
+void he_map2alm(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms)
 {
   int nbatches,nodd,itrans;
   double time;
   sharp_alm_info *alm_info;
   sharp_geom_info *geom_info;
+#ifdef _SPREC
+  int flag_prec=0;
+#else //_SPREC
+  int flag_prec=SHARP_DP;
+#endif //_SPREC
+  int nmaps=1,spin=0;
+  if(pol) {
+    nmaps=2;
+    spin=2;
+  }
 
   sharp_make_triangular_alm_info(lmax,lmax,1,&alm_info);
   sharp_make_weighted_healpix_geom_info(nside,1,NULL,&geom_info);
@@ -100,29 +106,15 @@ void he_map2alm(int nside,int lmax,int ntrans,flouble **maps,fcomplex **alms)
 
   for(itrans=0;itrans<nbatches;itrans++) {
     time=0;
-#ifdef _SPREC
-    sharp_execute(SHARP_MAP2ALM,0,&(alms[itrans*MAX_SHT]),
-                  &(maps[itrans*MAX_SHT]),geom_info,
-                  alm_info,MAX_SHT,0,&time,NULL);
-#else //_SPREC
-    sharp_execute(SHARP_MAP2ALM,0,&(alms[itrans*MAX_SHT]),
-                  &(maps[itrans*MAX_SHT]),geom_info,
-                  alm_info,MAX_SHT,SHARP_DP,&time,NULL);
-#endif //_SPREC
-    //  printf("  Took %lf s according to libsharp\n",time);
+    sharp_execute(SHARP_MAP2ALM,spin,&(alms[itrans*nmaps*MAX_SHT]),
+                  &(maps[itrans*nmaps*MAX_SHT]),geom_info,
+                  alm_info,MAX_SHT,flag_prec,&time,NULL);
   }
   if(nodd>0) {
     time=0;
-#ifdef _SPREC
-    sharp_execute(SHARP_MAP2ALM,0,&(alms[nbatches*MAX_SHT]),
-		  &(maps[nbatches*MAX_SHT]),geom_info,
-		  alm_info,nodd,0,&time,NULL);
-#else //_SPREC
-    sharp_execute(SHARP_MAP2ALM,0,&(alms[nbatches*MAX_SHT]),
-		  &(maps[nbatches*MAX_SHT]),geom_info,
-		  alm_info,nodd,SHARP_DP,&time,NULL);
-#endif //_SPREC
-    //  printf("  Took %lf s according to libsharp\n",time);
+    sharp_execute(SHARP_MAP2ALM,spin,&(alms[nbatches*nmaps*MAX_SHT]),
+		  &(maps[nbatches*nmaps*MAX_SHT]),geom_info,
+		  alm_info,nodd,flag_prec,&time,NULL);
   }
 
   sharp_destroy_geom_info(geom_info);
@@ -164,9 +156,6 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
 		int pol_1,int pol_2,
 		flouble **cls,int nside,int lmax)
 {
-  double time;
-  sharp_alm_info *alm_info;
-  sharp_geom_info *geom_info;
   fcomplex **alms_1,**alms_2;
   int i1,lmax_here=3*nside-1;
 
@@ -177,35 +166,10 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
   if(pol_1) {
     if(nmaps_1!=2)
       report_error(1,"Must provide 2 maps for polarization\n");
-
-    sharp_make_triangular_alm_info(lmax,lmax,1,&alm_info);
-    sharp_make_weighted_healpix_geom_info(nside,1,NULL,&geom_info);
-
-    /*
-    //Transform T
-    time=0;
-#ifdef _SPREC
-    sharp_execute(SHARP_MAP2ALM,0,&(alms_1[0]),&(maps_1[0]),geom_info,
-		  alm_info,1,0,&time,NULL);
-#else //_SPREC
-    sharp_execute(SHARP_MAP2ALM,0,&(alms_1[0]),&(maps_1[0]),geom_info,
-		  alm_info,1,SHARP_DP,&time,NULL);
-#endif //_SPREC
-    */
-    //Transform Q,U
-#ifdef _SPREC
-    sharp_execute(SHARP_MAP2ALM,2,&(alms_1[0]),&(maps_1[0]),geom_info,
-		  alm_info,1,0,&time,NULL);
-#else //_SPREC
-    sharp_execute(SHARP_MAP2ALM,2,&(alms_1[0]),&(maps_1[0]),geom_info,
-		  alm_info,1,SHARP_DP,&time,NULL);
-#endif //_SPREC
-
-    sharp_destroy_geom_info(geom_info);
-    sharp_destroy_alm_info(alm_info);
+    he_map2alm(nside,lmax,1,pol_1,maps_1,alms_1);
   }
   else {
-    he_map2alm(nside,lmax,nmaps_1,maps_1,alms_1);
+    he_map2alm(nside,lmax,nmaps_1,0,maps_1,alms_1);
   }
 
   if(maps_1==maps_2)
@@ -217,35 +181,10 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
     if(pol_2) {
       if(nmaps_2!=2)
 	report_error(1,"Must provide 2 maps for polarization\n");
-      
-      sharp_make_triangular_alm_info(lmax,lmax,1,&alm_info);
-      sharp_make_weighted_healpix_geom_info(nside,1,NULL,&geom_info);
-
-      /*      
-      //Transform T
-      time=0;
-#ifdef _SPREC
-      sharp_execute(SHARP_MAP2ALM,0,&(alms_2[0]),&(maps_2[0]),geom_info,
-		    alm_info,1,0,&time,NULL);
-#else //_SPREC
-      sharp_execute(SHARP_MAP2ALM,0,&(alms_2[0]),&(maps_2[0]),geom_info,
-		    alm_info,1,SHARP_DP,&time,NULL);
-#endif //_SPREC
-      */
-      //Transform Q,U
-#ifdef _SPREC
-      sharp_execute(SHARP_MAP2ALM,2,&(alms_2[0]),&(maps_2[0]),geom_info,
-		    alm_info,1,0,&time,NULL);
-#else //_SPREC
-      sharp_execute(SHARP_MAP2ALM,2,&(alms_2[0]),&(maps_2[0]),geom_info,
-		    alm_info,1,SHARP_DP,&time,NULL);
-#endif //_SPREC
-
-      sharp_destroy_geom_info(geom_info);
-      sharp_destroy_alm_info(alm_info);
+      he_map2alm(nside,lmax,1,pol_2,maps_2,alms_2);
     }
     else {
-      he_map2alm(nside,lmax,nmaps_2,maps_2,alms_2);
+      he_map2alm(nside,lmax,nmaps_2,0,maps_2,alms_2);
     }
   }
 
@@ -299,12 +238,44 @@ void he_write_healpix_map(flouble **tmap,int nfields,long nside,char *fname)
   fits_close_file(fptr, &status);
 }
 
+void he_get_file_params(char *fname,long *nside,int *nfields,int *isnest)
+{
+  //////
+  // Reads a healpix map from file fname. The map will be
+  // read from column #nfield. It also returns the map's nside.
+  int status=0,hdutype,nfound;
+  long naxes,*naxis;
+  fitsfile *fptr;
+  char order_in_file[32];
+
+  fits_open_file(&fptr,fname,READONLY,&status);
+  fits_movabs_hdu(fptr,2,&hdutype,&status);
+  fits_read_key_lng(fptr,"NAXIS",&naxes,NULL,&status);
+  naxis=my_malloc(naxes*sizeof(long));
+  fits_read_keys_lng(fptr,"NAXIS",1,naxes,naxis,&nfound,&status);
+  fits_read_key_lng(fptr,"NSIDE",nside,NULL,&status);
+
+  if (fits_read_key(fptr, TSTRING, "ORDERING", order_in_file, NULL, &status)) {
+    report_error(1,"WARNING: Could not find %s keyword in in file %s\n",
+		 "ORDERING",fname);
+  }
+
+  if(!strncmp(order_in_file,"NEST",4))
+    *isnest=1;
+  else
+    *isnest=0;
+  fits_get_num_cols(fptr,nfields,&status);
+  free(naxis);
+  fits_close_file(fptr,&status);
+}
+
+
 flouble *he_read_healpix_map(char *fname,long *nside,int nfield)
 {
   //////
   // Reads a healpix map from file fname. The map will be
   // read from column #nfield. It also returns the map's nside.
-  int status=0,hdutype,nfound,anynul;
+  int status=0,hdutype,nfound,anynul,ncols;
   long naxes,*naxis,npix;
   fitsfile *fptr;
   flouble *map,nulval;
@@ -318,20 +289,20 @@ flouble *he_read_healpix_map(char *fname,long *nside,int nfield)
   fits_read_keys_lng(fptr,"NAXIS",1,naxes,naxis,&nfound,&status);
   fits_read_key_lng(fptr,"NSIDE",nside,NULL,&status);
   npix=12*(*nside)*(*nside);
-  if(npix%naxis[1]!=0) {
-    fprintf(stderr,"CRIME: WTFFF\n");
-    exit(1);
-  }
+  if(npix%naxis[1]!=0)
+    report_error(1,"FITS file %s corrupt\n",fname);
 
   if (fits_read_key(fptr, TSTRING, "ORDERING", order_in_file, NULL, &status)) {
-    fprintf(stderr, "WARNING: Could not find %s keyword in in file %s\n",
-            "ORDERING",fname);
-    exit(1);
+    report_error(1,"WARNING: Could not find %s keyword in in file %s\n",
+		 "ORDERING",fname);
   }
   if(!strncmp(order_in_file,"NEST",4))
     nested_in_file=1;
 
   map=my_malloc(npix*sizeof(flouble));
+  fits_get_num_cols(fptr,&ncols,&status);
+  if(nfield>=ncols)
+    report_error(1,"Not enough columns in FITS file\n");
 #ifdef _SPREC
   fits_read_col(fptr,TFLOAT,nfield+1,1,1,npix,&nulval,map,&anynul,&status);
 #else //_SPREC
