@@ -137,12 +137,12 @@ Finally, the following orthogonality relation for the Wigner 3$j$ symbols is use
       \hat{\sf F}^1_\ell&=\frac{1}{2\ell+1}\sum_{m{\bf l}_{1,2,3,4}}v_{{\bf l}_2}w^*_{{\bf l}_4}\hat{\sf D}^{s_a}_{{\bf l}{\bf l}_1{\bf l}_2}\langle{\bf a}_{{\bf l}_1}{\bf b}^\dag_{{\bf l}_3}\rangle\hat{\sf D}^{s_b\dag}_{{\bf l}{\bf l}_3{\bf l}_4}\\\nonumber
       &=\frac{1}{2\ell+1}\sum_{m{\bf l}_{1,2,3}}v_{{\bf l}_2}w^*_{{\bf l}_3}\hat{\sf D}^{s_a}_{{\bf l}{\bf l}_1{\bf l}_2}\hat{\sf C}^{ab}_{{\bf l}_1}\hat{\sf D}^{s_b\dag}_{{\bf l}{\bf l}_1{\bf l}_3}\\\nonumber
       &=\frac{1}{2\ell+1}\sum_{\ell_1{\bf l}_{2,3}}v_{{\bf l}_2}w^*_{{\bf l}_3}\frac{(2\ell+1)(2\ell_1+1)}{4\pi}\sqrt{(2\ell_2+1)(2\ell_3+1)}\wtj{\ell}{\ell_1}{\ell_2}{s_a}{-s_a}{0}\wtj{\ell}{\ell_1}{\ell_3}{s_b}{-s_b}{0}\\\nonumber
-      &\hspace{50pt}\hat{\sf d}^{s_a}_{\ell+\ell_1+\ell_2}\hat{\sf C}^{ab}_{\ell_1}\hat{\sf d}^{s_b\dag}_{\ell+\ell_1+\ell_3}\sum_{mm_1}\wtj{\ell}{\ell_1}{\ell_2}{-m}{m_1}{m_2}\wtj{\ell}{\ell_1}{\ell_3}{-m}{m_1}{m_3}\\\nonumber
+      &\hspace{50pt}\hat{\sf d}^{s_a}_{\ell+\ell_1+\ell_2}\hat{\sf C}^{ab}_{\ell_1}\hat{\sf d}^{s_b\dag}_{\ell+\ell_1+\ell_3}\sum_{mm_1}\wtj{\ell}{\ell_1}{\ell_2}{-m}{m_1}{m_2}\wtj{\ell}{\ell_1}{\ell_3}{-m}{m_1}{m_3}\\\label{eq:master_transformation}
       &=\sum_{\ell_1\ell_2}\frac{(2\ell_1+1)(2\ell_2+1)}{4\pi}\tilde{C}^{vw}_{\ell_2}\wtj{\ell}{\ell_1}{\ell_2}{s_a}{-s_a}{0}\wtj{\ell}{\ell_1}{\ell_2}{s_b}{-s_b}{0}\hat{\sf d}^{s_a}_{\ell+\ell_1+\ell_2}\hat{\sf C}^{ab}_{\ell_1}\hat{\sf d}^{s_b\dag}_{\ell+\ell_1+\ell_2}
     \end{align}
     
     For $v=w=1$ this reduces to $\tilde{C}^{vw}_\ell=4\pi\delta_{\ell0}$ and:
-    \begin{align}
+    \begin{align}\nonumber
       \hat{\sf F}^1_\ell
       &=\sum_{\ell_1\ell_2}(2\ell_1+1)(2\ell_2+1)\delta_{\ell_20}\wtj{\ell}{\ell_1}{\ell_2}{s_a}{-s_a}{0}\wtj{\ell}{\ell_1}{\ell_2}{s_b}{-s_b}{0}\hat{\sf d}^{s_a}_{\ell+\ell_1+\ell_2}\hat{\sf C}^{ab}_{\ell_1}\hat{\sf d}^{s_b\dag}_{\ell+\ell_1+\ell_2}\\\nonumber
       &=\sum_{\ell_1}(2\ell_1+1)\wtj{\ell}{\ell_1}{0}{s_a}{-s_a}{0}\wtj{\ell}{\ell_1}{0}{s_b}{-s_b}{0}\hat{\sf d}^{s_a}_{\ell+\ell_1}\hat{\sf C}^{ab}_{\ell_1}\hat{\sf d}^{s_b\dag}_{\ell+\ell_1}\\\nonumber
@@ -155,8 +155,8 @@ Finally, the following orthogonality relation for the Wigner 3$j$ symbols is use
   \subsection{$\hat{\sf F}^2_\ell$}
     \begin{align}\nonumber
      \hat{\sf F}^2_\ell
-     &=N^*_{ij}\int d\nv\,d\nv'\,\frac{\sum_{m{\bf l}'{\bf l}_{1,2,3,4}}}{2\ell+1}\hat{\sf Y}^{s_a\dag}_{\bf l}(\nv)\hat{\sf Y}^{s_a}_{{\bf l}_1}(\nv)\langle{\bf a}_{{\bf l}_1}{\bf b}^\dag_{{\bf l}_3}\rangle\hat{\sf Y}^{s_b\dag}_{{\bf l}_3}(\nv')\hat{\sf Y}^{s_b}_{{\bf l}'}(\nv'){\bf g}^j_{{\bf l}'}{\bf g}^{i\dag}_{\bf l}v_{{\bf l}_2}w^*_{{\bf l}_4}Y_{{\bf l}_2}(\nv)Y^*_{{\bf l}_4}(\nv')\\
-     &=N^*_{ij}\,\frac{\sum_m}{2\ell+1}\left\{\int d\nv\,v(\nv)\,\hat{\sf Y}^{s_a\dag}_{\bf l}(\nv)\left[\sum_{\ell_1m_1}\hat{\sf Y}^{s_a}_{{\bf l}_1}(\nv)\hat{\sf C}^{ab}_{\ell_1}\left(\int d\nv'\hat{\sf Y}^{s_b\dag}_{{\bf l}_1}(\nv'){\bf g}^j(\nv')w(\nv')\right)\right]{\bf g}^{i\dag}_{\bf l}\right\}\\
+     &=N^*_{ij}\int d\nv\,d\nv'\,\frac{\sum_{m{\bf l}'{\bf l}_{1,2,3,4}}}{2\ell+1}\hat{\sf Y}^{s_a\dag}_{\bf l}(\nv)\hat{\sf Y}^{s_a}_{{\bf l}_1}(\nv)\langle{\bf a}_{{\bf l}_1}{\bf b}^\dag_{{\bf l}_3}\rangle\hat{\sf Y}^{s_b\dag}_{{\bf l}_3}(\nv')\hat{\sf Y}^{s_b}_{{\bf l}'}(\nv'){\bf g}^j_{{\bf l}'}{\bf g}^{i\dag}_{\bf l}v_{{\bf l}_2}w^*_{{\bf l}_4}Y_{{\bf l}_2}(\nv)Y^*_{{\bf l}_4}(\nv')\\\nonumber
+     &=N^*_{ij}\,\frac{\sum_m}{2\ell+1}\left\{\int d\nv\,v(\nv)\,\hat{\sf Y}^{s_a\dag}_{\bf l}(\nv)\left[\sum_{\ell_1m_1}\hat{\sf Y}^{s_a}_{{\bf l}_1}(\nv)\hat{\sf C}^{ab}_{\ell_1}\left(\int d\nv'\hat{\sf Y}^{s_b\dag}_{{\bf l}_1}(\nv'){\bf g}^j(\nv')w(\nv')\right)\right]{\bf g}^{i\dag}_{\bf l}\right\}\\\label{eq:bias_2}
      &=N^*_{ij}\,\frac{\sum_m}{2\ell+1}{\rm SHT}\left\{v(\nv){\rm SHT}^{-1}\left[\hat{\sf C}^{ab}_{\ell_1}{\rm SHT}\left(w\,{\bf g}^j\right)^{s_b}_{{\bf l}_1}\right]^{s_a}_{\nv}\right\}^{s_a}_{\bf l}{\bf g}^{i\dag}_{\bf l}
     \end{align}
     
@@ -171,8 +171,8 @@ Finally, the following orthogonality relation for the Wigner 3$j$ symbols is use
   \subsection{$\hat{\sf F}^3_\ell$}
     \begin{align}\nonumber
      \hat{\sf F}^3_\ell
-     &=M_{ij}\int d\nv\,d\nv'\,\frac{\sum_{m{\bf l}'{\bf l}_{1,2,3,4}}}{2\ell+1}{\bf f}^i_{\bf l}{\bf f}^{j\dag}_{{\bf l}'}\hat{\sf Y}^{s_a\dag}_{\bf l'}(\nv')\hat{\sf Y}^{s_a}_{{\bf l}_3}(\nv')\langle{\bf a}_{{\bf l}_3}{\bf b}^\dag_{{\bf l}_1}\rangle\hat{\sf Y}^{s_b\dag}_{{\bf l}_1}(\nv)\hat{\sf Y}^{s_b}_{{\bf l}}(\nv)v_{{\bf l}_4}w^*_{{\bf l}_2}Y_{{\bf l}_2}(\nv)Y^*_{{\bf l}_4}(\nv')\\
-     &=M_{ij}\frac{\sum_{m}}{2\ell+1}{\bf f}^i_{\bf l}\left\{\int d\nv\,w(\nv)\,\left[\sum_{\ell_1m_1}\left(\int d\nv'\,v(\nv'){\bf f}^{j\dag}(\nv')\hat{\sf Y}^{s_a}_{{\bf l}_1}(\nv')\right)\hat{\sf C}^{ab}_{\ell_1}\hat{\sf Y}^{s_b\dag}_{{\bf l}_1}(\nv)\right]\hat{\sf Y}^{s_b}_{{\bf l}}(\nv)\right\}\\
+     &=M_{ij}\int d\nv\,d\nv'\,\frac{\sum_{m{\bf l}'{\bf l}_{1,2,3,4}}}{2\ell+1}{\bf f}^i_{\bf l}{\bf f}^{j\dag}_{{\bf l}'}\hat{\sf Y}^{s_a\dag}_{\bf l'}(\nv')\hat{\sf Y}^{s_a}_{{\bf l}_3}(\nv')\langle{\bf a}_{{\bf l}_3}{\bf b}^\dag_{{\bf l}_1}\rangle\hat{\sf Y}^{s_b\dag}_{{\bf l}_1}(\nv)\hat{\sf Y}^{s_b}_{{\bf l}}(\nv)v_{{\bf l}_4}w^*_{{\bf l}_2}Y_{{\bf l}_2}(\nv)Y^*_{{\bf l}_4}(\nv')\\\nonumber
+     &=M_{ij}\frac{\sum_{m}}{2\ell+1}{\bf f}^i_{\bf l}\left\{\int d\nv\,w(\nv)\,\left[\sum_{\ell_1m_1}\left(\int d\nv'\,v(\nv'){\bf f}^{j\dag}(\nv')\hat{\sf Y}^{s_a}_{{\bf l}_1}(\nv')\right)\hat{\sf C}^{ab}_{\ell_1}\hat{\sf Y}^{s_b\dag}_{{\bf l}_1}(\nv)\right]\hat{\sf Y}^{s_b}_{{\bf l}}(\nv)\right\}\\\label{eq:bias_3}
      &=M_{ij}\frac{\sum_{m}}{2\ell+1}{\bf f}^i_{\bf l}\,{\rm SHT}\left\{w(\nv)\,{\rm SHT}^{-1}\left[\hat{\sf C}^{ab\dag}_{\ell_1}{\rm SHT}\left(v\,{\bf f}^j\right)^{s_a}_{{\bf l}_1}\right]^{s_b}_{\nv}\right\}^{s_b\dag}_{\bf l}
     \end{align}
 
@@ -188,118 +188,67 @@ Finally, the following orthogonality relation for the Wigner 3$j$ symbols is use
     \begin{align}\nonumber
      \hat{\sf F}^4_\ell
      &=\frac{M_{ij}N^*_{pq}}{2\ell+1}\int d\nv\,d\nv'\,\sum_{m{\bf l}'{\bf l}''{\bf l}_{1,2,3,4}}
-     {\bf f}^i_{\bf l}{\bf f}^{j\dag}_{{\bf l}'}\hat{\sf Y}^{s_a\dag}_{\bf l'}(\nv)\hat{\sf Y}^{s_a}_{{\bf l}_1}(\nv)\langle{\bf a}_{{\bf l}_1}{\bf b}^\dag_{{\bf l}_3}\rangle\hat{\sf Y}^{s_b\dag}_{{\bf l}_3}(\nv')\hat{\sf Y}^{s_b}_{{\bf l}''}(\nv'){\bf g}^q_{{\bf l}''}{\bf g}^{p\dag}_{\bf l}v_{{\bf l}_2}w^*_{{\bf l}_4}Y_{{\bf l}_2}(\nv)Y^*_{{\bf l}_4}(\nv')\\
+     {\bf f}^i_{\bf l}{\bf f}^{j\dag}_{{\bf l}'}\hat{\sf Y}^{s_a\dag}_{\bf l'}(\nv)\hat{\sf Y}^{s_a}_{{\bf l}_1}(\nv)\langle{\bf a}_{{\bf l}_1}{\bf b}^\dag_{{\bf l}_3}\rangle\hat{\sf Y}^{s_b\dag}_{{\bf l}_3}(\nv')\hat{\sf Y}^{s_b}_{{\bf l}''}(\nv'){\bf g}^q_{{\bf l}''}{\bf g}^{p\dag}_{\bf l}v_{{\bf l}_2}w^*_{{\bf l}_4}Y_{{\bf l}_2}(\nv)Y^*_{{\bf l}_4}(\nv')\\\nonumber
      &=\frac{M_{ij}N^*_{pq}}{2\ell+1}\sum_{m}
-     {\bf f}^i_{\bf l}\left\{\int d\nv\,v(\nv)\,{\bf f}^{j\dag}(\nv)\left[\sum_{\ell_1m_1}\hat{\sf Y}^{s_a}_{{\bf l}_1}(\nv)\hat{\sf C}^{ab}_{\ell_1}\left(\int d\nv'\,\hat{\sf Y}^{s_b\dag}_{{\bf l}_1}(\nv'){\bf g}^q(\nv')w(\nv')\right)\right]\right\}{\bf g}^{p\dag}_{\bf l}\\
-     &=\frac{M_{ij}N^*_{pq}}{2\ell+1}\sum_{m}
-     {\bf f}^i_{\bf l}\left\{\int d\nv\,v(\nv)\,{\bf f}^{j\dag}(\nv)\,{\rm SHT}^{-1}\left[\hat{\sf C}^{ab}_{\ell_1}{\rm SHT}\left(w\,{\bf g}^q\right)^{s_b}_{{\bf l}_1}\right]^{s_a}_{\nv}\right\}{\bf g}^{p\dag}_{\bf l}
+     {\bf f}^i_{\bf l}\left\{\int d\nv\,v(\nv)\,{\bf f}^{j\dag}(\nv)\left[\sum_{\ell_1m_1}\hat{\sf Y}^{s_a}_{{\bf l}_1}(\nv)\hat{\sf C}^{ab}_{\ell_1}\left(\int d\nv'\,\hat{\sf Y}^{s_b\dag}_{{\bf l}_1}(\nv'){\bf g}^q(\nv')w(\nv')\right)\right]\right\}{\bf g}^{p\dag}_{\bf l}\\\label{eq:bias_4}
+     &=M_{ij}N^*_{pq}
+     \left\{\int d\nv\,v(\nv)\,{\bf f}^{j\dag}(\nv)\,{\rm SHT}^{-1}\left[\hat{\sf C}^{ab}_{\ell_1}{\rm SHT}\left(w\,{\bf g}^q\right)^{s_b}_{{\bf l}_1}\right]^{s_a}_{\nv}\right\}\tilde{\sf C}^{f^ig^p}_\ell
     \end{align}
 
     For $v=w=1$ this reduces to:
     \begin{align}\nonumber
      \hat{\sf F}^4_\ell
-     &=\frac{M_{ij}N^*_{pq}}{2\ell+1}\sum_{m}
-     {\bf f}^i_{\bf l}\left\{\int d\nv\,{\bf f}^{j\dag}(\nv)\,{\rm SHT}^{-1}\left[\hat{\sf C}^{ab}_{\ell_1}{\rm SHT}\left({\bf g}^q\right)^{s_b}_{{\bf l}_1}\right]^{s_a}_{\nv}\right\}{\bf g}^{p\dag}_{\bf l}\\\nonumber
-     &=\frac{M_{ij}N^*_{pq}}{2\ell+1}\sum_{m}{\bf f}^i_{\bf l}\left\{\int d\nv\,\sum_{{\bf l}_2}{\bf f}^{j\dag}_{{\bf l}_2}\hat{\sf Y}^{s_a\dag}_{{\bf l}_2}(\nv)\,\sum_{{\bf l}_1}\hat{\sf Y}^{s_a}_{{\bf l}_1}(\nv)\hat{\sf C}^{ab}_{\ell_1}{\bf g}^q_{{\bf l}_1}\right\}{\bf g}^{p\dag}_{\bf l}\\\nonumber
-     &=\frac{M_{ij}N^*_{pq}}{2\ell+1}\sum_{m\ell_1 m_1}{\bf f}^i_{\bf l}{\bf f}^{j\dag}_{{\bf l}_1}\hat{\sf C}^{ab}_{\ell_1}{\bf g}^q_{{\bf l}_1}{\bf g}^{p\dag}_{\bf l}\\\nonumber
-     &=M_{ij}N^*_{pq}\tilde{\sf C}^{f^ig^p}_\ell\sum_{\ell_1}(2\ell_1+1){\rm Tr}\left(\hat{\sf C}^{ab}_{\ell_1}\tilde{\sf C}^{g^qf^j}_{\ell_1}\right)
+     &=M_{ij}N^*_{pq}\left\{\int d\nv\,{\bf f}^{j\dag}(\nv)\,{\rm SHT}^{-1}\left[\hat{\sf C}^{ab}_{\ell_1}{\rm SHT}\left({\bf g}^q\right)^{s_b}_{{\bf l}_1}\right]^{s_a}_{\nv}\right\}\tilde{\sf C}^{f^ig^p}_\ell\\\nonumber
+     &=M_{ij}N^*_{pq}\left\{\int d\nv\,\sum_{{\bf l}_2}{\bf f}^{j\dag}_{{\bf l}_2}\hat{\sf Y}^{s_a\dag}_{{\bf l}_2}(\nv)\,\sum_{{\bf l}_1}\hat{\sf Y}^{s_a}_{{\bf l}_1}(\nv)\hat{\sf C}^{ab}_{\ell_1}{\bf g}^q_{{\bf l}_1}\right\}\tilde{\sf C}^{f^ig^p}_\ell\\\nonumber
+     &=M_{ij}N^*_{pq}{\bf f}^{j\dag}_{{\bf l}_1}\hat{\sf C}^{ab}_{\ell_1}{\bf g}^q_{{\bf l}_1}\tilde{\sf C}^{f^ig^p}_\ell\\\nonumber
+     &=M_{ij}N^*_{pq}\left[\sum_{\ell_1}(2\ell_1+1){\rm Tr}\left(\hat{\sf C}^{ab}_{\ell_1}\tilde{\sf C}^{g^qf^j}_{\ell_1}\right)\right]\tilde{\sf C}^{f^ig^p}_\ell
     \end{align}
 
-    
-\section{MASTER algorithm}
+  \subsection{Final form of the estimator}
+    Putting together the results from Equations \ref{eq:master_transformation}, \ref{eq:bias_2}, \ref{eq:bias_3} and \ref{eq:bias_4}, we can write down an unbiased estimator for the pseudo-$C_\ell$ of the cut-sky maps free from contamination from ${\bf f}$ and ${\bf g}$:
+    \begin{align}\nonumber
+      \tilde{\sf C}^{ab}_\ell=&\tilde{\sf C}^{\tilde{a}\tilde{b}}_\ell+N^*_{ij}\,\frac{\sum_m}{2\ell+1}{\rm SHT}\left\{v(\nv){\rm SHT}^{-1}\left[\hat{\sf C}^{ab}_{\ell_1}{\rm SHT}\left(w\,{\bf g}^j\right)^{s_b}_{{\bf l}_1}\right]^{s_a}_{\nv}\right\}^{s_a}_{\bf l}{\bf g}^{i\dag}_{\bf l}+\\\nonumber
+      &+M_{ij}\frac{\sum_{m}}{2\ell+1}{\bf f}^i_{\bf l}\,{\rm SHT}\left\{w(\nv)\,{\rm SHT}^{-1}\left[\hat{\sf C}^{ab\dag}_{\ell_1}{\rm SHT}\left(v\,{\bf f}^j\right)^{s_a}_{{\bf l}_1}\right]^{s_b}_{\nv}\right\}^{s_b\dag}_{\bf l}-\\
+      &-M_{ij}N^*_{pq}\left\{\int d\nv\,v(\nv)\,{\bf f}^{j\dag}(\nv)\,{\rm SHT}^{-1}\left[\hat{\sf C}^{ab}_{\ell_1}{\rm SHT}\left(w\,{\bf g}^q\right)^{s_b}_{{\bf l}_1}\right]^{s_a}_{\nv}\right\}\tilde{\sf C}^{f^ig^p}_\ell
+    \end{align}
 
-Let $_{s_a}\mathbf{I}^a(\nv)$ be a spin-$s_a$ field, where $s_a$ can be 0 (i.e. 1 single component - e.g. $T$) or
-2 (i.e. 2 components - e.g. $(Q,U)$). The observed map is:
-\begin{equation}
-  _{s_a}\tilde{\mathbf{I}}^a(\nv)=w^a(\nv)\,\left[_{s_a}\mathbf{I}^a(\nv)+N^a(\nv)\right],
-\end{equation}
-where $w(\nv)$ is the weights map. The harmonic coefficients of the observed map
-can be written as:
-\begin{equation}
-  _{s_a}\tilde{\mathbf{I}}^a_{\ell_1 m_1}=\sum_{\ell_2,m_2}\,_{s_a}\mathsf{W}^{a}_{\ell_1\ell_2,m_1m_2}\,\cdot\,_{s_a}\mathbf{I}^a_{\ell_2m_2},
-\end{equation}
-where the mixing matrix is
-\begin{equation}
-  _{s_a}\mathsf{W}^a_{\ell_1\ell_2,m_1m_2}\equiv(-1)^m\sum_{\ell_3,m_3}w^a_{\ell_3m_3}\left[\frac{(2\ell_1+1)(2\ell_2+1)(2\ell_3+1)}{4\pi}\right]^{1/2}
-  \wtj{\ell_1}{\ell_2}{\ell_3}{-m_1}{m_2}{m_3}\,_{s_a}\mathsf{J}_{\ell_1\ell_2\ell_3}
-\end{equation}
-with
-\begin{align}
- &_0\mathsf{J}_{\ell_1\ell_2\ell_3}=\wtj{\ell_1}{\ell_2}{\ell_3}{0}{0}{0},\\
- &_2\mathsf{J}_{\ell_1\ell_2\ell_3}=\wtj{\ell_1}{\ell_2}{\ell_3}{2}{-2}{0}\frac{1}{2}
- \left(\begin{array}{ll}
-   1+(-1)^{\ell_1+\ell_2+\ell_3} & i\,[(-1)^{\ell_1+\ell_2+\ell_3}-1]\\
-   -i\,[(-1)^{\ell_1+\ell_2+\ell_3}-1] & 1+(-1)^{\ell_1+\ell_2+\ell_3}
- \end{array}\right)
-\end{align}
+    Once $\tilde{\sf C}^{ab}$ is calculated, it can be corrected for the effects of masking by inverting the linear transformation in Eq \ref{eq:master_transformation}. This transformation can be written explicitly by first transforming the power spectrum matrices into vectors $_v{\sf C}$. E.g. for $s_a=s_b=2$ we transform:
+    \begin{equation}
+      \hat{\sf C}^{ab}_\ell\equiv\left(
+      \begin{array}{cc}
+        C^{E_aE_b}_\ell & C^{E_aB_b}_\ell \\
+        C^{B_aE_b}_\ell & C^{B_aB_b}_\ell
+      \end{array}\right)
+      \hspace{12pt}\text{into}\hspace{12pt}
+      _v\hat{\sf C}^{ab}_\ell\equiv\left(
+      \begin{array}{c}
+        C^{E_aE_b}_\ell\\
+        C^{E_aB_b}_\ell\\
+        C^{B_aE_b}_\ell\\
+        C^{B_aB_b}_\ell
+      \end{array}\right).
+    \end{equation}
+    We can then write, in general:
+    \begin{equation}
+      _v\tilde{\sf C}^{ab}_\ell=\sum_{\ell'}{\sf M}^{s_as_b}_{\ell\ell'}\cdot\,_v\hat{\sf C}^{ab}_{\ell'},
+    \end{equation}
+    where:
+    \begin{align}
+      &{\sf M}^{00}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}(2\ell''+1)C^{vw}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{0}{0}{0}^2\\
+      &{\sf M}^{02}_{\ell\ell'}=M^{0+}_{\ell\ell'}\,\hat{\sf 1},
+      \hspace{12pt}
+      M^{0+}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}(2\ell''+1)C^{vw}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{0}{0}{0}\wtj{\ell}{\ell'}{\ell''}{2}{-2}{0}\\
+      &{\sf M}^{22}_{\ell\ell'}=\left(
+      \begin{array}{cccc}
+        M^{++}_{\ell\ell'} &0 &0&M^{--}_{\ell\ell'}\\
+        0&M^{++}_{\ell\ell'} &-M^{--}_{\ell\ell'}&0\\
+        0&-M^{--}_{\ell\ell'} &M^{++}_{\ell\ell'}&0\\
+        M^{--}_{\ell\ell'} &0 &0&M^{++}_{\ell\ell'}
+      \end{array}\right)\\
+      & \hspace{12pt}M^{\pm\pm}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}(2\ell''+1)C^{vw}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{2}{-2}{0}^2\frac{1\pm(-1)^{\ell+\ell'+\ell''}}{2}
+    \end{align}
 
-Let us define the pseudo-power-spectrum $\tilde{\mathsf{C}}^{ab}_\ell$
-\begin{equation}
- \tilde{\mathsf{C}}^{ab}_\ell\equiv\frac{1}{2\ell+1}\sum_m\,_{s_a}\mathbf{I}^a_{\ell m}\cdot\left(_{s_b}\mathbf{I}^b_{\ell m}\right)^\dag
-\end{equation}
-The relation between the pseudo-power-spectrum and the true power spectrum $\mathsf{C}^{ab}_\ell$ can be derived to be of the form
-\begin{equation}\label{eq:pcl_gen}
-  \langle\tilde{\mathbf{C}}^{ab}_\ell\rangle=\sum_{\ell'}\mathsf{M}^{s_as_b}_{\ell\ell'}\cdot\mathbf{C}^{ab}_{\ell'},
-\end{equation}
-where the mode-coupling matrix $\mathsf{M}^{s_as_b}_{\ell\ell'}$ takes the form:
-\begin{itemize}
- \item Case $s_a=s_b=0$:
- \begin{equation}
-   \langle\tilde{C}^{T_aT_b}_\ell\rangle=\sum_{\ell'}M^{00}_{\ell\ell'}C^{T_aT_b}_{\ell'}
- \end{equation}
- with
- \begin{equation}
-  M^{00}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}W^{ab}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{0}{0}{0}^2
- \end{equation}
- \item Case $s_a=0,\,s_b=2$:
- \begin{equation}
-   \left\langle\left(\begin{array}{c}
-                \tilde{C}^{T_aE_b}_\ell \\ \tilde{C}^{T_aB_b}_\ell
-               \end{array}\right)\right\rangle
-   =\sum_{\ell'}\left(
-   \begin{array}{ll}
-    M^{0+}_{\ell\ell'} & 0 \\
-    0 & M^{0+}_{\ell\ell'}
-   \end{array}\right)\cdot\left(
-   \begin{array}{c}
-    C^{T_aE_b}_{\ell'}\\ C^{T_aB_b}_{\ell'}
-   \end{array}\right)
- \end{equation}
- with
- \begin{equation}
-  M^{0+}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}W^{ab}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{0}{0}{0}\wtj{\ell}{\ell'}{\ell''}{2}{-2}{0}
- \end{equation}
- \item Case $s_a=2,\,s_b=2$:
- \begin{equation}
-   \left\langle\left(\begin{array}{c}
-                \tilde{C}^{E_aE_b}_\ell \\ \tilde{C}^{E_aB_b}_\ell \\ \tilde{C}^{B_aE_b}_\ell \\ \tilde{C}^{B_aB_b}_\ell
-               \end{array}\right)\right\rangle
-   =\sum_{\ell'}\left(
-   \begin{array}{llll}
-    M^{++}_{\ell\ell'} & 0 & 0 & M^{--}_{\ell\ell'}\\
-    0 & M^{++}_{\ell\ell'} & -M^{--}_{\ell\ell'} & 0\\
-    0 & -M^{--}_{\ell\ell'} & M^{++}_{\ell\ell'} & 0\\
-    M^{--}_{\ell\ell'} & 0 & 0 & M^{++}_{\ell\ell'}
-   \end{array}\right)\cdot\left(
-   \begin{array}{c}
-    C^{E_aE_b}_{\ell'}\\ C^{E_aB_b}_{\ell'} \\ C^{B_aE_b}_{\ell'}\\ C^{B_aB_b}_{\ell'}
-   \end{array}\right)
- \end{equation}
- with
- \begin{align}
-  &M^{++}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}W^{ab}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{2}{-2}{0}^2\frac{1+(-1)^{\ell+\ell'+\ell''}}{2}\\
-  &M^{--}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}W^{ab}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{2}{-2}{0}^2\frac{1-(-1)^{\ell+\ell'+\ell''}}{2},
- \end{align}
-\end{itemize}
-where in all these equations $W^{ab}_{\ell''}$ is the cross-spectrum of the weights map (without the $(2\ell+1)$ normalization):
-\begin{equation}
- W^{ab}_\ell\equiv\sum_m w^a_{\ell m}(w^b_{\ell m})^*.
-\end{equation}
-Note that, in Eq. \ref{eq:pcl_gen} one should add, on the right-hand side, the noise cross-power-spectrum:
-\begin{equation}
-\langle\tilde{\mathsf{N}}^{ab}_\ell\rangle\equiv\frac{1}{2\ell+1}\sum_m\langle\mathbf{N}^a_{\ell m}\cdot(\mathbf{N}^b_{\ell m})^\dag\rangle 
-\end{equation}
-
+\end{document}
 
 \subsection{Beam}
 Adding the effect of a beam amounts to redefining:
@@ -493,5 +442,3 @@ vectors:
 % \frac{\bar{\sigma}_N^2}{4\pi}\int d\Omega\, \Theta(\nv)\frac{\bar{\sigma}_N^2}{\sigma_N^2(\nv)}=
 % f_{\rm sky}\,\bar{\sigma}_N^2\overline{\left(\frac{\bar{\sigma}_N^2}{\sigma^2_N}\right)}
 %\end{equation}
-
-\end{document}
