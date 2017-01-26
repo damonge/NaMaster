@@ -567,6 +567,48 @@ void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,d
     free(beam);
 }
 
+void he_map_product(int nside,flouble *mp1,flouble *mp2,flouble *mp_out)
+{
+#pragma omp parallel default(none)		\
+  shared(nside,mp1,mp2,mp_out)
+  {
+    long ip;
+    long npix=12*nside*nside;
+
+#pragma omp for
+    for(ip=0;ip<npix;ip++) {
+      mp_out[ip]=mp1[ip]*mp2[ip];
+    } //end omp for
+  } //end omp parallel
+}
+
+flouble he_map_dot(int nside,flouble *mp1,flouble *mp2)
+{
+  double sum=0;
+  long npix=12*nside*nside;
+  double pixsize=4*M_PI/npix;
+
+#pragma omp parallel default(none)		\
+  shared(nside,mp1,mp2,sum,npix)
+  {
+    long ip;
+    double sum_thr=0;
+    
+#pragma omp for
+    for(ip=0;ip<npix;ip++) {
+      sum_thr+=mp1[ip]*mp2[ip];
+    } //end omp for
+
+#pragma omp critical
+    {
+      sum+=sum_thr;
+    } //end omp critical
+  } //end omp parallel
+
+  return (flouble)(sum*pixsize);
+}
+
+
 /*
 flouble *he_synfast(flouble *cl,int nside,int lmax,unsigned int seed)
 {

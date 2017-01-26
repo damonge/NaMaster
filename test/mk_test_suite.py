@@ -81,8 +81,8 @@ def run_namaster(mp1,mp2,msk1,msk2,p1,p2,tmp1,tmp2,cln,nlb,lcomp,clcomp) :
         plt.plot(data[0],cl,'k-')
     plt.xscale('log')
     return data
-#run_namaster("map_t.fits" ,"map_t.fits" ,"mask.fits","mask.fits",0,0,"none","none","cl_noise_1.txt",4,l,[cl_tt])
-run_namaster("map_t_cont.fits" ,"map_t_cont.fits" ,"mask_full.fits","mask_full.fits",0,0,"none","temp_t.fits","cl_noise_1.txt",4,l,[cl_tt])
+run_namaster("map_t.fits"     ,"map_t.fits"     ,"mask_full.fits","mask_full.fits",0,0,"none"       ,"none"       ,"cl_noise_1.txt",4,l,[cl_tt])
+run_namaster("map_t_cont.fits","map_t_cont.fits","mask_full.fits","mask_full.fits",0,0,"temp_t.fits","temp_t.fits","cl_noise_1.txt",4,l,[cl_tt])
 #run_namaster("map_e.fits" ,"map_e.fits" ,"mask.fits","mask.fits",0,0,"cl_noise_1.txt",4,l,[cl_ee])
 #run_namaster("map_b.fits" ,"map_b.fits" ,"mask.fits","mask.fits",0,0,"cl_noise_1.txt",4,l,[cl_bb])
 #run_namaster("map_t.fits" ,"map_e.fits" ,"mask.fits","mask.fits",0,0,"cl_noise_1.txt",4,l,[cl_te])

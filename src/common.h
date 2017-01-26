@@ -32,38 +32,55 @@ typedef double flouble;
 typedef double complex fcomplex;
 #endif //_SPREC
 
-typedef struct {
-  int n_bands;
-  int *nell_list;
-  int **ell_list;
-  flouble **w_list;
-} BinSchm;
-
 //Defined in common.c
 int my_linecount(FILE *f);
 void report_error(int level,char *fmt,...);
 void *my_malloc(size_t size);
 void *my_calloc(size_t nmemb,size_t size);
 FILE *my_fopen(const char *path,const char *mode);
-BinSchm *create_bins(int nlb,int nside);
-BinSchm *read_bins(char *fname,int nside);
-void free_bins(BinSchm *bin);
 size_t my_fwrite(const void *ptr, size_t size, size_t nmemb,FILE *stream);
 size_t my_fread(void *ptr,size_t size,size_t count,FILE *stream);
+
+//Defined in field.c
+typedef struct {
+  long nside;
+  long npix;
+  int lmax;
+  flouble *mask;
+  int pol;
+  int nmaps;
+  flouble **maps;
+  int ntemp;
+  flouble ***temp;
+  fcomplex ***a_temp;
+  gsl_matrix *matrix_M;
+} Field;
+void field_free(Field *fl);
+Field *field_alloc(char *fname_mask,char *fname_maps,char *fname_temp,int pol);
+
+//Defined in bins.c
+typedef struct {
+  int n_bands;
+  int *nell_list;
+  int **ell_list;
+  flouble **w_list;
+} BinSchm;
+BinSchm *bins_create(int nlb,int nside);
+BinSchm *bins_read(char *fname,int nside);
+void bins_free(BinSchm *bin);
 
 //Defined in master.c
 void read_coupling_matrix(char *fname_in,int nbins_in,
 			  gsl_matrix **coupling_matrix_b_out,
-			  gsl_permutation **perm_out,
-			  int pol1,int pol2);
-void compute_coupling_matrix(flouble *cl_mask,long nside_in,int lmax_in,BinSchm *bins,
+			  gsl_permutation **perm_out,int n_cl);
+void compute_coupling_matrix(Field *fl1,Field *fl2,BinSchm *bins,
 			     gsl_matrix **coupling_matrix_b_out,
 			     gsl_permutation **perm_out,
-			     char *write_matrix,char *write_matrix_b,
-			     int pol1,int pol2);
-flouble **decouple_cl_l(flouble **cl_in,flouble **cl_noise_in,
+			     char *write_matrix,char *write_matrix_b);
+flouble **decouple_cl_l(flouble **cl_in,flouble **cl_noise_in,flouble **cl_bias,
 			int n_cl,BinSchm *bins,
 			gsl_matrix *coupling_matrix_b,gsl_permutation *perm);
+void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,flouble **cl_bias);
 
 //Defined in healpix_extra.c
 long he_nalms(int lmax);
@@ -90,6 +107,8 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
 		flouble **cls,int nside,int lmax);
 void he_ring2nest_inplace(flouble *map_in,long nside);
 void he_nest2ring_inplace(flouble *map_in,long nside);
+void he_map_product(int nside,flouble *mp1,flouble *mp2,flouble *mp_out);
+flouble he_map_dot(int nside,flouble *mp1,flouble *mp2);
 //flouble *he_synfast(flouble *cl,int nside,int lmax,unsigned int seed);
 
 #endif //_COMMON_

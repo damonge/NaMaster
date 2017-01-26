@@ -219,24 +219,20 @@ static int drc3jj(int il2,int il3,int im2, int im3,int *l1min_out,
 }
 
 //Reads coupling matrix from file and computes its LU decomposition
+// fname_in (in) : input file
+// nbins_in (in) : number of ell bands
+// coupling_matrix_b_out (out) : LU decomposition of the coupling matrix
+// perm (out) : permutation used in the LU decomposition
+// n_cl (in) : number of power spectra (nmaps1 x nmaps2)
 void read_coupling_matrix(char *fname_in,int nbins_in,
 			  gsl_matrix **coupling_matrix_b_out,
-			  gsl_permutation **perm_out,
-			  int pol1,int pol2)
+			  gsl_permutation **perm_out,int n_cl)
 {
-  int sig,n_cl,stat;
+  int sig,stat;
   FILE *fi;
   gsl_permutation *perm;
   gsl_matrix *coupling_matrix_b;
 
-  if(pol1) {
-    if(pol2) n_cl=4;
-    else n_cl=2;
-  }
-  else {
-    if(pol2) n_cl=2;
-    else n_cl=1;
-  }
   perm=gsl_permutation_alloc(n_cl*nbins_in);
   coupling_matrix_b=gsl_matrix_alloc(n_cl*nbins_in,n_cl*nbins_in);
 
@@ -252,39 +248,32 @@ void read_coupling_matrix(char *fname_in,int nbins_in,
 }
 
 //Computes binned coupling matrix
-// fname_mask (in) : path to fits file containing the mask
-// n_lbin (in) : number of multipoles per l-bin
-// nside (out) : mask resolution
-// lmax (out)  : maximum l used (3*nside-1)
-// nbins (out) : number of l-bins
+// fl1,fl2 (in) : fields we're correlating
+// bins         : binning scheme
 // coupling_matrix_b_out (out) : LU decomposition of the coupling matrix
 // perm (out) : permutation used in the LU decomposition
-// mask_out (out) : mask map
-void compute_coupling_matrix(flouble *cl_mask,long nside_in,int lmax_in,BinSchm *bins,
+// write_matrix (in) : file in which to write the binned matrix
+// write_matrix_b (in) : file in which to write the unbinned matrix
+void compute_coupling_matrix(Field *fl1,Field *fl2,BinSchm *bins,
 			     gsl_matrix **coupling_matrix_b_out,
 			     gsl_permutation **perm_out,
-			     char *write_matrix,char *write_matrix_b,
-			     int pol1,int pol2)
+			     char *write_matrix,char *write_matrix_b)
 {
   int sig,ib2,ib3,l2,l3;
   double *cl_mask_bad_ub;
   double **coupling_matrix_ub;
   gsl_matrix *coupling_matrix_b;
   gsl_permutation *perm;
-  int n_cl;
-
-  if(pol1) {
-    if(pol2) n_cl=4;
-    else n_cl=2;
-  }
-  else {
-    if(pol2) n_cl=2;
-    else n_cl=1;
-  }
+  long nside_in=fl1->nside;
+  int lmax_in=fl1->lmax;
+  int n_cl=fl1->nmaps*fl2->nmaps;
+  if(fl1->nside!=fl2->nside)
+    report_error(1,"Cant' correlate fields with different resolution\n");
 
   cl_mask_bad_ub=my_malloc((lmax_in+1)*sizeof(double));
+  he_anafast(&(fl1->mask),&(fl2->mask),1,1,0,0,&cl_mask_bad_ub,nside_in,lmax_in);
   for(l2=0;l2<=lmax_in;l2++)
-    cl_mask_bad_ub[l2]=cl_mask[l2]*(2*l2+1.);
+    cl_mask_bad_ub[l2]*=(2*l2+1.);
 
   //Compute coupling matrix
   coupling_matrix_ub=my_malloc(n_cl*(lmax_in+1)*(sizeof(double *)));
@@ -442,7 +431,7 @@ void compute_coupling_matrix(flouble *cl_mask,long nside_in,int lmax_in,BinSchm 
 // coupling_matrix_b (in) : LU decomposition of the coupling matrix
 // perm (int) : permutation used in the LU decomposition
 // returns decoupled D_l
-flouble **decouple_cl_l(flouble **cl_in,flouble **cl_noise_in,
+flouble **decouple_cl_l(flouble **cl_in,flouble **cl_noise_in,flouble **cl_bias,
 			int n_cl,BinSchm *bins,
 			gsl_matrix *coupling_matrix_b,gsl_permutation *perm)
 {
@@ -462,7 +451,7 @@ flouble **decouple_cl_l(flouble **cl_in,flouble **cl_noise_in,
       double dl_b=0;
       for(i2=0;i2<bins->nell_list[ib2];i2++) {
 	l2=bins->ell_list[ib2][i2];
-	dl_b+=(cl_in[icl][l2]-cl_noise_in[icl][l2])*weigh_l(l2)*bins->w_list[ib2][i2];
+	dl_b+=(cl_in[icl][l2]-cl_noise_in[icl][l2]-cl_bias[icl][l2])*weigh_l(l2)*bins->w_list[ib2][i2];
       }
       gsl_vector_set(dl_map_bad_b,n_cl*ib2+icl,dl_b);
     }
@@ -480,4 +469,170 @@ flouble **decouple_cl_l(flouble **cl_in,flouble **cl_noise_in,
   gsl_vector_free(dl_map_good_b);
 
   return dl_out;
+}
+
+void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,flouble **cl_bias)
+{
+  int ii;
+  flouble **cl_dum;
+  long ip;
+  int nspec=fl1->nmaps*fl2->nmaps;
+  int lmax=fl1->lmax;
+
+  cl_dum=my_malloc(nspec*sizeof(flouble *));
+  for(ii=0;ii<nspec;ii++) {
+    cl_dum[ii]=my_calloc((lmax+1),sizeof(flouble));
+    for(ip=0;ip<=lmax;ip++)
+      cl_bias[ii][ip]=0;
+  }
+
+  //TODO: some terms (e.g. C^ab*SHT[w*g^j]) could be precomputed
+  //TODO: if fl1=fl2 F2=F3
+  //Allocate dummy maps and alms
+  flouble **map_1_dum=my_malloc(fl1->nmaps*sizeof(flouble *));
+  fcomplex **alm_1_dum=my_malloc(fl1->nmaps*sizeof(fcomplex *));
+  for(ii=0;ii<fl1->nmaps;ii++) {
+    map_1_dum[ii]=my_malloc(fl1->npix*sizeof(flouble));
+    alm_1_dum[ii]=my_malloc(he_nalms(fl1->lmax)*sizeof(fcomplex));
+  }
+  flouble **map_2_dum=my_malloc(fl2->nmaps*sizeof(flouble *));
+  fcomplex **alm_2_dum=my_malloc(fl2->nmaps*sizeof(fcomplex *));
+  for(ii=0;ii<fl2->nmaps;ii++) {
+    map_2_dum[ii]=my_malloc(fl1->npix*sizeof(flouble));
+    alm_2_dum[ii]=my_malloc(he_nalms(fl1->lmax)*sizeof(fcomplex));
+  }
+
+  if(fl2->ntemp>0) {
+    printf("Computing F2\n");
+    int iti;
+    for(iti=0;iti<fl2->ntemp;iti++) {
+      int itj;
+      for(itj=0;itj<fl2->ntemp;itj++) {
+	int im1,im2;
+	double nij=gsl_matrix_get(fl2->matrix_M,iti,itj);
+	//w*g^j
+	for(im2=0;im2<fl2->nmaps;im2++)
+	  he_map_product(fl2->nside,fl2->temp[itj][im2],fl2->mask,map_2_dum[im2]);
+	//SHT[w*g^j]
+	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum);
+	//C^ab*SHT[w*g^j]
+	for(im1=0;im1<fl1->nmaps;im1++) {
+	  for(im2=0;im2<fl2->nmaps;im2++)
+	    he_alter_alm(lmax,-1.,alm_2_dum[im2],alm_1_dum[im1],cl_proposal[im1*fl2->nmaps+im2]);
+	}
+	//SHT^-1[C^ab*SHT[w*g^j]]
+	he_alm2map(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum);
+	//v*SHT^-1[C^ab*SHT[w*g^j]]
+	for(im1=0;im1<fl1->nmaps;im1++)
+	  he_map_product(fl1->nside,map_1_dum[im1],fl1->mask,map_1_dum[im1]);
+	//SHT[v*SHT^-1[C^ab*SHT[w*g^j]]]
+	he_map2alm(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum);
+	//Sum_m(SHT[v*SHT^-1[C^ab*SHT[w*g^j]]]*g^i*)/(2l+1)
+	he_alm2cl(alm_1_dum,fl2->a_temp[iti],fl1->nmaps,fl2->nmaps,fl1->pol,fl1->pol,cl_dum,lmax);
+	for(im1=0;im1<nspec;im1++) {
+	  for(ip=0;ip<=lmax;ip++)
+	    cl_bias[im1][ip]-=cl_dum[im1][ip]*nij;
+	}
+      }
+    }
+  }
+
+  if(fl1->ntemp>0) {
+    printf("Computing F3\n");
+    int iti;
+    for(iti=0;iti<fl1->ntemp;iti++) {
+      int itj;
+      for(itj=0;itj<fl1->ntemp;itj++) {
+	int im1,im2;
+	double mij=gsl_matrix_get(fl1->matrix_M,iti,itj);
+	//v*f^j
+	for(im1=0;im1<fl1->nmaps;im1++)
+	  he_map_product(fl1->nside,fl1->temp[itj][im1],fl1->mask,map_1_dum[im1]);
+	//SHT[v*f^j]
+	he_map2alm(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum);
+	//C^abT*SHT[v*f^j]
+	for(im2=0;im2<fl2->nmaps;im2++) {
+	  for(im1=0;im1<fl1->nmaps;im1++)
+	    he_alter_alm(lmax,-1.,alm_1_dum[im1],alm_2_dum[im2],cl_proposal[im1*fl2->nmaps+im2]);
+	}
+	//SHT^-1[C^abT*SHT[v*f^j]]
+	he_alm2map(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum);
+	//w*SHT^-1[C^abT*SHT[v*f^j]]
+	for(im2=0;im2<fl2->nmaps;im2++)
+	  he_map_product(fl2->nside,map_2_dum[im2],fl2->mask,map_2_dum[im2]);
+	//SHT[w*SHT^-1[C^abT*SHT[v*f^j]]]
+	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum);
+	//Sum_m(f^i*SHT[w*SHT^-1[C^abT*SHT[v*f^j]]]^*)/(2l+1)
+	he_alm2cl(fl1->a_temp[iti],alm_2_dum,fl1->nmaps,fl2->nmaps,fl1->pol,fl2->pol,cl_dum,lmax);
+	for(im1=0;im1<nspec;im1++) {
+	  for(ip=0;ip<=lmax;ip++)
+	    cl_bias[im1][ip]-=cl_dum[im1][ip]*mij;
+	}
+      }
+    }
+  }
+  
+  if((fl1->ntemp>0) && (fl2->ntemp>0)) {
+    printf("Computing F4\n");
+    int iti,itj,itp,itq,im1,im2;
+    
+    flouble *mat_prod=my_calloc(fl1->ntemp*fl2->ntemp,sizeof(flouble));
+    for(itj=0;itj<fl1->ntemp;itj++) {
+      for(itq=0;itq<fl2->ntemp;itq++) {
+	//w*g^q
+	for(im2=0;im2<fl2->nmaps;im2++)
+	  he_map_product(fl2->nside,fl2->temp[itq][im2],fl2->mask,map_2_dum[im2]);
+	//SHT[w*g^q]
+	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum);
+	//C^ab*SHT[w*g^q]
+	for(im1=0;im1<fl1->nmaps;im1++) {
+	  for(im2=0;im2<fl2->nmaps;im2++)
+	    he_alter_alm(lmax,-1.,alm_2_dum[im2],alm_1_dum[im1],cl_proposal[im1*fl2->nmaps+im2]);
+	}
+	//SHT^-1[C^ab*SHT[w*g^q]]
+	he_alm2map(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum);
+	for(im1=0;im1<fl1->nmaps;im1++) {
+	  //v*SHT^-1[C^ab*SHT[w*g^q]]
+	  he_map_product(fl1->nside,map_1_dum[im1],fl1->mask,map_1_dum[im1]);
+	  //Int[f^jT*v*SHT^-1[C^ab*SHT[w*g^q]]]
+	  mat_prod[itj*fl2->ntemp+itq]+=he_map_dot(fl1->nside,map_1_dum[im1],fl1->temp[itj][im1]);
+	}
+      }
+    }
+    
+    for(iti=0;iti<fl1->ntemp;iti++) {
+      for(itp=0;itp<fl2->ntemp;itp++) {
+	//Sum_m(f^i*g^p*)/(2l+1)
+	he_alm2cl(fl1->a_temp[iti],fl2->a_temp[itp],fl1->nmaps,fl2->nmaps,fl1->pol,fl2->pol,cl_dum,lmax);
+	for(itj=0;itj<fl1->ntemp;itj++) {
+	  double mij=gsl_matrix_get(fl1->matrix_M,iti,itj);
+	  for(itq=0;itq<fl2->ntemp;itq++) {
+	    double npq=gsl_matrix_get(fl2->matrix_M,itp,itq);
+	    for(im1=0;im1<nspec;im1++) {
+	      for(ip=0;ip<=lmax;ip++)
+		cl_bias[im1][ip]+=cl_dum[im1][ip]*mat_prod[itj*fl2->ntemp+itq]*mij*npq;
+	    }
+	  }
+	}
+      }
+    }
+    
+    free(mat_prod);
+  }
+  
+  for(ii=0;ii<fl1->nmaps;ii++) {
+    free(map_1_dum[ii]);
+    free(alm_1_dum[ii]);
+  }
+  free(map_1_dum);
+  free(alm_1_dum);
+  for(ii=0;ii<fl2->nmaps;ii++) {
+    free(map_2_dum[ii]);
+    free(alm_2_dum[ii]);
+  }
+  free(map_2_dum);
+  free(alm_2_dum);
+  for(ii=0;ii<nspec;ii++)
+    free(cl_dum[ii]);
+  free(cl_dum);
 }
