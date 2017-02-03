@@ -54,7 +54,7 @@ Field *field_alloc(long nside,flouble *mask,int pol,flouble **maps,int ntemp,flo
 	memcpy(fl->temp[itemp][imap],temp[itemp][imap],fl->npix*sizeof(flouble));
 	he_map_product(fl->nside,fl->temp[itemp][imap],fl->mask,fl->temp[itemp][imap]); //Multiply by mask
       }
-      he_map2alm(fl->nside,fl->lmax,1,fl->pol,fl->temp[itemp],fl->a_temp[itemp]); //SHT
+      he_map2alm(fl->nside,fl->lmax,1,fl->pol,fl->temp[itemp],fl->a_temp[itemp],HE_NITER_DEFAULT); //SHT
     }
 
     //Compute normalization matrix

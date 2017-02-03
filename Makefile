@@ -1,5 +1,5 @@
 CC= gcc
-WOPT= -Wall -fopenmp
+WOPT= -Wall -fopenmp -O3
 #WOPT+= -D_WEIGH_L2
 LIB_GSL= -L/home/damonge/lib
 INC_GSL= -I/home/damonge/include

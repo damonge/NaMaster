@@ -14,6 +14,10 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_blas.h>
+#ifdef _WITH_NEEDLET
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_spline.h>
+#endif //_WITH_NEEDLET
 
 #define COM_MAX(a,b)  (((a)>(b)) ? (a) : (b)) // maximum
 #define COM_MIN(a,b)  (((a)<(b)) ? (a) : (b)) // minimum
@@ -90,31 +94,54 @@ MasterWorkspace *compute_power_spectra(Field *fl1,Field *fl2,BinSchm *bin,
 				       flouble **cl_noise,flouble **cl_proposal,flouble **cl_out);
 
 //Defined in healpix_extra.c
+#define HE_NITER_DEFAULT 3
 long he_nalms(int lmax);
 long he_indexlm(int l,int m,int lmax);
 void he_alm2map(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms);
-void he_map2alm(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms);
+void he_map2alm(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms,int niter);
+void he_alm2cl(fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls,int lmax);
+void he_anafast(flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls,int nside,int lmax);
 void he_write_healpix_map(flouble **tmap,int nfields,long nside,char *fname);
 void he_get_file_params(char *fname,long *nside,int *nfields,int *isnest);
 flouble *he_read_healpix_map(char *fname,long *nside,int nfield);
 int he_ring_num(long nside,double z);
-long *he_query_strip(long nside,double theta1,double theta2,
-		     long *npix_strip);
-void he_udgrade(flouble *map_in,long nside_in,
-		flouble *map_out,long nside_out,
-		int nest);
-double *he_generate_beam_window(int lmax,double fwhm_amin);
-void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,double *window);
-void he_alm2cl(fcomplex **alms_1,fcomplex **alms_2,
-	       int pol_1,int pol_2,
-	       flouble **cls,int lmax);
-void he_anafast(flouble **maps_1,flouble **maps_2,
-		int pol_1,int pol_2,
-		flouble **cls,int nside,int lmax);
+void he_query_strip(long nside,double theta1,double theta2,int *pixlist,long *npix_strip);
 void he_ring2nest_inplace(flouble *map_in,long nside);
 void he_nest2ring_inplace(flouble *map_in,long nside);
+void he_in_ring(int nside,int iz,flouble phi0,flouble dphi,int *listir,int *nir);
+void he_query_disc(int nside,double cth0,double phi,flouble radius,int *listtot,int *nlist,int inclusive);
+void he_udgrade(flouble *map_in,long nside_in,flouble *map_out,long nside_out,int nest);
+double *he_generate_beam_window(int lmax,double fwhm_amin);
+void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,double *window);
 void he_map_product(int nside,flouble *mp1,flouble *mp2,flouble *mp_out);
 flouble he_map_dot(int nside,flouble *mp1,flouble *mp2);
 //flouble *he_synfast(flouble *cl,int nside,int lmax,unsigned int seed);
-
+#ifdef _WITH_NEEDLET
+#define HE_NBAND_NX 512
+#define HE_NORM_FT 2.2522836206907617
+#define HE_NL_INTPREC 1E-6
+#define HE_NT_NSIDE_MIN 32
+typedef struct {
+  double b;
+  double inv_b;
+  gsl_spline *b_spline;
+  gsl_interp_accel *b_intacc;
+  int niter;
+  int nside0;
+  int jmax_min;
+  int nj;
+  int *nside_arr;
+  int *lmax_arr;
+  flouble **b_arr;
+} HE_nt_param;
+void he_nt_end(HE_nt_param *par);
+HE_nt_param *he_nt_init(flouble b_nt,int nside0,int niter);
+void he_free_needlet(HE_nt_param *par,int pol,flouble ***nt);
+flouble ***he_alloc_needlet(HE_nt_param *par,int pol);
+void he_nt_get_window(HE_nt_param *par,int j,flouble *b);
+fcomplex **he_needlet2map(HE_nt_param *par,flouble **map,flouble ***nt,
+			  int return_alm,int pol,int input_TEB,int output_TEB);
+fcomplex **he_map2needlet(HE_nt_param *par,flouble **map,flouble ***nt,
+			  int return_alm,int pol,int input_TEB,int output_TEB);
+#endif //_WITH_NEEDLET
 #endif //_COMMON_

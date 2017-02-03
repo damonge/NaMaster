@@ -90,7 +90,8 @@ void run_master(Field *fl1,Field *fl2,
   else {
     printf("Computing coupling matrix \n");
     w=compute_coupling_matrix(fl1,fl2,bin);
-    write_master_workspace(w,fname_coupling);
+    if(strcmp(fname_coupling,"none"))
+      write_master_workspace(w,fname_coupling);
   }
 
   printf("Computing data pseudo-Cl\n");

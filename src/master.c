@@ -374,7 +374,7 @@ MasterWorkspace *compute_coupling_matrix(Field *fl1,Field *fl2,BinSchm *bin)
   shared(w)
   {
     int ll2,ll3;
-    double *wigner_00,*wigner_22;
+    double *wigner_00=NULL,*wigner_22=NULL;
     int lstart=0;
 
     if((w->ncls==1) || (w->ncls==2))
@@ -493,7 +493,7 @@ void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,floub
 	for(im2=0;im2<fl2->nmaps;im2++)
 	  he_map_product(fl2->nside,fl2->temp[itj][im2],fl2->mask,map_2_dum[im2]);
 	//SHT[w*g^j]
-	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum);
+	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
 	//C^ab*SHT[w*g^j]
 	for(im1=0;im1<fl1->nmaps;im1++) {
 	  for(im2=0;im2<fl2->nmaps;im2++)
@@ -505,7 +505,7 @@ void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,floub
 	for(im1=0;im1<fl1->nmaps;im1++)
 	  he_map_product(fl1->nside,map_1_dum[im1],fl1->mask,map_1_dum[im1]);
 	//SHT[v*SHT^-1[C^ab*SHT[w*g^j]]]
-	he_map2alm(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum);
+	he_map2alm(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
 	//Sum_m(SHT[v*SHT^-1[C^ab*SHT[w*g^j]]]*g^i*)/(2l+1)
 	he_alm2cl(alm_1_dum,fl2->a_temp[iti],fl1->pol,fl1->pol,cl_dum,lmax);
 	for(im1=0;im1<nspec;im1++) {
@@ -528,7 +528,7 @@ void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,floub
 	for(im1=0;im1<fl1->nmaps;im1++)
 	  he_map_product(fl1->nside,fl1->temp[itj][im1],fl1->mask,map_1_dum[im1]);
 	//SHT[v*f^j]
-	he_map2alm(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum);
+	he_map2alm(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
 	//C^abT*SHT[v*f^j]
 	for(im2=0;im2<fl2->nmaps;im2++) {
 	  for(im1=0;im1<fl1->nmaps;im1++)
@@ -540,7 +540,7 @@ void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,floub
 	for(im2=0;im2<fl2->nmaps;im2++)
 	  he_map_product(fl2->nside,map_2_dum[im2],fl2->mask,map_2_dum[im2]);
 	//SHT[w*SHT^-1[C^abT*SHT[v*f^j]]]
-	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum);
+	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
 	//Sum_m(f^i*SHT[w*SHT^-1[C^abT*SHT[v*f^j]]]^*)/(2l+1)
 	he_alm2cl(fl1->a_temp[iti],alm_2_dum,fl1->pol,fl2->pol,cl_dum,lmax);
 	for(im1=0;im1<nspec;im1++) {
@@ -562,7 +562,7 @@ void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,floub
 	for(im2=0;im2<fl2->nmaps;im2++)
 	  he_map_product(fl2->nside,fl2->temp[itq][im2],fl2->mask,map_2_dum[im2]);
 	//SHT[w*g^q]
-	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum);
+	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
 	//C^ab*SHT[w*g^q]
 	for(im1=0;im1<fl1->nmaps;im1++) {
 	  for(im2=0;im2<fl2->nmaps;im2++)
