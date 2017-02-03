@@ -3,20 +3,20 @@
 //   Copyright 2012 David Alonso                                     //
 //                                                                   //
 //                                                                   //
-// This file is part of CRIME.                                       //
+// This file is part of NaMaster.                                    //
 //                                                                   //
-// CRIME is free software: you can redistribute it and/or modify it  //
-// under the terms of the GNU General Public License as published by //
-// the Free Software Foundation, either version 3 of the License, or //
-// (at your option) any later version.                               //
+// NaMaster is free software: you can redistribute it and/or modify  //
+// it under the terms of the GNU General Public License as published //
+// by the Free Software Foundation, either version 3 of the License, //
+// or (at your option) any later version.                            //
 //                                                                   //
-// CRIME is distributed in the hope that it will be useful, but      //
+// NaMaster is distributed in the hope that it will be useful, but   //
 // WITHOUT ANY WARRANTY; without even the implied warranty of        //
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU //
 // General Public License for more details.                          //
 //                                                                   //
 // You should have received a copy of the GNU General Public License //
-// along with CRIME.  If not, see <http://www.gnu.org/licenses/>.    //
+// along with NaMaster.  If not, see <http://www.gnu.org/licenses/>. //
 //                                                                   //
 ///////////////////////////////////////////////////////////////////////
 #include "common.h"
@@ -41,17 +41,29 @@ long he_indexlm(int l,int m,int lmax)
     return l;
 }
 
+static void wrap_sharp_execute(sharp_jobtype type,int spin,void *alm,void *map,
+			       const sharp_geom_info *geom_info,const sharp_alm_info *alm_info,
+			       int ntrans,double *time,unsigned long long *opcnt)
+{
+#ifdef _SPREC
+  int flags=0;
+#else //_SPREC
+  int flags=SHARP_DP;
+#endif //_SPREC
+
+#ifdef _NEW_SHARP
+  sharp_execute(type,spin,0,alm,map,geom_info,alm_info,ntrans,flags,0,time,opcnt);
+#else //_NEW_SHARP
+  sharp_execute(type,spin,alm,map,geom_info,alm_info,ntrans,flags,time,opcnt);
+#endif //_NEW_SHARP
+}
+
 void he_alm2map(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms)
 {
   int nbatches,nodd,itrans;
   double time;
   sharp_alm_info *alm_info;
   sharp_geom_info *geom_info;
-#ifdef _SPREC
-  int flag_prec=0;
-#else //_SPREC
-  int flag_prec=SHARP_DP;
-#endif //_SPREC
   int nmaps=1,spin=0;
   if(pol) {
     nmaps=2;
@@ -66,15 +78,15 @@ void he_alm2map(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **
 
   for(itrans=0;itrans<nbatches;itrans++) {
     time=0;
-    sharp_execute(SHARP_ALM2MAP,spin,&(alms[itrans*nmaps*MAX_SHT]),
-                  &(maps[itrans*nmaps*MAX_SHT]),geom_info,
-                  alm_info,MAX_SHT,flag_prec,&time,NULL);
+    wrap_sharp_execute(SHARP_ALM2MAP,spin,&(alms[itrans*nmaps*MAX_SHT]),
+		       &(maps[itrans*nmaps*MAX_SHT]),geom_info,
+		       alm_info,MAX_SHT,&time,NULL);
   }
   if(nodd>0) {
     time=0;
-    sharp_execute(SHARP_ALM2MAP,spin,&(alms[nbatches*nmaps*MAX_SHT]),
-		  &(maps[nbatches*nmaps*MAX_SHT]),geom_info,
-		  alm_info,nodd,flag_prec,&time,NULL);
+    wrap_sharp_execute(SHARP_ALM2MAP,spin,&(alms[nbatches*nmaps*MAX_SHT]),
+		       &(maps[nbatches*nmaps*MAX_SHT]),geom_info,
+		       alm_info,nodd,&time,NULL);
   }
 
   sharp_destroy_geom_info(geom_info);
@@ -87,11 +99,6 @@ void he_map2alm(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **
   double time;
   sharp_alm_info *alm_info;
   sharp_geom_info *geom_info;
-#ifdef _SPREC
-  int flag_prec=0;
-#else //_SPREC
-  int flag_prec=SHARP_DP;
-#endif //_SPREC
   int nmaps=1,spin=0;
   if(pol) {
     nmaps=2;
@@ -106,15 +113,15 @@ void he_map2alm(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **
 
   for(itrans=0;itrans<nbatches;itrans++) {
     time=0;
-    sharp_execute(SHARP_MAP2ALM,spin,&(alms[itrans*nmaps*MAX_SHT]),
-                  &(maps[itrans*nmaps*MAX_SHT]),geom_info,
-                  alm_info,MAX_SHT,flag_prec,&time,NULL);
+    wrap_sharp_execute(SHARP_MAP2ALM,spin,&(alms[itrans*nmaps*MAX_SHT]),
+		       &(maps[itrans*nmaps*MAX_SHT]),geom_info,
+		       alm_info,MAX_SHT,&time,NULL);
   }
   if(nodd>0) {
     time=0;
-    sharp_execute(SHARP_MAP2ALM,spin,&(alms[nbatches*nmaps*MAX_SHT]),
-		  &(maps[nbatches*nmaps*MAX_SHT]),geom_info,
-		  alm_info,nodd,flag_prec,&time,NULL);
+    wrap_sharp_execute(SHARP_MAP2ALM,spin,&(alms[nbatches*nmaps*MAX_SHT]),
+		       &(maps[nbatches*nmaps*MAX_SHT]),geom_info,
+		       alm_info,nodd,&time,NULL);
   }
 
   sharp_destroy_geom_info(geom_info);
@@ -122,11 +129,13 @@ void he_map2alm(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **
 }
 
 void he_alm2cl(fcomplex **alms_1,fcomplex **alms_2,
-	       int nmaps_1,int nmaps_2,
 	       int pol_1,int pol_2,
 	       flouble **cls,int lmax)
 {
   int i1,index_cl;
+  int nmaps_1=1,nmaps_2=1;
+  if(pol_1) nmaps_1=2;
+  if(pol_2) nmaps_2=2;
 
   index_cl=0;
   for(i1=0;i1<nmaps_1;i1++) {
@@ -152,25 +161,19 @@ void he_alm2cl(fcomplex **alms_1,fcomplex **alms_2,
 }
 
 void he_anafast(flouble **maps_1,flouble **maps_2,
-		int nmaps_1,int nmaps_2,
 		int pol_1,int pol_2,
 		flouble **cls,int nside,int lmax)
 {
   fcomplex **alms_1,**alms_2;
   int i1,lmax_here=3*nside-1;
-
+  int nmaps_1=1, nmaps_2=1;
+  if(pol_1) nmaps_1=2;
+  if(pol_2) nmaps_2=2;
 
   alms_1=my_malloc(nmaps_1*sizeof(fcomplex *));
   for(i1=0;i1<nmaps_1;i1++)
     alms_1[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
-  if(pol_1) {
-    if(nmaps_1!=2)
-      report_error(1,"Must provide 2 maps for polarization\n");
-    he_map2alm(nside,lmax,1,pol_1,maps_1,alms_1);
-  }
-  else {
-    he_map2alm(nside,lmax,nmaps_1,0,maps_1,alms_1);
-  }
+  he_map2alm(nside,lmax,1,pol_1,maps_1,alms_1);
 
   if(maps_1==maps_2)
     alms_2=alms_1;
@@ -178,17 +181,10 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
     alms_2=my_malloc(nmaps_2*sizeof(fcomplex *));
     for(i1=0;i1<nmaps_2;i1++)
       alms_2[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
-    if(pol_2) {
-      if(nmaps_2!=2)
-	report_error(1,"Must provide 2 maps for polarization\n");
-      he_map2alm(nside,lmax,1,pol_2,maps_2,alms_2);
-    }
-    else {
-      he_map2alm(nside,lmax,nmaps_2,0,maps_2,alms_2);
-    }
+    he_map2alm(nside,lmax,1,pol_2,maps_2,alms_2);
   }
 
-  he_alm2cl(alms_1,alms_2,nmaps_1,nmaps_2,pol_1,pol_2,cls,lmax);
+  he_alm2cl(alms_1,alms_2,pol_1,pol_2,cls,lmax);
 
   for(i1=0;i1<nmaps_1;i1++)
     free(alms_1[i1]);
@@ -210,7 +206,7 @@ void he_write_healpix_map(flouble **tmap,int nfields,long nside,char *fname)
   float *map_dum=my_malloc(nside2npix(nside)*sizeof(float));
 
   if((nfields!=1)&&(nfields!=3)) {
-    fprintf(stderr,"CRIME: nfields must be 1 or 3\n");
+    fprintf(stderr,"NaMaster: nfields must be 1 or 3\n");
     exit(1);
   }
 
@@ -268,7 +264,6 @@ void he_get_file_params(char *fname,long *nside,int *nfields,int *isnest)
   free(naxis);
   fits_close_file(fptr,&status);
 }
-
 
 flouble *he_read_healpix_map(char *fname,long *nside,int nfield)
 {
@@ -389,10 +384,8 @@ long *he_query_strip(long nside,double theta1,double theta2,
 
   if((theta2<=theta1)||
      (theta1<0)||(theta1>M_PI)||
-     (theta2<0)||(theta2>M_PI)) {
-    fprintf(stderr,"CRIME: wrong strip boundaries\n");
-    exit(1);
-  }
+     (theta2<0)||(theta2>M_PI))
+    report_error(1,"Wrong strip boundaries\n");
 
   irmin=he_ring_num(nside,z_hi);
   irmax=he_ring_num(nside,z_lo);
@@ -534,11 +527,11 @@ void he_udgrade(flouble *map_in,long nside_in,
 //Transforms FWHM in arcmin to sigma_G in rad:
 //         pi/(60*180*sqrt(8*log(2))
 #define FWHM2SIGMA 0.00012352884853326381 
-double *he_generate_beam_window(int lmax,double fwhm_amin)
+flouble *he_generate_beam_window(int lmax,double fwhm_amin)
 {
   long l;
   double sigma=FWHM2SIGMA*fwhm_amin;
-  double *beam=my_malloc((lmax+1)*sizeof(double));
+  flouble *beam=my_malloc((lmax+1)*sizeof(flouble));
 
   for(l=0;l<=lmax;l++)
     beam[l]=exp(-0.5*l*(l+1)*sigma*sigma);
@@ -546,9 +539,9 @@ double *he_generate_beam_window(int lmax,double fwhm_amin)
   return beam;
 }
 
-void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,double *window)
+void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,flouble *window)
 {
-  double *beam;
+  flouble *beam;
   int mm;
 
   if(window==NULL) beam=he_generate_beam_window(lmax,fwhm_amin);
@@ -607,7 +600,6 @@ flouble he_map_dot(int nside,flouble *mp1,flouble *mp2)
 
   return (flouble)(sum*pixsize);
 }
-
 
 /*
 flouble *he_synfast(flouble *cl,int nside,int lmax,unsigned int seed)

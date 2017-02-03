@@ -12,9 +12,9 @@ void bins_free(BinSchm *bins)
   free(bins->w_list);
 }
 
-BinSchm *bins_create(int nlb,int nside)
+BinSchm *bins_create(int nlb,int lmax)
 {
-  int ii,lmax=3*nside-1;
+  int ii;
   int nband_max=(lmax-1)/nlb;
   flouble w0=1./nlb;
 
@@ -38,11 +38,11 @@ BinSchm *bins_create(int nlb,int nside)
   return bins;
 }
 
-BinSchm *bins_read(char *fname,int nside)
+BinSchm *bins_read(char *fname,int lmax)
 {
   FILE *fi=my_fopen(fname,"r");
   int ii,nlines=my_linecount(fi); rewind(fi);
-  if(nlines!=3*nside)
+  if(nlines!=lmax+1)
     report_error(1,"Error reading binning table\n");
 
   int *band_number,*larr;

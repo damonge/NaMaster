@@ -32,7 +32,7 @@ typedef double flouble;
 typedef double complex fcomplex;
 #endif //_SPREC
 
-//Defined in common.c
+//Defined in utils.c
 int my_linecount(FILE *f);
 void report_error(int level,char *fmt,...);
 void *my_malloc(size_t size);
@@ -56,7 +56,8 @@ typedef struct {
   gsl_matrix *matrix_M;
 } Field;
 void field_free(Field *fl);
-Field *field_alloc(char *fname_mask,char *fname_maps,char *fname_temp,int pol);
+Field *field_alloc(long nside,flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp);
+Field *field_read(char *fname_mask,char *fname_maps,char *fname_temp,int pol);
 
 //Defined in bins.c
 typedef struct {
@@ -70,17 +71,23 @@ BinSchm *bins_read(char *fname,int nside);
 void bins_free(BinSchm *bin);
 
 //Defined in master.c
-void read_coupling_matrix(char *fname_in,int nbins_in,
-			  gsl_matrix **coupling_matrix_b_out,
-			  gsl_permutation **perm_out,int n_cl);
-void compute_coupling_matrix(Field *fl1,Field *fl2,BinSchm *bins,
-			     gsl_matrix **coupling_matrix_b_out,
-			     gsl_permutation **perm_out,
-			     char *write_matrix,char *write_matrix_b);
-flouble **decouple_cl_l(flouble **cl_in,flouble **cl_noise_in,flouble **cl_bias,
-			int n_cl,BinSchm *bins,
-			gsl_matrix *coupling_matrix_b,gsl_permutation *perm);
+typedef struct {
+  int lmax;
+  int ncls;
+  flouble *pcl_masks;
+  flouble **coupling_matrix_unbinned;
+  BinSchm *bin;
+  gsl_matrix *coupling_matrix_binned;
+  gsl_permutation *coupling_matrix_perm;
+} MasterWorkspace;
+MasterWorkspace *compute_coupling_matrix(Field *fl1,Field *fl2,BinSchm *bin); //
+void write_master_workspace(MasterWorkspace *w,char *fname); //
+MasterWorkspace *read_master_workspace(char *fname); //
+void master_workspace_free(MasterWorkspace *w); //
 void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,flouble **cl_bias);
+void decouple_cl_l(MasterWorkspace *w,flouble **cl_in,flouble **cl_noise_in,flouble **cl_bias,flouble **cl_out);
+MasterWorkspace *compute_power_spectra(Field *fl1,Field *fl2,BinSchm *bin,
+				       flouble **cl_noise,flouble **cl_proposal,flouble **cl_out);
 
 //Defined in healpix_extra.c
 long he_nalms(int lmax);
@@ -99,11 +106,10 @@ void he_udgrade(flouble *map_in,long nside_in,
 double *he_generate_beam_window(int lmax,double fwhm_amin);
 void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,double *window);
 void he_alm2cl(fcomplex **alms_1,fcomplex **alms_2,
-	       int nmaps_1,int nmaps_2,
 	       int pol_1,int pol_2,
 	       flouble **cls,int lmax);
 void he_anafast(flouble **maps_1,flouble **maps_2,
-		int nmaps_1,int nmaps_2,int pol_1,int pol_2,
+		int pol_1,int pol_2,
 		flouble **cls,int nside,int lmax);
 void he_ring2nest_inplace(flouble *map_in,long nside);
 void he_nest2ring_inplace(flouble *map_in,long nside);

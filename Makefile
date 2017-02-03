@@ -14,13 +14,13 @@ CFLAGS= $(WOPT) -I./src $(INC_GSL) $(INC_HP) $(INC_FITS) $(INC_SHARP)
 LIBS= $(LIB_GSL) $(LIB_HP) $(LIB_FITS) $(LIB_SHARP)
 LIBS+= -lgsl -lgslcblas -lchealpix -lsharp -lfftpack -lc_utils -lcfitsio -lm
 
-COMMONO= src/common.o
+UTILSO= src/utils.o
 BINSO= src/bins.o
 FIELDO= src/field.o
 HEO= src/healpix_extra.o
 MASTERO= src/master.o
 MAINO= src/main.o
-OBJ= $(COMMONO) $(BINSO) $(FIELDO) $(HEO) $(MASTERO) $(MAINO)
+OBJ= $(UTILSO) $(BINSO) $(FIELDO) $(HEO) $(MASTERO) $(MAINO)
 
 EXEC= NaMaster
 all: $(EXEC)

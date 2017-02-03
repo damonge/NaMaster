@@ -20,49 +20,41 @@ void field_free(Field *fl)
   free(fl);
 }
 
-Field *field_alloc(char *fname_mask,char *fname_maps,char *fname_temp,int pol)
+Field *field_alloc(long nside,flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp)
 {
-  int ii;
-  long nside_dum;
+  int ii,itemp,itemp2,imap;
   Field *fl=my_malloc(sizeof(Field));
-
-  //Read mask and compute nside, lmax etc.
-  fl->mask=he_read_healpix_map(fname_mask,&(fl->nside),0);
+  fl->nside=nside;
   fl->lmax=3*fl->nside-1;
   fl->npix=12*fl->nside*fl->nside;
   fl->pol=pol;
   if(pol) fl->nmaps=2;
   else fl->nmaps=1;
+  fl->ntemp=ntemp;
 
-  //Read data maps
+  fl->mask=my_malloc(fl->npix*sizeof(flouble));
+  memcpy(fl->mask,mask,fl->npix*sizeof(flouble));
+
   fl->maps=my_malloc(fl->nmaps*sizeof(flouble *));
   for(ii=0;ii<fl->nmaps;ii++) {
-    fl->maps[ii]=he_read_healpix_map(fname_maps,&(nside_dum),ii);
-    if(nside_dum!=fl->nside)
-      report_error(1,"Wrong nside %ld\n",nside_dum);
+    fl->maps[ii]=my_malloc(fl->npix*sizeof(flouble));
+    memcpy(fl->maps[ii],maps[ii],fl->npix*sizeof(flouble));
     he_map_product(fl->nside,fl->maps[ii],fl->mask,fl->maps[ii]);
   }
 
-  //Read templates and deproject
-  if(strcmp(fname_temp,"none")) {
-    int ncols,isnest,itemp,itemp2,imap;
-    he_get_file_params(fname_temp,&nside_dum,&ncols,&isnest);
-    if(nside_dum!=fl->nside)
-      report_error(1,"Wrong nside %ld\n",nside_dum);
-    if((ncols==0) || (ncols%fl->nmaps!=0))
-      report_error(1,"Not enough templates in file %s\n",fname_temp);
-    fl->ntemp=ncols/fl->nmaps;
+  if(fl->ntemp>0) {
     fl->temp=my_malloc(fl->ntemp*sizeof(flouble **));
     fl->a_temp=my_malloc(fl->ntemp*sizeof(fcomplex **));
     for(itemp=0;itemp<fl->ntemp;itemp++) {
       fl->temp[itemp]=my_malloc(fl->nmaps*sizeof(flouble *));
       fl->a_temp[itemp]=my_malloc(fl->nmaps*sizeof(fcomplex *));
       for(imap=0;imap<fl->nmaps;imap++) {
+	fl->temp[itemp][imap]=my_malloc(fl->npix*sizeof(flouble));
 	fl->a_temp[itemp][imap]=my_malloc(he_nalms(fl->lmax)*sizeof(fcomplex));
-	fl->temp[itemp][imap]=he_read_healpix_map(fname_temp,&(nside_dum),itemp*fl->nmaps+imap);
+	memcpy(fl->temp[itemp][imap],temp[itemp][imap],fl->npix*sizeof(flouble));
 	he_map_product(fl->nside,fl->temp[itemp][imap],fl->mask,fl->temp[itemp][imap]); //Multiply by mask
-	he_map2alm(fl->nside,fl->lmax,1,fl->pol,fl->temp[itemp],fl->a_temp[itemp]); //SHT
       }
+      he_map2alm(fl->nside,fl->lmax,1,fl->pol,fl->temp[itemp],fl->a_temp[itemp]); //SHT
     }
 
     //Compute normalization matrix
@@ -93,7 +85,7 @@ Field *field_alloc(char *fname_mask,char *fname_maps,char *fname_temp,int pol)
 	alpha+=mij*prods[itemp2];
       }
 #ifdef _DEBUG
-      printf("alpha_%d = %lE\n",itemp2,alpha);
+      printf("alpha_%d = %lE\n",itemp,alpha);
 #endif //_DEBUG
       for(imap=0;imap<fl->nmaps;imap++) {
 	long ip;
@@ -103,7 +95,66 @@ Field *field_alloc(char *fname_mask,char *fname_maps,char *fname_temp,int pol)
     }
     free(prods);
   }
-  else
-    fl->ntemp=0;
+
+  return fl;
+}
+
+Field *field_read(char *fname_mask,char *fname_maps,char *fname_temp,int pol)
+{
+  long nside,nside_dum;
+  Field *fl;
+  flouble *mask;
+  flouble **maps;
+  flouble ***temp;
+  int ii,ntemp,itemp,imap,nmaps=1;
+  if(pol) nmaps=2;
+
+  //Read mask and compute nside, lmax etc.
+  mask=he_read_healpix_map(fname_mask,&nside,0);
+
+  //Read data maps
+  maps=my_malloc(nmaps*sizeof(flouble *));
+  for(ii=0;ii<nmaps;ii++) {
+    maps[ii]=he_read_healpix_map(fname_maps,&(nside_dum),ii);
+    if(nside_dum!=nside)
+      report_error(1,"Wrong nside %ld\n",nside_dum);
+  }
+
+  //Read templates and deproject
+  if(strcmp(fname_temp,"none")) {
+    int ncols,isnest;
+    he_get_file_params(fname_temp,&nside_dum,&ncols,&isnest);
+    if(nside_dum!=nside)
+      report_error(1,"Wrong nside %ld\n",nside_dum);
+    if((ncols==0) || (ncols%nmaps!=0))
+      report_error(1,"Not enough templates in file %s\n",fname_temp);
+    ntemp=ncols/nmaps;
+    temp=my_malloc(ntemp*sizeof(flouble **));
+    for(itemp=0;itemp<ntemp;itemp++) {
+      temp[itemp]=my_malloc(nmaps*sizeof(flouble *));
+      for(imap=0;imap<nmaps;imap++)
+	temp[itemp][imap]=he_read_healpix_map(fname_temp,&(nside_dum),itemp*nmaps+imap);
+    }
+  }
+  else {
+    ntemp=0;
+    temp=NULL;
+  }
+
+  fl=field_alloc(nside,mask,pol,maps,ntemp,temp);
+
+  free(mask);
+  for(imap=0;imap<nmaps;imap++)
+    free(maps[imap]);
+  free(maps);
+  if(ntemp>0) {
+    for(itemp=0;itemp<ntemp;itemp++) {
+      for(imap=0;imap<nmaps;imap++)
+	free(temp[itemp][imap]);
+      free(temp[itemp]);
+    }
+    free(temp);
+  }
+
   return fl;
 }
