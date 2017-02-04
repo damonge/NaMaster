@@ -1,6 +1,6 @@
 #ifndef _NM_UTILS_
 #define _NM_UTILS_
-#include "define.h"
+#include "namaster.h"
 
 //Defined in utils.c
 int my_linecount(FILE *f);
@@ -51,15 +51,15 @@ typedef struct {
   int *nside_arr;
   int *lmax_arr;
   flouble **b_arr;
-} HE_nt_param;
-void he_nt_end(HE_nt_param *par);
-HE_nt_param *he_nt_init(flouble b_nt,int nside0,int niter);
-void he_free_needlet(HE_nt_param *par,int pol,flouble ***nt);
-flouble ***he_alloc_needlet(HE_nt_param *par,int pol);
-void he_nt_get_window(HE_nt_param *par,int j,flouble *b);
-fcomplex **he_needlet2map(HE_nt_param *par,flouble **map,flouble ***nt,
+} he_needlet_params;
+void he_nt_end(he_needlet_params *par);
+he_needlet_params *he_nt_init(flouble b_nt,int nside0,int niter);
+void he_free_needlet(he_needlet_params *par,int pol,flouble ***nt);
+flouble ***he_alloc_needlet(he_needlet_params *par,int pol);
+void he_nt_get_window(he_needlet_params *par,int j,flouble *b);
+fcomplex **he_needlet2map(he_needlet_params *par,flouble **map,flouble ***nt,
 			  int return_alm,int pol,int input_TEB,int output_TEB);
-fcomplex **he_map2needlet(HE_nt_param *par,flouble **map,flouble ***nt,
+fcomplex **he_map2needlet(he_needlet_params *par,flouble **map,flouble ***nt,
 			  int return_alm,int pol,int input_TEB,int output_TEB);
 #endif //_WITH_NEEDLET
 

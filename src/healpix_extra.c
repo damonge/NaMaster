@@ -1,12 +1,16 @@
-#include "define.h"
 #include "utils.h"
 #include <fitsio.h>
 #include <chealpix.h>
-#include "sharp_almhelpers.h"
-#include "sharp_geomhelpers.h"
-#include "sharp.h"
+#include <sharp_almhelpers.h>
+#include <sharp_geomhelpers.h>
+#include <sharp.h>
 
 #define MAX_SHT 32
+
+long he_nside2npix(long nside)
+{
+  return 12*nside*nside;
+}
 
 long he_nalms(int lmax)
 {
@@ -212,7 +216,7 @@ void he_write_healpix_map(flouble **tmap,int nfields,long nside,char *fname)
   fitsfile *fptr;
   int ii,status=0;
   char **ttype,**tform,**tunit;
-  float *map_dum=my_malloc(nside2npix(nside)*sizeof(float));
+  float *map_dum=my_malloc(he_nside2npix(nside)*sizeof(float));
 
   ttype=my_malloc(nfields*sizeof(char *));
   tform=my_malloc(nfields*sizeof(char *));
@@ -243,9 +247,9 @@ void he_write_healpix_map(flouble **tmap,int nfields,long nside,char *fname)
 		     &status);
   for(ii=0;ii<nfields;ii++) {
     lint ip;
-    for(ip=0;ip<nside2npix(nside);ip++)
+    for(ip=0;ip<he_nside2npix(nside);ip++)
       map_dum[ip]=(float)(tmap[ii][ip]);
-    fits_write_col(fptr,TFLOAT,ii+1,1,1,nside2npix(nside),map_dum,&status);
+    fits_write_col(fptr,TFLOAT,ii+1,1,1,he_nside2npix(nside),map_dum,&status);
   }
   fits_close_file(fptr, &status);
 
@@ -723,8 +727,8 @@ void he_udgrade(flouble *map_in,long nside_in,
 		flouble *map_out,long nside_out,
 		int nest)
 {
-  long npix_in=nside2npix(nside_in);
-  long npix_out=nside2npix(nside_out);
+  long npix_in=he_nside2npix(nside_in);
+  long npix_out=he_nside2npix(nside_out);
 
   if(nside_in>nside_out) {
     long ii;
@@ -925,7 +929,7 @@ static double func_phix(double x,double invB,
   return -1.;
 }
 
-void he_nt_end(HE_nt_param *par)
+void he_nt_end(he_needlet_params *par)
 {
   int j;
 
@@ -939,9 +943,9 @@ void he_nt_end(HE_nt_param *par)
   free(par);
 }
 
-HE_nt_param *he_nt_init(flouble b_nt,int nside0,int niter)
+he_needlet_params *he_nt_init(flouble b_nt,int nside0,int niter)
 {
-  HE_nt_param *par=my_malloc(sizeof(HE_nt_param));
+  he_needlet_params *par=my_malloc(sizeof(he_needlet_params));
   par->niter=niter;
   par->b=b_nt;
   par->inv_b=1./b_nt;
@@ -980,7 +984,7 @@ HE_nt_param *he_nt_init(flouble b_nt,int nside0,int niter)
     int lmx=(int)(dlmx)+1;
     int ns=pow(2,(int)(log((double)lmx)/log(2.))+1);
     //    par->nside_arr[ii]=par->nside0;
-    par->nside_arr[ii]=COM_MAX((COM_MIN(ns,par->nside0)),HE_NT_NSIDE_MIN);
+    par->nside_arr[ii]=NMT_MAX((NMT_MIN(ns,par->nside0)),HE_NT_NSIDE_MIN);
     par->lmax_arr[ii]=3*par->nside_arr[ii]-1;
   }
 
@@ -1011,7 +1015,7 @@ HE_nt_param *he_nt_init(flouble b_nt,int nside0,int niter)
   return par;
 }
 
-void he_free_needlet(HE_nt_param *par,int pol,flouble ***nt)
+void he_free_needlet(he_needlet_params *par,int pol,flouble ***nt)
 {
   int ii,nmaps;
   if(pol) nmaps=3;
@@ -1026,7 +1030,7 @@ void he_free_needlet(HE_nt_param *par,int pol,flouble ***nt)
   free(nt);
 }
 
-flouble ***he_alloc_needlet(HE_nt_param *par,int pol)
+flouble ***he_alloc_needlet(he_needlet_params *par,int pol)
 {
   int ii,nmaps;
   flouble ***nt=my_malloc(par->nj*sizeof(flouble **));
@@ -1045,7 +1049,7 @@ flouble ***he_alloc_needlet(HE_nt_param *par,int pol)
   return nt;
 }
 
-void he_nt_get_window(HE_nt_param *par,int j,flouble *b)
+void he_nt_get_window(he_needlet_params *par,int j,flouble *b)
 {
   int l;
   flouble bfac;
@@ -1082,7 +1086,7 @@ void he_nt_get_window(HE_nt_param *par,int j,flouble *b)
   }
 }
 
-fcomplex **he_needlet2map(HE_nt_param *par,flouble **map,flouble ***nt,
+fcomplex **he_needlet2map(he_needlet_params *par,flouble **map,flouble ***nt,
 			  int return_alm,int pol,int input_TEB,int output_TEB)
 {
   int j,nmaps;
@@ -1153,7 +1157,7 @@ fcomplex **he_needlet2map(HE_nt_param *par,flouble **map,flouble ***nt,
   return alm;
 }
 
-fcomplex **he_map2needlet(HE_nt_param *par,flouble **map,flouble ***nt,
+fcomplex **he_map2needlet(he_needlet_params *par,flouble **map,flouble ***nt,
 			  int return_alm,int pol,int input_TEB,int output_TEB)
 {
   int j,nmaps;

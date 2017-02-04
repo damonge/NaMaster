@@ -1,5 +1,5 @@
 CC= gcc
-WOPT= -Wall -fopenmp -O3
+WOPT= -Wall -fopenmp
 #WOPT+= -D_WEIGH_L2
 LIB_GSL= -L/home/damonge/lib
 INC_GSL= -I/home/damonge/include
@@ -15,12 +15,12 @@ LIBS= $(LIB_GSL) $(LIB_HP) $(LIB_FITS) $(LIB_SHARP)
 LIBS+= -lgsl -lgslcblas -lchealpix -lsharp -lfftpack -lc_utils -lcfitsio -lm
 
 UTILSO= src/utils.o
-BINSO= src/bins.o
-FIELDO= src/field.o
 HEO= src/healpix_extra.o
-MASTERO= src/master.o
-MAINO= src/main.o
-OBJ= $(UTILSO) $(BINSO) $(FIELDO) $(HEO) $(MASTERO) $(MAINO)
+FIELDO= src/nmt_field.o
+BINSO= src/nmt_bins.o
+MASTERO= src/nmt_master.o
+MAINO= src/nmt_main.o
+OBJ= $(UTILSO) $(HEO) $(FIELDO) $(BINSO) $(MASTERO) $(MAINO)
 
 EXEC= NaMaster
 all: $(EXEC)

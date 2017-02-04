@@ -2,13 +2,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.4])
-AC_INIT([CCL], [0.0], [github.com/damonge/NaMaster])
+AC_INIT([namaster], [0.0], [github.com/damonge/NaMaster])
 AM_INIT_AUTOMAKE([-Wall subdir-objects foreign serial-tests])
 AM_PROG_AR
 LT_PREREQ([2.2])
 LT_INIT([dlopen])
 
-AC_CONFIG_SRCDIR([src/master.c])
+AC_CONFIG_SRCDIR([src/nmt_master.c])
 AC_CONFIG_HEADERS([config.h])
 
 # Avoid problem with git timestamps
@@ -20,14 +20,15 @@ AC_PROG_CC_STDC
 AC_PROG_INSTALL
 AM_PROG_CC_C_O
 AM_MAINTAINER_MODE
+AC_OPENMP
 
 # Checks for libraries.
 AC_SEARCH_LIBS([pow],[m],[],AC_MSG_ERROR(Couldn't find libm. Required.))
 AC_SEARCH_LIBS([cblas_dgemm],[gslcblas],[],AC_MSG_ERROR(Couldn't find libgslcblas.))
 AC_SEARCH_LIBS([gsl_spline2d_eval_e],[gsl],[],AC_MSG_ERROR(Couldn't find libgsl. GSL V2+ required.))
-AC_SEARCH_LIBS([sharp_execute],[sharp],[],AC_MSG_ERROR(Couldn't find libsharp))
-AC_SEARCH_LIBS([fits_write_col],[cfitsio],[],AC_MSG_ERROR(Couldn't find cfitsio))
-
+AC_SEARCH_LIBS([ffopen],[cfitsio],[],AC_MSG_ERROR(Couldn't find cfitsio))
+AC_SEARCH_LIBS([sharp_Ylmgen_destroy],[sharp],[],AC_MSG_ERROR(Couldn't find libsharp),[-lfftpack -lc_utils])
+AC_SEARCH_LIBS([ring2nest],[chealpix],[],AC_MSG_ERROR(Couldn't find libchealpix))
 
 # Checks for header files.
 AC_CHECK_HEADERS([stdlib.h string.h math.h stdarg.h unistd.h time.h omp.h complex.h])
@@ -39,9 +40,7 @@ AC_FUNC_MALLOC
 # Checks for library functions.
 AC_CHECK_FUNCS([pow sqrt])
 
-AC_CONFIG_FILES([Makefile
-		 include/Makefile
-		 class/Makefile])
+AC_CONFIG_FILES([Makefile])
 
 AC_OUTPUT
 
@@ -58,7 +57,7 @@ echo \
  Now type 'make @<:@<target>@:>@', where the optional
  target may be:
 
-   all     : to build everything (currently libccl)
+   all     : to build everything (currently libnmt)
              this is the default target
    check   : runs the library's unit tests   
    install : to put everything in the installation

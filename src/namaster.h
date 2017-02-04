@@ -1,6 +1,40 @@
-#ifndef _NAMASTER_
-#define _NAMASTER_
-#include "define.h"
+#ifndef _NAMASTER_H_
+#define _NAMASTER_H_
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <unistd.h>
+#include <math.h>
+#include <time.h>
+#include <complex.h>
+#include <omp.h>
+#include <gsl/gsl_vector.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_blas.h>
+#ifdef _WITH_NEEDLET
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_spline.h>
+#endif //_WITH_NEEDLET
+
+#define NMT_MAX(a,b)  (((a)>(b)) ? (a) : (b)) // maximum
+#define NMT_MIN(a,b)  (((a)<(b)) ? (a) : (b)) // minimum
+
+#ifdef _LONGIDS
+typedef long lint;
+#else //_LONGIDS
+typedef int lint;
+#endif //_LONGIDS
+
+#ifdef _SPREC
+typedef float flouble;
+typedef float complex fcomplex;
+#else //_SPREC
+typedef double flouble;
+typedef double complex fcomplex;
+#endif //_SPREC
 
 //Defined in bins.c
 typedef struct {
@@ -8,10 +42,10 @@ typedef struct {
   int *nell_list;
   int **ell_list;
   flouble **w_list;
-} BinSchm;
-BinSchm *bins_create(int nlb,int nside);
-BinSchm *bins_read(char *fname,int nside);
-void bins_free(BinSchm *bin);
+} nmt_binning_scheme;
+nmt_binning_scheme *nmt_bins_create(int nlb,int nside);
+nmt_binning_scheme *nmt_bins_read(char *fname,int nside);
+void nmt_bins_free(nmt_binning_scheme *bin);
 
 //Defined in field.c
 typedef struct {
@@ -26,10 +60,10 @@ typedef struct {
   flouble ***temp;
   fcomplex ***a_temp;
   gsl_matrix *matrix_M;
-} Field;
-void field_free(Field *fl);
-Field *field_alloc(long nside,flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp);
-Field *field_read(char *fname_mask,char *fname_maps,char *fname_temp,int pol);
+} nmt_field;
+void nmt_field_free(nmt_field *fl);
+nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp);
+nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,int pol);
 
 //Defined in master.c
 typedef struct {
@@ -37,17 +71,18 @@ typedef struct {
   int ncls;
   flouble *pcl_masks;
   flouble **coupling_matrix_unbinned;
-  BinSchm *bin;
+  nmt_binning_scheme *bin;
   gsl_matrix *coupling_matrix_binned;
   gsl_permutation *coupling_matrix_perm;
-} MasterWorkspace;
-MasterWorkspace *compute_coupling_matrix(Field *fl1,Field *fl2,BinSchm *bin); //
-void write_master_workspace(MasterWorkspace *w,char *fname); //
-MasterWorkspace *read_master_workspace(char *fname); //
-void master_workspace_free(MasterWorkspace *w); //
-void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,flouble **cl_bias);
-void decouple_cl_l(MasterWorkspace *w,flouble **cl_in,flouble **cl_noise_in,flouble **cl_bias,flouble **cl_out);
-MasterWorkspace *compute_power_spectra(Field *fl1,Field *fl2,BinSchm *bin,
-				       flouble **cl_noise,flouble **cl_proposal,flouble **cl_out);
+} nmt_workspace;
+nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_binning_scheme *bin); //
+void nmt_workspace_write(nmt_workspace *w,char *fname); //
+nmt_workspace *nmt_workspace_read(char *fname); //
+void nmt_workspace_free(nmt_workspace *w); //
+void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_proposal,flouble **cl_bias);
+void nmt_decouple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_noise_in,
+		       flouble **cl_bias,flouble **cl_out);
+nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,nmt_binning_scheme *bin,
+					 flouble **cl_noise,flouble **cl_proposal,flouble **cl_out);
 
-#endif //_NAMASTER_
+#endif //_NAMASTER_H_

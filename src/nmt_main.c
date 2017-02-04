@@ -1,8 +1,6 @@
-#include "define.h"
 #include "utils.h"
-#include "namaster.h"
 
-void run_master(Field *fl1,Field *fl2,
+void run_master(nmt_field *fl1,nmt_field *fl2,
 		char *fname_cl_noise,
 		char *fname_cl_proposal,
 		char *fname_coupling,
@@ -20,11 +18,11 @@ void run_master(Field *fl1,Field *fl2,
     report_error(1,"Can't correlate fields with different resolution\n");
 
   //Binning
-  BinSchm *bin;
+  nmt_binning_scheme *bin;
   if(!strcmp(fname_bins,"none"))
-    bin=bins_create(n_lbin,fl1->lmax);
+    bin=nmt_bins_create(n_lbin,fl1->lmax);
   else
-    bin=bins_read(fname_bins,fl1->lmax);
+    bin=nmt_bins_read(fname_bins,fl1->lmax);
 
   //Allocate cl
   cl_noise=my_malloc(nspec*sizeof(flouble *));
@@ -82,28 +80,28 @@ void run_master(Field *fl1,Field *fl2,
     fclose(fi);
   }
 
-  MasterWorkspace *w;
+  nmt_workspace *w;
   if(access(fname_coupling,F_OK)!=-1) { //If file exists just read matrix
     printf("Reading coupling matrix\n");
-    w=read_master_workspace(fname_coupling);
+    w=nmt_workspace_read(fname_coupling);
     if(w->bin->n_bands!=bin->n_bands)
       report_error(1,"Read coupling matrix doesn't fit input binning scheme\n");
   }
   else {
     printf("Computing coupling matrix \n");
-    w=compute_coupling_matrix(fl1,fl2,bin);
+    w=nmt_compute_coupling_matrix(fl1,fl2,bin);
     if(strcmp(fname_coupling,"none"))
-      write_master_workspace(w,fname_coupling);
+      nmt_workspace_write(w,fname_coupling);
   }
 
   printf("Computing data pseudo-Cl\n");
   he_anafast(fl1->maps,fl2->maps,fl1->pol,fl2->pol,cl_data,fl1->nside,fl1->lmax);
 
   printf("Computing deprojection bias\n");
-  compute_deprojection_bias(fl1,fl2,cl_proposal,cl_bias);
+  nmt_compute_deprojection_bias(fl1,fl2,cl_proposal,cl_bias);
 
   printf("Computing decoupled bandpowers\n");
-  decouple_cl_l(w,cl_data,cl_noise,cl_bias,cl_out);
+  nmt_decouple_cl_l(w,cl_data,cl_noise,cl_bias,cl_out);
 
   printf("Writing output\n");
   fi=my_fopen(fname_out,"w");
@@ -119,8 +117,8 @@ void run_master(Field *fl1,Field *fl2,
   }
   fclose(fi);
 
-  bins_free(bin);
-  master_workspace_free(w);
+  nmt_bins_free(bin);
+  nmt_workspace_free(w);
   for(ii=0;ii<nspec;ii++) {
     free(cl_noise[ii]);
     free(cl_proposal[ii]);
@@ -137,7 +135,7 @@ void run_master(Field *fl1,Field *fl2,
 
 int main(int argc,char **argv)
 {
-  int n_lbin=1,pol_1=0,pol_2=0,is_auto=0;
+  int n_lbin=1,pol_1=0,pol_2=0,is_auto=0,print_help=0;
   char fname_map_1[256]="none";
   char fname_map_2[256]="none";
   char fname_mask_1[256]="none";
@@ -149,7 +147,10 @@ int main(int argc,char **argv)
   char fname_cl_proposal[256]="none";
   char fname_coupling[256]="none";
   char fname_out[256]="none";
-  Field *fl1,*fl2;
+  nmt_field *fl1,*fl2;
+
+  if(argc==1)
+    print_help=1;
 
   char **c;
   for(c=argv+1;*c;c++) {
@@ -181,43 +182,53 @@ int main(int argc,char **argv)
       sprintf(fname_bins,"%s",*++c);
     else if(!strcmp(*c,"-nlb"))
       n_lbin=atoi(*++c);
-    else if(!strcmp(*c,"-h")) {
-      fprintf(stderr,"Usage: NaMaster -<opt-name> <option>\n");
-      fprintf(stderr,"Options:\n");
-      fprintf(stderr,"  -map      -> path to file containing map(s)\n");
-      fprintf(stderr,"  -map_2    -> path to file containing 2nd map(s) (optional)\n");
-      fprintf(stderr,"  -mask     -> path to file containing mask\n");
-      fprintf(stderr,"  -mask_2   -> path to file containing mask for 2nd map(s) (optional)\n");
-      fprintf(stderr,"  -temp     -> path to file containing contaminant templates (optional)\n");
-      fprintf(stderr,"  -temp_2   -> path to file containing contaminant templates\n");
-      fprintf(stderr,"               for 2nd map(s) (optional)\n");
-      fprintf(stderr,"  -pol      -> spin-0 (0) or spin-2 (1) input map(s)\n");
-      fprintf(stderr,"  -pol_2    -> spin-0 (0) or spin-2 (1) 2nd input map(s)\n");
-      fprintf(stderr,"  -cl_noise -> path to file containing noise Cl(s)\n");
-      fprintf(stderr,"  -cl_guess -> path to file containing initial guess for the Cl(s)\n");
-      fprintf(stderr,"  -coupling -> path to file containing coupling matrix (optional)\n");
-      fprintf(stderr,"  -out      -> output filename\n");
-      fprintf(stderr,"  -binning  -> path to file containing binning scheme\n");
-      fprintf(stderr,"  -nlb      -> number of ells per bin (used only if -binning isn't used)\n");
-      fprintf(stderr,"  -h        -> this help\n\n");
-      return 0;
-    }
+    else if(!strcmp(*c,"-h"))
+      print_help=1;
     else {
       fprintf(stderr,"Unknown option %s\n",*c);
       exit(1);
     }
   }
 
-  if(!strcmp(fname_map_1,"none"))
-    report_error(1,"Must provide map to correlate!\n");
-  if(!strcmp(fname_mask_1,"none"))
-    report_error(1,"Must provide mask\n");
-  if(!strcmp(fname_out,"none"))
-    report_error(1,"Must provide output filename\n");
+  if(!strcmp(fname_map_1,"none")) {
+    fprintf(stderr,"Must provide map to correlate!\n");
+    print_help=1;
+  }
+  if(!strcmp(fname_mask_1,"none")) {
+    fprintf(stderr,"Must provide mask\n");
+    print_help=1;
+  }
+  if(!strcmp(fname_out,"none")) {
+    fprintf(stderr,"Must provide output filename\n");
+    print_help=1;
+  }
+
+  if(print_help) {
+    fprintf(stderr,"Usage: namaster -<opt-name> <option>\n");
+    fprintf(stderr,"Options:\n");
+    fprintf(stderr,"  -map      -> path to file containing map(s)\n");
+    fprintf(stderr,"  -map_2    -> path to file containing 2nd map(s) (optional)\n");
+    fprintf(stderr,"  -mask     -> path to file containing mask\n");
+    fprintf(stderr,"  -mask_2   -> path to file containing mask for 2nd map(s) (optional)\n");
+    fprintf(stderr,"  -temp     -> path to file containing contaminant templates (optional)\n");
+    fprintf(stderr,"  -temp_2   -> path to file containing contaminant templates\n");
+    fprintf(stderr,"               for 2nd map(s) (optional)\n");
+    fprintf(stderr,"  -pol      -> spin-0 (0) or spin-2 (1) input map(s)\n");
+    fprintf(stderr,"  -pol_2    -> spin-0 (0) or spin-2 (1) 2nd input map(s)\n");
+    fprintf(stderr,"  -cl_noise -> path to file containing noise Cl(s)\n");
+    fprintf(stderr,"  -cl_guess -> path to file containing initial guess for the Cl(s)\n");
+    fprintf(stderr,"  -coupling -> path to file containing coupling matrix (optional)\n");
+    fprintf(stderr,"  -out      -> output filename\n");
+    fprintf(stderr,"  -binning  -> path to file containing binning scheme\n");
+    fprintf(stderr,"  -nlb      -> number of ells per bin (used only if -binning isn't used)\n");
+    fprintf(stderr,"  -h        -> this help\n\n");
+    return 0;
+  }
+
   if(n_lbin<=0)
     report_error(1,"#ell per bin must be positive\n");
 
-  fl1=field_read(fname_mask_1,fname_map_1,fname_temp_1,pol_1);
+  fl1=nmt_field_read(fname_mask_1,fname_map_1,fname_temp_1,pol_1);
 
   if(!strcmp(fname_map_2,"none")) {
     fl2=fl1;
@@ -228,7 +239,7 @@ int main(int argc,char **argv)
       sprintf(fname_mask_2,"%s",fname_mask_1);
     if(!strcmp(fname_temp_2,"none"))
       sprintf(fname_temp_2,"%s",fname_temp_1);
-    fl2=field_read(fname_mask_2,fname_map_2,fname_temp_2,pol_2);
+    fl2=nmt_field_read(fname_mask_2,fname_map_2,fname_temp_2,pol_2);
   }
 
   run_master(fl1,fl2,
@@ -237,9 +248,9 @@ int main(int argc,char **argv)
 	     fname_coupling,
 	     fname_out,fname_bins,n_lbin);
 
-  field_free(fl1);
+  nmt_field_free(fl1);
   if(!is_auto)
-    field_free(fl2);
+    nmt_field_free(fl2);
 
   return 0;
 }

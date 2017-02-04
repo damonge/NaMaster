@@ -1,8 +1,6 @@
-#include "define.h"
 #include "utils.h"
-#include "namaster.h"
 
-void bins_free(BinSchm *bins)
+void nmt_bins_free(nmt_binning_scheme *bins)
 {
   int ii;
   free(bins->nell_list);
@@ -14,13 +12,13 @@ void bins_free(BinSchm *bins)
   free(bins->w_list);
 }
 
-BinSchm *bins_create(int nlb,int lmax)
+nmt_binning_scheme *nmt_bins_create(int nlb,int lmax)
 {
   int ii;
   int nband_max=(lmax-1)/nlb;
   flouble w0=1./nlb;
 
-  BinSchm *bins=my_malloc(sizeof(BinSchm));
+  nmt_binning_scheme *bins=my_malloc(sizeof(nmt_binning_scheme));
   bins->n_bands=nband_max;
   bins->nell_list=my_calloc(nband_max,sizeof(int));
   bins->ell_list=my_malloc(nband_max*sizeof(int *));
@@ -40,7 +38,7 @@ BinSchm *bins_create(int nlb,int lmax)
   return bins;
 }
 
-BinSchm *bins_read(char *fname,int lmax)
+nmt_binning_scheme *nmt_bins_read(char *fname,int lmax)
 {
   FILE *fi=my_fopen(fname,"r");
   int ii,nlines=my_linecount(fi); rewind(fi);
@@ -66,7 +64,7 @@ BinSchm *bins_read(char *fname,int lmax)
   fclose(fi);
   nband_max++;
 
-  BinSchm *bins=my_malloc(sizeof(BinSchm));
+  nmt_binning_scheme *bins=my_malloc(sizeof(nmt_binning_scheme));
   bins->n_bands=nband_max;
   bins->nell_list=my_calloc(nband_max,sizeof(int));
   bins->ell_list=my_malloc(nband_max*sizeof(int *));

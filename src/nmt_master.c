@@ -1,6 +1,4 @@
-#include "define.h"
 #include "utils.h"
-#include "namaster.h"
 
 static flouble weigh_l(int l)
 {
@@ -46,7 +44,7 @@ static int drc3jj(int il2,int il3,int im2, int im3,int *l1min_out,
   
   //l1 bounds
   l1max=il2+il3;
-  l1min=COM_MAX((abs(il2-il3)),(abs(im1)));
+  l1min=NMT_MAX((abs(il2-il3)),(abs(im1)));
   *l1max_out=l1max;
   *l1min_out=l1min;
   
@@ -220,10 +218,10 @@ static int drc3jj(int il2,int il3,int im2, int im3,int *l1min_out,
   return 2;
 }
 
-static MasterWorkspace *master_workspace_new(int lmax,int ncls,BinSchm *bin)
+static nmt_workspace *master_workspace_new(int lmax,int ncls,nmt_binning_scheme *bin)
 {
   int ii;
-  MasterWorkspace *w=my_malloc(sizeof(MasterWorkspace));
+  nmt_workspace *w=my_malloc(sizeof(nmt_workspace));
   w->lmax=lmax;
   w->ncls=ncls;
 
@@ -233,7 +231,7 @@ static MasterWorkspace *master_workspace_new(int lmax,int ncls,BinSchm *bin)
   for(ii=0;ii<w->ncls*(w->lmax+1);ii++)
     w->coupling_matrix_unbinned[ii]=my_calloc(w->ncls*(w->lmax+1),sizeof(flouble));
 
-  w->bin=my_malloc(sizeof(BinSchm));
+  w->bin=my_malloc(sizeof(nmt_binning_scheme));
   w->bin->n_bands=bin->n_bands;
   w->bin->nell_list=my_malloc(w->bin->n_bands*sizeof(int));
   memcpy(w->bin->nell_list,bin->nell_list,w->bin->n_bands*sizeof(int));
@@ -253,12 +251,12 @@ static MasterWorkspace *master_workspace_new(int lmax,int ncls,BinSchm *bin)
   return w;
 }
 
-void master_workspace_free(MasterWorkspace *w)
+void nmt_workspace_free(nmt_workspace *w)
 {
   int ii;
   gsl_permutation_free(w->coupling_matrix_perm);
   gsl_matrix_free(w->coupling_matrix_binned);
-  bins_free(w->bin);
+  nmt_bins_free(w->bin);
   for(ii=0;ii<w->ncls*(w->lmax+1);ii++)
     free(w->coupling_matrix_unbinned[ii]);
   free(w->coupling_matrix_unbinned);
@@ -266,10 +264,10 @@ void master_workspace_free(MasterWorkspace *w)
   free(w);
 }
 
-MasterWorkspace *read_master_workspace(char *fname)
+nmt_workspace *nmt_workspace_read(char *fname)
 {
   int ii;
-  MasterWorkspace *w=my_malloc(sizeof(MasterWorkspace));
+  nmt_workspace *w=my_malloc(sizeof(nmt_workspace));
   FILE *fi=my_fopen(fname,"rb");
 
   my_fread(&(w->lmax),sizeof(int),1,fi);
@@ -284,7 +282,7 @@ MasterWorkspace *read_master_workspace(char *fname)
     my_fread(w->coupling_matrix_unbinned[ii],sizeof(flouble),w->ncls*(w->lmax+1),fi);
   }
 
-  w->bin=my_malloc(sizeof(BinSchm));
+  w->bin=my_malloc(sizeof(nmt_binning_scheme));
   my_fread(&(w->bin->n_bands),sizeof(int),1,fi);
   w->bin->nell_list=my_malloc(w->bin->n_bands*sizeof(int));
   w->bin->ell_list=my_malloc(w->bin->n_bands*sizeof(int *));
@@ -307,7 +305,7 @@ MasterWorkspace *read_master_workspace(char *fname)
   return w;
 }
 
-void write_master_workspace(MasterWorkspace *w,char *fname)
+void nmt_workspace_write(nmt_workspace *w,char *fname)
 {
   int ii;
   FILE *fo=my_fopen(fname,"wb");
@@ -331,7 +329,7 @@ void write_master_workspace(MasterWorkspace *w,char *fname)
   fclose(fo);
 }
 
-static void bin_coupling_matrix(MasterWorkspace *w)
+static void bin_coupling_matrix(nmt_workspace *w)
 {
   int icl_a,icl_b,ib2,ib3,l2,l3,i2,i3,sig;
   
@@ -360,10 +358,10 @@ static void bin_coupling_matrix(MasterWorkspace *w)
 //Computes binned coupling matrix
 // fl1,fl2 (in) : fields we're correlating
 // coupling_matrix_out (out) : unbinned coupling matrix
-MasterWorkspace *compute_coupling_matrix(Field *fl1,Field *fl2,BinSchm *bin)
+nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_binning_scheme *bin)
 {
   int l2;
-  MasterWorkspace *w;
+  nmt_workspace *w;
   int n_cl=fl1->nmaps*fl2->nmaps;
   if(fl1->nside!=fl2->nside)
     report_error(1,"Can't correlate fields with different resolutions\n");
@@ -399,8 +397,8 @@ MasterWorkspace *compute_coupling_matrix(Field *fl1,Field *fl2,BinSchm *bin)
 	if((w->ncls==2) || (w->ncls==4))
 	  drc3jj(ll2,ll3,2,-2,&lmin_here_22,&lmax_here_22,wigner_22,2*(w->lmax+1));
 
-	lmin_here=COM_MAX(lmin_here_00,lmin_here_22);
-	lmax_here=COM_MIN(lmax_here_00,lmax_here_22);
+	lmin_here=NMT_MAX(lmin_here_00,lmin_here_22);
+	lmax_here=NMT_MIN(lmax_here_00,lmax_here_22);
 	  
 	for(l1=lmin_here;l1<=lmax_here;l1++) {
 	  if(l1<=w->lmax) {
@@ -452,7 +450,7 @@ MasterWorkspace *compute_coupling_matrix(Field *fl1,Field *fl2,BinSchm *bin)
   return w;
 }
 
-void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,flouble **cl_bias)
+void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_proposal,flouble **cl_bias)
 {
   int ii;
   flouble **cl_dum;
@@ -484,7 +482,7 @@ void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,floub
   }
 
   if(fl2->ntemp>0) {
-    printf("Computing F2\n");
+    //    printf("Computing F2\n");
     int iti;
     for(iti=0;iti<fl2->ntemp;iti++) {
       int itj;
@@ -519,7 +517,7 @@ void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,floub
   }
 
   if(fl1->ntemp>0) {
-    printf("Computing F3\n");
+    //    printf("Computing F3\n");
     int iti;
     for(iti=0;iti<fl1->ntemp;iti++) {
       int itj;
@@ -554,7 +552,7 @@ void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,floub
   }
 
   if((fl1->ntemp>0) && (fl2->ntemp>0)) {
-    printf("Computing F4\n");
+    //    printf("Computing F4\n");
     int iti,itj,itp,itq,im1,im2;
 
     flouble *mat_prod=my_calloc(fl1->ntemp*fl2->ntemp,sizeof(flouble));
@@ -618,7 +616,8 @@ void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,floub
   free(cl_dum);
 }
 
-void decouple_cl_l(MasterWorkspace *w,flouble **cl_in,flouble **cl_noise_in,flouble **cl_bias,flouble **cl_out)
+void nmt_decouple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_noise_in,
+		       flouble **cl_bias,flouble **cl_out)
 {
   int icl,ib2,l2;
   gsl_vector *dl_map_bad_b=gsl_vector_alloc(w->ncls*w->bin->n_bands);
@@ -637,7 +636,7 @@ void decouple_cl_l(MasterWorkspace *w,flouble **cl_in,flouble **cl_noise_in,flou
     }
   }
 
-  printf("Solving for uncoupled Cls\n");
+  //  printf("Solving for uncoupled Cls\n");
   gsl_linalg_LU_solve(w->coupling_matrix_binned,w->coupling_matrix_perm,dl_map_bad_b,dl_map_good_b);
   for(icl=0;icl<w->ncls;icl++) {
     for(ib2=0;ib2<w->bin->n_bands;ib2++)
@@ -648,12 +647,12 @@ void decouple_cl_l(MasterWorkspace *w,flouble **cl_in,flouble **cl_noise_in,flou
   gsl_vector_free(dl_map_good_b);
 }
 
-MasterWorkspace *compute_power_spectra(Field *fl1,Field *fl2,BinSchm *bin,
-				       flouble **cl_noise,flouble **cl_proposal,flouble **cl_out)
+nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,nmt_binning_scheme *bin,
+					 flouble **cl_noise,flouble **cl_proposal,flouble **cl_out)
 {
   int ii;
   flouble **cl_bias,**cl_data;
-  MasterWorkspace *w=compute_coupling_matrix(fl1,fl2,bin);
+  nmt_workspace *w=nmt_compute_coupling_matrix(fl1,fl2,bin);
 
   cl_bias=my_malloc(w->ncls*sizeof(flouble *));
   cl_data=my_malloc(w->ncls*sizeof(flouble *));
@@ -662,8 +661,8 @@ MasterWorkspace *compute_power_spectra(Field *fl1,Field *fl2,BinSchm *bin,
     cl_data[ii]=my_calloc((w->lmax+1),sizeof(flouble));
   }
   he_anafast(fl1->maps,fl2->maps,fl1->pol,fl2->pol,cl_data,fl1->nside,fl1->lmax);
-  compute_deprojection_bias(fl1,fl2,cl_proposal,cl_bias);
-  decouple_cl_l(w,cl_data,cl_noise,cl_bias,cl_out);
+  nmt_compute_deprojection_bias(fl1,fl2,cl_proposal,cl_bias);
+  nmt_decouple_cl_l(w,cl_data,cl_noise,cl_bias,cl_out);
   for(ii=0;ii<w->ncls;ii++) {
     free(cl_bias[ii]);
     free(cl_data[ii]);

@@ -1,8 +1,6 @@
-#include "define.h"
 #include "utils.h"
-#include "namaster.h"
 
-void field_free(Field *fl)
+void nmt_field_free(nmt_field *fl)
 {
   int imap;
   for(imap=0;imap<fl->nmaps;imap++)
@@ -22,10 +20,10 @@ void field_free(Field *fl)
   free(fl);
 }
 
-Field *field_alloc(long nside,flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp)
+nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp)
 {
   int ii,itemp,itemp2,imap;
-  Field *fl=my_malloc(sizeof(Field));
+  nmt_field *fl=my_malloc(sizeof(nmt_field));
   fl->nside=nside;
   fl->lmax=3*fl->nside-1;
   fl->npix=12*fl->nside*fl->nside;
@@ -101,10 +99,10 @@ Field *field_alloc(long nside,flouble *mask,int pol,flouble **maps,int ntemp,flo
   return fl;
 }
 
-Field *field_read(char *fname_mask,char *fname_maps,char *fname_temp,int pol)
+nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,int pol)
 {
   long nside,nside_dum;
-  Field *fl;
+  nmt_field *fl;
   flouble *mask;
   flouble **maps;
   flouble ***temp;
@@ -143,7 +141,7 @@ Field *field_read(char *fname_mask,char *fname_maps,char *fname_temp,int pol)
     temp=NULL;
   }
 
-  fl=field_alloc(nside,mask,pol,maps,ntemp,temp);
+  fl=nmt_field_alloc(nside,mask,pol,maps,ntemp,temp);
 
   free(mask);
   for(imap=0;imap<nmaps;imap++)
