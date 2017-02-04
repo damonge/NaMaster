@@ -1,4 +1,6 @@
-#include "common.h"
+#include "define.h"
+#include "utils.h"
+#include "namaster.h"
 
 void run_master(Field *fl1,Field *fl2,
 		char *fname_cl_noise,

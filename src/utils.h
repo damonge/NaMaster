@@ -1,40 +1,6 @@
-#ifndef _COMMON_
-#define _COMMON_
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <unistd.h>
-#include <math.h>
-#include <time.h>
-#include <complex.h>
-#include <omp.h>
-#include <gsl/gsl_vector.h>
-#include <gsl/gsl_matrix.h>
-#include <gsl/gsl_linalg.h>
-#include <gsl/gsl_blas.h>
-#ifdef _WITH_NEEDLET
-#include <gsl/gsl_integration.h>
-#include <gsl/gsl_spline.h>
-#endif //_WITH_NEEDLET
-
-#define COM_MAX(a,b)  (((a)>(b)) ? (a) : (b)) // maximum
-#define COM_MIN(a,b)  (((a)<(b)) ? (a) : (b)) // minimum
-
-#ifdef _LONGIDS
-typedef long lint;
-#else //_LONGIDS
-typedef int lint;
-#endif //_LONGIDS
-
-#ifdef _SPREC
-typedef float flouble;
-typedef float complex fcomplex;
-#else //_SPREC
-typedef double flouble;
-typedef double complex fcomplex;
-#endif //_SPREC
+#ifndef _NM_UTILS_
+#define _NM_UTILS_
+#include "define.h"
 
 //Defined in utils.c
 int my_linecount(FILE *f);
@@ -44,54 +10,6 @@ void *my_calloc(size_t nmemb,size_t size);
 FILE *my_fopen(const char *path,const char *mode);
 size_t my_fwrite(const void *ptr, size_t size, size_t nmemb,FILE *stream);
 size_t my_fread(void *ptr,size_t size,size_t count,FILE *stream);
-
-//Defined in field.c
-typedef struct {
-  long nside;
-  long npix;
-  int lmax;
-  flouble *mask;
-  int pol;
-  int nmaps;
-  flouble **maps;
-  int ntemp;
-  flouble ***temp;
-  fcomplex ***a_temp;
-  gsl_matrix *matrix_M;
-} Field;
-void field_free(Field *fl);
-Field *field_alloc(long nside,flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp);
-Field *field_read(char *fname_mask,char *fname_maps,char *fname_temp,int pol);
-
-//Defined in bins.c
-typedef struct {
-  int n_bands;
-  int *nell_list;
-  int **ell_list;
-  flouble **w_list;
-} BinSchm;
-BinSchm *bins_create(int nlb,int nside);
-BinSchm *bins_read(char *fname,int nside);
-void bins_free(BinSchm *bin);
-
-//Defined in master.c
-typedef struct {
-  int lmax;
-  int ncls;
-  flouble *pcl_masks;
-  flouble **coupling_matrix_unbinned;
-  BinSchm *bin;
-  gsl_matrix *coupling_matrix_binned;
-  gsl_permutation *coupling_matrix_perm;
-} MasterWorkspace;
-MasterWorkspace *compute_coupling_matrix(Field *fl1,Field *fl2,BinSchm *bin); //
-void write_master_workspace(MasterWorkspace *w,char *fname); //
-MasterWorkspace *read_master_workspace(char *fname); //
-void master_workspace_free(MasterWorkspace *w); //
-void compute_deprojection_bias(Field *fl1,Field *fl2,flouble **cl_proposal,flouble **cl_bias);
-void decouple_cl_l(MasterWorkspace *w,flouble **cl_in,flouble **cl_noise_in,flouble **cl_bias,flouble **cl_out);
-MasterWorkspace *compute_power_spectra(Field *fl1,Field *fl2,BinSchm *bin,
-				       flouble **cl_noise,flouble **cl_proposal,flouble **cl_out);
 
 //Defined in healpix_extra.c
 #define HE_NITER_DEFAULT 3
@@ -144,4 +62,5 @@ fcomplex **he_needlet2map(HE_nt_param *par,flouble **map,flouble ***nt,
 fcomplex **he_map2needlet(HE_nt_param *par,flouble **map,flouble ***nt,
 			  int return_alm,int pol,int input_TEB,int output_TEB);
 #endif //_WITH_NEEDLET
-#endif //_COMMON_
+
+#endif //_NM_UTILS_

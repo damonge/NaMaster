@@ -1,4 +1,6 @@
-#include "common.h"
+#include "define.h"
+#include "utils.h"
+#include "namaster.h"
 
 void field_free(Field *fl)
 {

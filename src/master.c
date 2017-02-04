@@ -1,4 +1,6 @@
-#include "common.h"
+#include "define.h"
+#include "utils.h"
+#include "namaster.h"
 
 static flouble weigh_l(int l)
 {

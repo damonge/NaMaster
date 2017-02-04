@@ -1,4 +1,5 @@
-#include "common.h"
+#include "define.h"
+#include "utils.h"
 
 int my_linecount(FILE *f)
 {

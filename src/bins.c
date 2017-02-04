@@ -1,4 +1,6 @@
-#include "common.h"
+#include "define.h"
+#include "utils.h"
+#include "namaster.h"
 
 void bins_free(BinSchm *bins)
 {
