@@ -22,12 +22,6 @@
 #define NMT_MAX(a,b)  (((a)>(b)) ? (a) : (b)) // maximum
 #define NMT_MIN(a,b)  (((a)<(b)) ? (a) : (b)) // minimum
 
-#ifdef _LONGIDS
-typedef long lint;
-#else //_LONGIDS
-typedef int lint;
-#endif //_LONGIDS
-
 #ifdef _SPREC
 typedef float flouble;
 typedef float complex fcomplex;
@@ -43,9 +37,12 @@ typedef struct {
   int **ell_list;
   flouble **w_list;
 } nmt_binning_scheme;
-nmt_binning_scheme *nmt_bins_create(int nlb,int nside);
-nmt_binning_scheme *nmt_bins_read(char *fname,int nside);
+nmt_binning_scheme *nmt_bins_create(int nlb,int lmax);
+nmt_binning_scheme *nmt_bins_read(char *fname,int lmax);
 void nmt_bins_free(nmt_binning_scheme *bin);
+void nmt_bin_cls(nmt_binning_scheme *bin,flouble **cls_in,flouble **cls_out,int ncls);
+void nmt_unbin_cls(nmt_binning_scheme *bin,flouble **cls_in,flouble **cls_out,int ncls);
+void nmt_ell_eff(nmt_binning_scheme *bin,flouble *larr);
 
 //Defined in field.c
 typedef struct {
@@ -79,10 +76,13 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
 void nmt_workspace_write(nmt_workspace *w,char *fname); //
 nmt_workspace *nmt_workspace_read(char *fname); //
 void nmt_workspace_free(nmt_workspace *w); //
-void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_proposal,flouble **cl_bias);
+void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_proposal,flouble **cl_bias); //
+void nmt_couple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_out);
 void nmt_decouple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_noise_in,
-		       flouble **cl_bias,flouble **cl_out);
-nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,nmt_binning_scheme *bin,
-					 flouble **cl_noise,flouble **cl_proposal,flouble **cl_out);
+		       flouble **cl_bias,flouble **cl_out); //
+void nmt_compute_coupled_cell(nmt_field *fl1,nmt_field *fl2,flouble **cl_out); //
+nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,
+					 nmt_binning_scheme *bin,nmt_workspace *w0,
+					 flouble **cl_noise,flouble **cl_proposal,flouble **cl_out); //
 
 #endif //_NAMASTER_H_

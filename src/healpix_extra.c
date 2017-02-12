@@ -246,7 +246,7 @@ void he_write_healpix_map(flouble **tmap,int nfields,long nside,char *fname)
 		     "G = Galactic, E = ecliptic, C = celestial = equatorial",
 		     &status);
   for(ii=0;ii<nfields;ii++) {
-    lint ip;
+    long ip;
     for(ip=0;ip<he_nside2npix(nside);ip++)
       map_dum[ip]=(float)(tmap[ii][ip]);
     fits_write_col(fptr,TFLOAT,ii+1,1,1,he_nside2npix(nside),map_dum,&status);
@@ -352,6 +352,53 @@ flouble *he_read_healpix_map(char *fname,long *nside,int nfield)
     map_ring=map;
 
   return map_ring;
+}
+
+static double fmodulo (double v1, double v2)
+{
+  if (v1>=0)
+    return (v1<v2) ? v1 : fmod(v1,v2);
+  double tmp=fmod(v1,v2)+v2;
+  return (tmp==v2) ? 0. : tmp;
+}
+
+static int imodulo (int v1, int v2)
+{ int v=v1%v2; return (v>=0) ? v : v+v2; }
+
+static const double twopi=6.283185307179586476925286766559005768394;
+static const double twothird=2.0/3.0;
+static const double inv_halfpi=0.6366197723675813430755350534900574;
+long he_ang2pix(long nside,double cth,double phi)
+{
+  double ctha=fabs(cth);
+  double tt=fmodulo(phi,twopi)*inv_halfpi; /* in [0,4) */
+
+  if (ctha<=twothird) {/* Equatorial region */
+    double temp1=nside*(0.5+tt);
+    double temp2=nside*cth*0.75;
+    int jp=(int)(temp1-temp2); /* index of  ascending edge line */
+    int jm=(int)(temp1+temp2); /* index of descending edge line */
+    int ir=nside+1+jp-jm; /* ring number counted from cth=2/3 */ /* in {1,2n+1} */
+    int kshift=1-(ir&1); /* kshift=1 if ir even, 0 otherwise */
+    int ip=(jp+jm-nside+kshift+1)/2; /* in {0,4n-1} */
+    ip=imodulo(ip,4*nside);
+
+    return nside*(nside-1)*2 + (ir-1)*4*nside + ip;
+  }
+  else {  /* North & South polar caps */
+    double tp=tt-(int)(tt);
+    double tmp=nside*sqrt(3*(1-ctha));
+    int jp=(int)(tp*tmp); /* increasing edge line index */
+    int jm=(int)((1.0-tp)*tmp); /* decreasing edge line index */
+    int ir=jp+jm+1; /* ring number counted from the closest pole */
+    int ip=(int)(tt*ir); /* in {0,4*ir-1} */
+    ip = imodulo(ip,4*ir);
+
+    if (cth>0)
+      return 2*ir*(ir-1)+ip;
+    else
+      return 12*nside*nside-2*ir*(ir+1)+ip;
+  }
 }
 
 int he_ring_num(long nside,double z)

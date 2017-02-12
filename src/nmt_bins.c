@@ -112,3 +112,49 @@ nmt_binning_scheme *nmt_bins_read(char *fname,int lmax)
 
   return bins;
 }
+
+void nmt_bin_cls(nmt_binning_scheme *bin,flouble **cls_in,flouble **cls_out,int ncls)
+{
+  int icl;
+
+  for(icl=0;icl<ncls;icl++) {
+    int ib;
+    for(ib=0;ib<bin->n_bands;ib++) {
+      int il;
+      cls_out[icl][ib]=0;
+      for(il=0;il<bin->nell_list[ib];il++) {
+	int l=bin->ell_list[ib][il];
+	flouble w=bin->w_list[ib][il];
+	cls_out[icl][ib]+=w*cls_in[icl][l];
+      }
+    }
+  }
+}
+
+void nmt_unbin_cls(nmt_binning_scheme *bin,flouble **cls_in,flouble **cls_out,int ncls)
+{
+  int icl;
+
+  for(icl=0;icl<ncls;icl++) {
+    int ib;
+    for(ib=0;ib<bin->n_bands;ib++) {
+      int il;
+      flouble clb=cls_in[icl][ib];
+      for(il=0;il<bin->nell_list[ib];il++) {
+	int l=bin->ell_list[ib][il];
+	cls_out[icl][l]=clb;
+      }
+    }
+  }
+}
+
+void nmt_ell_eff(nmt_binning_scheme *bin,flouble *larr)
+{
+  int ib;
+
+  for(ib=0;ib<bin->n_bands;ib++) {
+    int il;
+    for(il=0;il<bin->nell_list[ib];il++)
+      larr[ib]+=bin->ell_list[ib][il]*bin->w_list[ib][il];
+  }
+}

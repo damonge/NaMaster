@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+
+from distutils.core import *
+from distutils import sysconfig
+import os.path
+
+# Get numpy include directory (works across versions)
+import numpy
+try:
+    numpy_include = numpy.get_include()
+except AttributeError:
+    numpy_include = numpy.get_numpy_include()
+
+LIBCCL_LIBRARY_PATH = "/home/damonge/lib"
+
+_nmtlib = Extension("_nmtlib",
+                    ["py_namaster/namaster.i"],
+                    libraries = ['nmt','sharp','fftpack','c_utils','chealpix','cfitsio','gsl','gslcblas','m','gomp'],
+                    include_dirs = [numpy_include, "../src/"],
+                    extra_compile_args=['-O4', '-fopenmp',],
+                    )
+
+setup(name = "py_namaster",
+      description = "Library for pseudo-Cl computation",
+      author = "David Alonso",
+      version = "0.1",
+      packages = ['py_namaster'],
+      ext_modules = [_nmtlib],
+      )
+
+
+'''
+# CCL extension module
+namaster_module = Extension("_namaster",
+                            sources=["namaster_wrap.c",],
+                            libraries = ['nmt','sharp','fftpack','c_utils','chealpix','cfitsio','gsl','gslcblas','m','gomp'],
+                            include_dirs = [numpy_include, "../src/"],
+                            extra_compile_args=['-O4', '-fopenmp',],
+                            )
+
+# CCL setup script
+setup(  name         = "namaster",
+        description  = "Library of validated cosmological functions.",
+        author       = "LSST DESC",
+        version      = "0.1",
+        ext_modules  = [namaster_module],
+        py_modules   = ['namaster']
+        )
+'''

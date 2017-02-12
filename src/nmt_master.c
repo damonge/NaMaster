@@ -482,7 +482,6 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
   }
 
   if(fl2->ntemp>0) {
-    //    printf("Computing F2\n");
     int iti;
     for(iti=0;iti<fl2->ntemp;iti++) {
       int itj;
@@ -517,7 +516,6 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
   }
 
   if(fl1->ntemp>0) {
-    //    printf("Computing F3\n");
     int iti;
     for(iti=0;iti<fl1->ntemp;iti++) {
       int itj;
@@ -552,7 +550,6 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
   }
 
   if((fl1->ntemp>0) && (fl2->ntemp>0)) {
-    //    printf("Computing F4\n");
     int iti,itj,itp,itq,im1,im2;
 
     flouble *mat_prod=my_calloc(fl1->ntemp*fl2->ntemp,sizeof(flouble));
@@ -616,6 +613,25 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
   free(cl_dum);
 }
 
+void nmt_couple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_out)
+{
+  int l1;
+  for(l1=0;l1<=w->lmax;l1++) {
+    int icl1=0;
+    for(icl1=0;icl1<w->ncls;icl1++) {
+      int l2;
+      flouble cl=0;
+      flouble *mrow=w->coupling_matrix_unbinned[w->ncls*l1+icl1];
+      for(l2=0;l2<=w->lmax;l2++) {
+	int icl2=0;
+	for(icl2=0;icl2<w->ncls;icl2++)
+	  cl+=mrow[w->ncls*l2+icl2]*cl_in[icl2][l2];
+	cl_out[icl1][l1]=cl;
+      }
+    }
+  }
+}
+
 void nmt_decouple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_noise_in,
 		       flouble **cl_bias,flouble **cl_out)
 {
@@ -636,7 +652,6 @@ void nmt_decouple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_noise_in,
     }
   }
 
-  //  printf("Solving for uncoupled Cls\n");
   gsl_linalg_LU_solve(w->coupling_matrix_binned,w->coupling_matrix_perm,dl_map_bad_b,dl_map_good_b);
   for(icl=0;icl<w->ncls;icl++) {
     for(ib2=0;ib2<w->bin->n_bands;ib2++)
@@ -647,12 +662,23 @@ void nmt_decouple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_noise_in,
   gsl_vector_free(dl_map_good_b);
 }
 
-nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,nmt_binning_scheme *bin,
+void nmt_compute_coupled_cell(nmt_field *fl1,nmt_field *fl2,flouble **cl_out)
+{
+  he_anafast(fl1->maps,fl2->maps,fl1->pol,fl2->pol,cl_out,fl1->nside,fl1->lmax);
+}
+
+nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,
+					 nmt_binning_scheme *bin,nmt_workspace *w0,
 					 flouble **cl_noise,flouble **cl_proposal,flouble **cl_out)
 {
   int ii;
   flouble **cl_bias,**cl_data;
-  nmt_workspace *w=nmt_compute_coupling_matrix(fl1,fl2,bin);
+  nmt_workspace *w;
+
+  if(w0==NULL)
+    w=nmt_compute_coupling_matrix(fl1,fl2,bin);
+  else
+    w=w0;
 
   cl_bias=my_malloc(w->ncls*sizeof(flouble *));
   cl_data=my_malloc(w->ncls*sizeof(flouble *));
@@ -660,7 +686,7 @@ nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,nmt_binni
     cl_bias[ii]=my_calloc((w->lmax+1),sizeof(flouble));
     cl_data[ii]=my_calloc((w->lmax+1),sizeof(flouble));
   }
-  he_anafast(fl1->maps,fl2->maps,fl1->pol,fl2->pol,cl_data,fl1->nside,fl1->lmax);
+  nmt_compute_coupled_cell(fl1,fl2,cl_data);
   nmt_compute_deprojection_bias(fl1,fl2,cl_proposal,cl_bias);
   nmt_decouple_cl_l(w,cl_data,cl_noise,cl_bias,cl_out);
   for(ii=0;ii<w->ncls;ii++) {
