@@ -27,23 +27,3 @@ setup(name = "py_namaster",
       packages = ['py_namaster'],
       ext_modules = [_nmtlib],
       )
-
-
-'''
-# CCL extension module
-namaster_module = Extension("_namaster",
-                            sources=["namaster_wrap.c",],
-                            libraries = ['nmt','sharp','fftpack','c_utils','chealpix','cfitsio','gsl','gslcblas','m','gomp'],
-                            include_dirs = [numpy_include, "../src/"],
-                            extra_compile_args=['-O4', '-fopenmp',],
-                            )
-
-# CCL setup script
-setup(  name         = "namaster",
-        description  = "Library of validated cosmological functions.",
-        author       = "LSST DESC",
-        version      = "0.1",
-        ext_modules  = [namaster_module],
-        py_modules   = ['namaster']
-        )
-'''

@@ -12,6 +12,11 @@ long he_nside2npix(long nside)
   return 12*nside*nside;
 }
 
+void he_pix2vec_ring(long nside, long ipix, double *vec)
+{
+  pix2vec_ring(nside,ipix,vec);
+}
+
 long he_nalms(int lmax)
 {
   return ((lmax+1)*(lmax+2))/2;

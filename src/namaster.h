@@ -42,7 +42,7 @@ nmt_binning_scheme *nmt_bins_read(char *fname,int lmax);
 void nmt_bins_free(nmt_binning_scheme *bin);
 void nmt_bin_cls(nmt_binning_scheme *bin,flouble **cls_in,flouble **cls_out,int ncls);
 void nmt_unbin_cls(nmt_binning_scheme *bin,flouble **cls_in,flouble **cls_out,int ncls);
-void nmt_ell_eff(nmt_binning_scheme *bin,flouble *larr);
+void nmt_ell_eff(nmt_binning_scheme *bin,int *larr);
 
 //Defined in field.c
 typedef struct {
@@ -61,6 +61,7 @@ typedef struct {
 void nmt_field_free(nmt_field *fl);
 nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp);
 nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,int pol);
+void nmt_apodize_mask(long nside,flouble *mask_in,flouble *mask_out,flouble aposize,char *apotype);
 
 //Defined in master.c
 typedef struct {

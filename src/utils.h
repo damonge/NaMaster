@@ -14,6 +14,7 @@ size_t my_fread(void *ptr,size_t size,size_t count,FILE *stream);
 //Defined in healpix_extra.c
 #define HE_NITER_DEFAULT 3
 long he_nside2npix(long nside);
+void he_pix2vec_ring(long nside, long ipix, double *vec);
 long he_ang2pix(long nside,double cth,double phi);
 long he_nalms(int lmax);
 long he_indexlm(int l,int m,int lmax);

@@ -30,3 +30,6 @@ class NmtField(object) :
             for imap in np.arange(self.fl.nmaps) :
                 temp[itemp,imap,:]=lib.get_temp(self.fl,itemp,imap,int(self.fl.npix))
         return temp
+
+def mask_apodization(mask_in,aposize,apotype="C1") :
+    return lib.apomask(mask_in,len(mask_in),aposize,apotype)

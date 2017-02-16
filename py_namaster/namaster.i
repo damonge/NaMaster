@@ -187,6 +187,18 @@ void get_temp(nmt_field *fl,int itemp,int imap,double *dout,int ndout)
   memcpy(dout,fl->temp[itemp][imap],fl->npix*sizeof(double));
 }
 
+void apomask(int npix_1,double *mask,
+	     double *dout,int ndout,double aposize,char *apotype)
+{
+  long nside=1;
+  assert(ndout==npix_1);
+
+  while(npix_1!=12*nside*nside)
+    nside*=2;
+
+  nmt_apodize_mask(nside,mask,dout,aposize,apotype);
+}
+
 void comp_deproj_bias(nmt_field *fl1,nmt_field *fl2,
 		      int ncl1,int nell1,double *cls1,
 		      double *dout,int ndout)

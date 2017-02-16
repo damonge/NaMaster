@@ -8,8 +8,8 @@
 
 
 %opening
-\title{Notes}
-\author{Dr. Frankenstein}
+\title{NaMaster: Scientific Documentation}
+%\author{Dr. Frankenstein}
 
 \begin{document}
 
@@ -17,15 +17,12 @@
 
 \section{Generalities and SHTs}
 
-Let ${\bf a}(\nv)$ be a spin-$s_a$ quantity defined on the sphere, where $s_a$ can be either 0 or 2. Then we define
-its spherical harmonic coefficients as:
+Let ${\bf a}(\nv)$ be a spin-$s_a$ quantity defined on the sphere, where $s_a$ can be either 0 or 2. Then we define its spherical harmonic coefficients as:
 \begin{equation}
  {\bf a}_{\ell m}\equiv{\rm SHT}({\bf a}(\nv))^{s_a}_{\ell m}\equiv\int d\nv\,\hat{\sf Y}^{s_a\dag}_{\ell m}(\nv)\,{\bf a}(\nv),\hspace{12pt}
  {\bf a}(\nv)={\rm SHT}^{-1}({\bf a}_{\ell m})^{s_a}_{\nv}\equiv\sum_{\ell m}\,\hat{\sf Y}^{s_a}_{\ell m}(\nv)\,{\bf a}_{\ell m}.
 \end{equation}
-Here, for a scalar quantity ${\bf a}(\nv)=a(\nv)$, ${\bf a}_{\ell m}=a_{\ell m}$ and $\hat{\sf Y}^0_{\ell m}=\,_0Y_{\ell m}$.
-A spin-2 quantity can be decomposed in real space into so-called $Q$ and $U$ components, and in harmonic space into
-$E$ and $B$ components:
+Here, for a scalar quantity ${\bf a}(\nv)=a(\nv)$, ${\bf a}_{\ell m}=a_{\ell m}$ are its spherical harmonic coefficients and $\hat{\sf Y}^0_{\ell m}=\,_0Y_{\ell m}$ are the scalar spherical harmonics. A spin-2 quantity can be decomposed in real space into so-called $Q$ and $U$ components, and in harmonic space into $E$ and $B$ components:
 \begin{equation}
   {\bf a}(\nv)=\left(\begin{array}{c}
                       Q(\nv)\\U(\nv)
@@ -36,7 +33,7 @@ $E$ and $B$ components:
                      \end{array}
   \right),
 \end{equation}
-and the transform matrix is
+and the transformation matrix is
 \begin{equation}
   \hat{\sf Y}^2_{\ell m}=\frac{1}{2}\left(\begin{array}{cc}
                              -(_2Y_{\ell m}+_{-2}Y_{\ell m}) & -i(_2Y_{\ell m}-_{-2}Y_{\ell m})\\
@@ -121,7 +118,7 @@ Finally, the following orthogonality relation for the Wigner 3$j$ symbols is use
   
   In order to compute the bias of $\tilde{\sf C}^{\tilde{a}\tilde{b}}_\ell$ with respect to $\hat{\sf C}^{ab}_\ell$, we need to compute the ensemble average of the former, which we will write as:
   \begin{equation}
-    \langle\tilde{\sf C}^{ab}_\ell\rangle=\hat{\sf F}^1_\ell-\hat{\sf F}^2_\ell-\hat{\sf F}^3_\ell+\hat{\sf F}^4_\ell,
+    \left\langle\tilde{\sf C}^{\tilde{a}\tilde{b}}_\ell\right\rangle=\hat{\sf F}^1_\ell-\hat{\sf F}^2_\ell-\hat{\sf F}^3_\ell+\hat{\sf F}^4_\ell,
   \end{equation}
   where:
   \begin{align}
@@ -229,7 +226,7 @@ Finally, the following orthogonality relation for the Wigner 3$j$ symbols is use
       \end{array}\right).
     \end{equation}
     We can then write, in general:
-    \begin{equation}
+    \begin{equation}\label{eq:cell_coupled}
       _v\tilde{\sf C}^{ab}_\ell=\sum_{\ell'}{\sf M}^{s_as_b}_{\ell\ell'}\cdot\,_v\hat{\sf C}^{ab}_{\ell'},
     \end{equation}
     where:
@@ -247,6 +244,29 @@ Finally, the following orthogonality relation for the Wigner 3$j$ symbols is use
       \end{array}\right)\\
       & \hspace{12pt}M^{\pm\pm}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}(2\ell''+1)C^{vw}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{2}{-2}{0}^2\frac{1\pm(-1)^{\ell+\ell'+\ell''}}{2}
     \end{align}
+    
+\subsection{Binning into bandpowers}
+  Given the loss of information implicit in masking the originally full-sky field, it is in general not possible to invert Eq. \ref{eq:cell_coupled} directly. De usual approach to doing so is by binning the pseudo-$C_\ell$ into bandpowers. A bandpower $k$ is defined by a set of $N_k$ multipoles $\vec{\ell}_k\equiv(\ell_k^1,...,\ell_k^{N_k})$ and a set of weights $\vec{w}_k\equiv(w_k^1,...,w_k^{N_k})$ normalized such that $\sum_{i=1}^{N_k}w_k^i=1$. The $k-$th bandpower for the coupled pseudo-$C_\ell$ is then defined as:
+  \begin{equation}
+    _v\tilde{\sf B}^{ab}_k\equiv\sum_{i=1}^{N_k}w_k^i\,_v\tilde{\sf C}^{ab}_{\ell_k^i}
+    =\sum_{i=1}^{N_k}w_k^i\sum_{\ell'}{\sf M}^{s_as_b}_{\ell_k^i\ell'}\,_v\hat{\sf C}^{ab}_\ell.
+  \end{equation}
+  One then proceeds by assuming that the true power spectrum is a step-wise function, taking constant values over the multipoles corresponding to each bandpower: $_v\hat{\sf C}^{ab}_\ell=\sum_k\,_v\hat{\sf B}^{ab}_k\Theta(\ell\in\vec{\ell}_k)$ (where $\Theta$ is a binary step function). The previous equation then reads:
+  \begin{equation}
+   _v\tilde{\sf B}^{ab}_k=\sum_{k'}\mathcal{M}^{s_as_b}_{kk'}\,_v\hat{\sf B}^{ab}_{kk'}\equiv\sum_{k'}\left(\sum_{\ell\in\vec{\ell}_k}\sum_{\ell'\in\vec{\ell}_{k'}}w_k^\ell{\sf M}^{s_as_b}_{\ell\ell'}\right)\,_v\hat{\sf B}^{ab}_{k'},
+  \end{equation}
+  which defines the binned coupling matrix $\mathcal{M}^{ab}_{kk'}$. The decoupled bandpowers are then estimated by inverting $\mathcal{M}^{ab}$:
+  \begin{equation}
+    _v\hat{\sf B}^{ab}_k=\sum_{k'}\left(\mathcal{M}^{ab}\right)^{-1}_{kk'}\,_v\tilde{\sf B}^{ab}_{k'}.
+  \end{equation}
+
+  Note that, even though this procedure is based on the assumption that the true power spectrum is step-wise constant, the bandpowers computed this way should be compared with the theoretical prediction subjected to the same type of transformation. I.e. the theoretical prediction for the bandpowers is:
+  \begin{equation}
+    _v\bar{\sf B}^{ab}_k=\sum_{k'}\left(\mathcal{M}^{ab}\right)^{-1}_{kk'}\sum_{\ell'\in\vec{\ell}_{k'}}w_{k'}^{\ell'}\sum_{\ell''}{\sf M}^{s_as_b}_{\ell'\ell''}\,_v\bar{\sf C}^{ab}_{\ell''},
+  \end{equation}
+  where we the overline $\bar{\,}$ denotes theoretical predictions.
+
+
 
 \end{document}
 
@@ -392,7 +412,6 @@ variance.
 
 Note that this procedure works for any $\hat{C}^{-1}{\bf v}$-type operation
 (see below).
-
 
 \item ${\bf d}^T_1\hat{C}^{-1}_{11}\hat{Q}_b\hat{C}^{-1}_{22}{\bf d}_2$. With
 ${\bf z}_i$ defined as above, this is just:

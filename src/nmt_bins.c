@@ -154,6 +154,7 @@ void nmt_ell_eff(nmt_binning_scheme *bin,flouble *larr)
 
   for(ib=0;ib<bin->n_bands;ib++) {
     int il;
+    larr[ib]=0;
     for(il=0;il<bin->nell_list[ib];il++)
       larr[ib]+=bin->ell_list[ib][il]*bin->w_list[ib][il];
   }
