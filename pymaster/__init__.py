@@ -1,6 +1,83 @@
 import nmtlib as lib
 import numpy as np
 
+
+class NmtField(object) :
+
+    def __init__(self,mask,maps,templates=None) :
+        if((len(maps)!=1) and (len(maps)!=2)) :
+            raise KeyError("Must supply 1 or 2 maps per field")
+        if(templates!=None) :
+            if((len(templates[0])!=1) and (len(templates[0])!=2)) :
+                raise KeyError("Must supply 1 or 2 maps per field")
+
+        if(templates==None) :
+            self.fl=lib.field_alloc_new_notemp(mask,maps)
+        else :
+            self.fl=lib.field_alloc_new(mask,maps,templates)
+
+    def __del__(self) :
+        lib.field_free(self.fl)
+
+    def get_maps(self) :
+        maps=np.zeros([self.fl.nmaps,self.fl.npix])
+        for imap in np.arange(self.fl.nmaps) :
+            maps[imap,:]=lib.get_map(self.fl,imap,int(self.fl.npix))
+        return maps
+
+    def get_templates(self) :
+        temp=np.zeros([self.fl.ntemp,self.fl.nmaps,self.fl.npix])
+        for itemp in np.arange(self.fl.ntemp) :
+            for imap in np.arange(self.fl.nmaps) :
+                temp[itemp,imap,:]=lib.get_temp(self.fl,itemp,imap,int(self.fl.npix))
+        return temp
+
+
+class NmtBin(object) :
+
+    def __init__(self,nside,fname=None,nlb=None) :
+        if((nlb==None) and (fname==None)) :
+            raise KeyError("Must supply filename or bandpower width")
+
+        if(nlb==None) :
+            self.bin=lib.bins_read(fname,3*nside-1)
+        if(fname==None) :
+            self.bin=lib.bins_create(nlb,3*nside-1)
+        self.lmax=3*nside-1
+
+    def __del__(self) :
+        lib.bins_free(self.bin)
+
+    def get_n_bands(self) :
+        return self.bin.n_bands
+
+    def get_nell_list(self) :
+        return lib.get_nell_list(self.bin,self.bin.n_bands)
+
+    def get_ell_list(self,ibin) :
+        return lib.get_ell_list(self.bin,ibin,lib.get_nell(self.bin,ibin))
+
+    def get_weight_list(self,ibin) :
+        return lib.get_weight_list(self.bin,ibin,lib.get_nell(self.bin,ibin))
+
+    def get_effective_ells(self) :
+        return lib.get_ell_eff(self.bin,self.bin.n_bands)
+
+    def bin_cell(self,cls_in) :
+        if(len(cls_in[0])!=self.lmax+1) :
+            raise KeyError("Input Cl has wrong size")
+        cl1d=lib.bin_cl(self.bin,cls_in,len(cls_in)*self.bin.n_bands)
+        clout=np.reshape(cl1d,[len(cls_in),self.bin.n_bands])
+        return clout
+
+    def unbin_cell(self,cls_in) :
+        if(len(cls_in[0])!=self.bin.n_bands) :
+            raise KeyError("Input Cl has wrong size")
+        cl1d=lib.unbin_cl(self.bin,cls_in,len(cls_in)*(self.lmax+1))
+        clout=np.reshape(cl1d,[len(cls_in),self.lmax+1])
+        return clout
+
+
 class NmtWorkspace(object) :
     def __init__(self) :
         self.wsp=None
@@ -95,3 +172,7 @@ def compute_decoupled_cell(f1,f2,b,cl_noise=None,cl_guess=None,workspace=None) :
     clout=np.reshape(cl1d,[len(cln),b.bin.n_bands])
 
     return clout
+
+def mask_apodization(mask_in,aposize,apotype="C1") :
+    """Apodizes mask"""
+    return lib.apomask(mask_in,len(mask_in),aposize,apotype)

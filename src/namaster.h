@@ -42,7 +42,7 @@ nmt_binning_scheme *nmt_bins_read(char *fname,int lmax);
 void nmt_bins_free(nmt_binning_scheme *bin);
 void nmt_bin_cls(nmt_binning_scheme *bin,flouble **cls_in,flouble **cls_out,int ncls);
 void nmt_unbin_cls(nmt_binning_scheme *bin,flouble **cls_in,flouble **cls_out,int ncls);
-void nmt_ell_eff(nmt_binning_scheme *bin,int *larr);
+void nmt_ell_eff(nmt_binning_scheme *bin,flouble *larr);
 
 //Defined in field.c
 typedef struct {
