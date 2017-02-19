@@ -181,8 +181,8 @@ void he_alm2cl(fcomplex **alms_1,fcomplex **alms_2,
 }
 
 void he_anafast(flouble **maps_1,flouble **maps_2,
-		int pol_1,int pol_2,
-		flouble **cls,int nside,int lmax)
+		int pol_1,int pol_2,flouble **cls,
+		int nside,int lmax,int iter)
 {
   fcomplex **alms_1,**alms_2;
   int i1,lmax_here=3*nside-1;
@@ -193,7 +193,7 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
   alms_1=my_malloc(nmaps_1*sizeof(fcomplex *));
   for(i1=0;i1<nmaps_1;i1++)
     alms_1[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
-  he_map2alm(nside,lmax,1,pol_1,maps_1,alms_1,HE_NITER_DEFAULT);
+  he_map2alm(nside,lmax,1,pol_1,maps_1,alms_1,iter);
 
   if(maps_1==maps_2)
     alms_2=alms_1;
@@ -201,7 +201,7 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
     alms_2=my_malloc(nmaps_2*sizeof(fcomplex *));
     for(i1=0;i1<nmaps_2;i1++)
       alms_2[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
-    he_map2alm(nside,lmax,1,pol_2,maps_2,alms_2,HE_NITER_DEFAULT);
+    he_map2alm(nside,lmax,1,pol_2,maps_2,alms_2,iter);
   }
 
   he_alm2cl(alms_1,alms_2,pol_1,pol_2,cls,lmax);

@@ -251,7 +251,7 @@ class NmtWorkspace(object) :
 
         return clout
 
-def deprojection_bias(fl1,fl2,cls_guess) :
+def deprojection_bias(f1,f2,cls_guess) :
     """
     Computes the bias associated to contaminant removal to the cross-pseudo-Cl of two fields.
 
@@ -268,17 +268,18 @@ def deprojection_bias(fl1,fl2,cls_guess) :
 
     return cl2d
 
-def compute_coupled_cell(f1,f2) :
+def compute_coupled_cell(f1,f2,n_iter=3) :
     """
     Computes the full-sky angular power spectra of two masked fields (f1 and f2) without aiming to deconvolve the mode-coupling matrix. Effectively, this is equivalent to calling the usual HEALPix anafast routine on the masked and contaminant-cleaned maps.
 
     :param NmtField f1,f2: fields to correlate
+    :param int n_iter: number of iterations for SHTs (optional)
     :return: array of coupled power spectra
     """
     if(f1.fl.nside!=f2.fl.nside) :
         raise KeyError("Fields must have same resolution")
     
-    cl1d=lib.comp_pspec_coupled(f1.fl,f2.fl,f1.fl.nmaps*f2.fl.nmaps*(f1.fl.lmax+1))
+    cl1d=lib.comp_pspec_coupled(f1.fl,f2.fl,f1.fl.nmaps*f2.fl.nmaps*(f1.fl.lmax+1),n_iter)
     clout=np.reshape(cl1d,[f1.fl.nmaps*f2.fl.nmaps,f1.fl.lmax+1])
 
     return clout

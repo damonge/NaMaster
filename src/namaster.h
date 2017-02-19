@@ -74,17 +74,17 @@ typedef struct {
   gsl_matrix *coupling_matrix_binned;
   gsl_permutation *coupling_matrix_perm;
 } nmt_workspace;
-nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_binning_scheme *bin); //
-void nmt_workspace_write(nmt_workspace *w,char *fname); //
-nmt_workspace *nmt_workspace_read(char *fname); //
-void nmt_workspace_free(nmt_workspace *w); //
-void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_proposal,flouble **cl_bias); //
+nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_binning_scheme *bin);
+void nmt_workspace_write(nmt_workspace *w,char *fname);
+nmt_workspace *nmt_workspace_read(char *fname);
+void nmt_workspace_free(nmt_workspace *w);
+void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_proposal,flouble **cl_bias);
 void nmt_couple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_out);
 void nmt_decouple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_noise_in,
-		       flouble **cl_bias,flouble **cl_out); //
-void nmt_compute_coupled_cell(nmt_field *fl1,nmt_field *fl2,flouble **cl_out); //
+		       flouble **cl_bias,flouble **cl_out);
+void nmt_compute_coupled_cell(nmt_field *fl1,nmt_field *fl2,flouble **cl_out,int iter);
 nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,
 					 nmt_binning_scheme *bin,nmt_workspace *w0,
-					 flouble **cl_noise,flouble **cl_proposal,flouble **cl_out); //
+					 flouble **cl_noise,flouble **cl_proposal,flouble **cl_out);
 
 #endif //_NAMASTER_H_

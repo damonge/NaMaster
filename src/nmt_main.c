@@ -95,7 +95,7 @@ void run_master(nmt_field *fl1,nmt_field *fl2,
   }
 
   printf("Computing data pseudo-Cl\n");
-  he_anafast(fl1->maps,fl2->maps,fl1->pol,fl2->pol,cl_data,fl1->nside,fl1->lmax);
+  he_anafast(fl1->maps,fl2->maps,fl1->pol,fl2->pol,cl_data,fl1->nside,fl1->lmax,3);
 
   printf("Computing deprojection bias\n");
   nmt_compute_deprojection_bias(fl1,fl2,cl_proposal,cl_bias);

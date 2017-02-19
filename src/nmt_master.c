@@ -366,7 +366,7 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
   if(fl1->nside!=fl2->nside)
     report_error(1,"Can't correlate fields with different resolutions\n");
   w=master_workspace_new(fl1->lmax,n_cl,bin);
-  he_anafast(&(fl1->mask),&(fl2->mask),0,0,&(w->pcl_masks),fl1->nside,fl1->lmax);
+  he_anafast(&(fl1->mask),&(fl2->mask),0,0,&(w->pcl_masks),fl1->nside,fl1->lmax,HE_NITER_DEFAULT);
   for(l2=0;l2<=fl1->lmax;l2++)
     w->pcl_masks[l2]*=(2*l2+1.);
 
@@ -662,9 +662,9 @@ void nmt_decouple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_noise_in,
   gsl_vector_free(dl_map_good_b);
 }
 
-void nmt_compute_coupled_cell(nmt_field *fl1,nmt_field *fl2,flouble **cl_out)
+void nmt_compute_coupled_cell(nmt_field *fl1,nmt_field *fl2,flouble **cl_out,int iter)
 {
-  he_anafast(fl1->maps,fl2->maps,fl1->pol,fl2->pol,cl_out,fl1->nside,fl1->lmax);
+  he_anafast(fl1->maps,fl2->maps,fl1->pol,fl2->pol,cl_out,fl1->nside,fl1->lmax,iter);
 }
 
 nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,
@@ -686,7 +686,7 @@ nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,
     cl_bias[ii]=my_calloc((w->lmax+1),sizeof(flouble));
     cl_data[ii]=my_calloc((w->lmax+1),sizeof(flouble));
   }
-  nmt_compute_coupled_cell(fl1,fl2,cl_data);
+  nmt_compute_coupled_cell(fl1,fl2,cl_data,HE_NITER_DEFAULT);
   nmt_compute_deprojection_bias(fl1,fl2,cl_proposal,cl_bias);
   nmt_decouple_cl_l(w,cl_data,cl_noise,cl_bias,cl_out);
   for(ii=0;ii<w->ncls;ii++) {

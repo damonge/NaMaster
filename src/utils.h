@@ -21,7 +21,8 @@ long he_indexlm(int l,int m,int lmax);
 void he_alm2map(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms);
 void he_map2alm(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms,int niter);
 void he_alm2cl(fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls,int lmax);
-void he_anafast(flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls,int nside,int lmax);
+void he_anafast(flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls,
+		int nside,int lmax,int iter);
 void he_write_healpix_map(flouble **tmap,int nfields,long nside,char *fname);
 void he_get_file_params(char *fname,long *nside,int *nfields,int *isnest);
 flouble *he_read_healpix_map(char *fname,long *nside,int nfield);
