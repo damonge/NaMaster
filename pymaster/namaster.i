@@ -16,7 +16,10 @@
 
 %apply (int* ARGOUT_ARRAY1, int DIM1) {(int* iout, int niout)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* dout, int ndout)};
-%apply (int DIM1,double *IN_ARRAY1) {(int npix_1,double *mask)};
+%apply (int DIM1,double *IN_ARRAY1) {(int npix_1,double *mask),
+                                     (int nell3,double *weights)};
+%apply (int DIM1,int *IN_ARRAY1) {(int nell1,int *bpws),
+                                  (int nell2,int *ells)};
 %apply (int DIM1,int DIM2,double *IN_ARRAY2) {(int nmap_2,int npix_2,double *mps),
                                               (int ncl1  ,int nell1 ,double *cls1),
                                               (int ncl2  ,int nell2 ,double *cls2),
@@ -60,6 +63,17 @@ void get_ell_eff(nmt_binning_scheme *bins,double *dout,int ndout)
   nmt_ell_eff(bins,dout);
 }
 
+nmt_binning_scheme *bins_create_py(int nell1,int *bpws,
+				   int nell2,int *ells,
+				   int nell3,double *weights,
+				   int lmax)
+{
+  assert(nell1==nell2);
+  assert(nell2==nell3);
+  
+  return nmt_bins_create(nell1,bpws,ells,weights,lmax);
+}
+
 void bin_cl(nmt_binning_scheme *bins,
 	    int ncl1,int nell1,double *cls1,
 	    double *dout,int ndout)
@@ -91,6 +105,7 @@ void unbin_cl(nmt_binning_scheme *bins,
   for(i=0;i<ncl1;i++) {
     cls_in[i]=&(cls1[i*nell1]);
     cls_out[i]=&(dout[i*nellout]);
+    memset(cls_out[i],0,nellout*sizeof(double));
   }
   nmt_unbin_cls(bins,cls_in,cls_out,ncl1);
   free(cls_in);
@@ -238,11 +253,11 @@ void comp_pspec_coupled(nmt_field *fl1,nmt_field *fl2,
   free(cl_out);
 }
 
-void decouple_cell(nmt_workspace *w,
-		   int ncl1,int nell1,double *cls1,
-		   int ncl2,int nell2,double *cls2,
-		   int ncl3,int nell3,double *cls3,
-		   double *dout,int ndout)
+void decouple_cell_py(nmt_workspace *w,
+		      int ncl1,int nell1,double *cls1,
+		      int ncl2,int nell2,double *cls2,
+		      int ncl3,int nell3,double *cls3,
+		      double *dout,int ndout)
 {
   int i;
   double **cl_in,**cl_noise,**cl_bias,**cl_out;
@@ -271,9 +286,9 @@ void decouple_cell(nmt_workspace *w,
   free(cl_bias);
 }
 
-void couple_cell(nmt_workspace *w,
-		 int ncl1,int nell1,double *cls1,
-		 double *dout,int ndout)
+void couple_cell_py(nmt_workspace *w,
+		    int ncl1,int nell1,double *cls1,
+		    double *dout,int ndout)
 {
   int i;
   double **cl_in,**cl_out;

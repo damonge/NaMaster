@@ -12,7 +12,7 @@ void nmt_bins_free(nmt_binning_scheme *bins)
   free(bins->w_list);
 }
 
-nmt_binning_scheme *nmt_bins_create(int nlb,int lmax)
+nmt_binning_scheme *nmt_bins_constant(int nlb,int lmax)
 {
   int ii;
   int nband_max=(lmax-1)/nlb;
@@ -38,41 +38,30 @@ nmt_binning_scheme *nmt_bins_create(int nlb,int lmax)
   return bins;
 }
 
-nmt_binning_scheme *nmt_bins_read(char *fname,int lmax)
+nmt_binning_scheme *nmt_bins_create(int nell,int *bpws,int *ells,flouble *weights,int lmax)
 {
-  FILE *fi=my_fopen(fname,"r");
-  int ii,nlines=my_linecount(fi); rewind(fi);
-  if(nlines!=lmax+1)
-    report_error(1,"Error reading binning table\n");
+  nmt_binning_scheme *bins;
+  int ii,nband_max=0;
 
-  int *band_number,*larr;
-  flouble *warr;
-  band_number=my_malloc(nlines*sizeof(int));
-  larr=my_malloc(nlines*sizeof(int));
-  warr=my_malloc(nlines*sizeof(flouble));
-  
-  int nband_max=0;
-  for(ii=0;ii<nlines;ii++) {
-    double w;
-    int stat=fscanf(fi,"%d %d %lf",&(band_number[ii]),&(larr[ii]),&w);
-    if(stat!=3)
-      report_error(1,"Error reading %s, line %d\n",fname,ii+1);
-    warr[ii]=w;
-    if(band_number[ii]>nband_max)
-      nband_max=band_number[ii];
+  for(ii=0;ii<nell;ii++) {
+    if(ells[ii]<=lmax) {
+      if(bpws[ii]>nband_max)
+	nband_max=bpws[ii];
+    }
   }
-  fclose(fi);
   nband_max++;
 
-  nmt_binning_scheme *bins=my_malloc(sizeof(nmt_binning_scheme));
+  bins=my_malloc(sizeof(nmt_binning_scheme));
   bins->n_bands=nband_max;
   bins->nell_list=my_calloc(nband_max,sizeof(int));
   bins->ell_list=my_malloc(nband_max*sizeof(int *));
   bins->w_list=my_malloc(nband_max*sizeof(flouble *));
-  
-  for(ii=0;ii<nlines;ii++) {
-    if(band_number[ii]>=0)
-      bins->nell_list[band_number[ii]]++;
+
+  for(ii=0;ii<nell;ii++) {
+    if(ells[ii]<=lmax) {
+      if(bpws[ii]>=0)
+	bins->nell_list[bpws[ii]]++;
+    }
   }
 
   for(ii=0;ii<nband_max;ii++) {
@@ -80,18 +69,20 @@ nmt_binning_scheme *nmt_bins_read(char *fname,int lmax)
     bins->w_list[ii]=my_malloc(bins->nell_list[ii]*sizeof(flouble));
   }
 
-  for(ii=0;ii<nlines;ii++)
-    bins->nell_list[band_number[ii]]=0;
+  for(ii=0;ii<nband_max;ii++)
+    bins->nell_list[ii]=0;
 
-  for(ii=0;ii<nlines;ii++) {
-    int l=larr[ii];
-    int b=band_number[ii];
-    flouble w=warr[ii];
+  for(ii=0;ii<nell;ii++) {
+    int l=ells[ii];
+    int b=bpws[ii];
+    flouble w=weights[ii];
 
-    if(b>=0) {
-      bins->ell_list[b][bins->nell_list[b]]=l;
-      bins->w_list[b][bins->nell_list[b]]=w;
-      bins->nell_list[b]++;
+    if(l<=lmax) {
+      if(b>=0) {
+	bins->ell_list[b][bins->nell_list[b]]=l;
+	bins->w_list[b][bins->nell_list[b]]=w;
+	bins->nell_list[b]++;
+      }
     }
   }
 
@@ -105,6 +96,30 @@ nmt_binning_scheme *nmt_bins_read(char *fname,int lmax)
     for(jj=0;jj<bins->nell_list[ii];jj++)
       bins->w_list[ii][jj]/=norm;
   }
+
+  return bins;
+}
+
+nmt_binning_scheme *nmt_bins_read(char *fname,int lmax)
+{
+  nmt_binning_scheme *bins;
+  int *band_number,*larr;
+  flouble *warr;
+
+  FILE *fi=my_fopen(fname,"r");
+  int ii,nlines=my_linecount(fi); rewind(fi);
+  band_number=my_malloc(nlines*sizeof(int));
+  larr=my_malloc(nlines*sizeof(int));
+  warr=my_malloc(nlines*sizeof(flouble));
+  
+  for(ii=0;ii<nlines;ii++) {
+    int stat=fscanf(fi,"%d %d %lf",&(band_number[ii]),&(larr[ii]),&(warr[ii]));
+    if(stat!=3)
+      report_error(1,"Error reading %s, line %d\n",fname,ii+1);
+  }
+  fclose(fi);
+
+  bins=nmt_bins_create(nlines,band_number,larr,warr,lmax);
 
   free(larr);
   free(band_number);

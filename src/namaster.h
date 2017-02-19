@@ -37,7 +37,8 @@ typedef struct {
   int **ell_list;
   flouble **w_list;
 } nmt_binning_scheme;
-nmt_binning_scheme *nmt_bins_create(int nlb,int lmax);
+nmt_binning_scheme *nmt_bins_constant(int nlb,int lmax);
+nmt_binning_scheme *nmt_bins_create(int nell,int *bpws,int *ells,flouble *weights,int lmax);
 nmt_binning_scheme *nmt_bins_read(char *fname,int lmax);
 void nmt_bins_free(nmt_binning_scheme *bin);
 void nmt_bin_cls(nmt_binning_scheme *bin,flouble **cls_in,flouble **cls_out,int ncls);

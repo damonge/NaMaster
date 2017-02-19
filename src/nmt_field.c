@@ -306,7 +306,6 @@ static void apodize_mask_smooth(long nside,flouble *mask_in,flouble *mask_out,fl
   he_alter_alm(3*nside-1,aporad*180*60*2.355/M_PI,alms_dum,alms_dum,NULL);
   he_alm2map(nside,3*nside-1,1,0,&mask_dum,&alms_dum);
   he_map_product(nside,mask_in,mask_dum,mask_out);
-  memcpy(mask_out,mask_dum,npix*sizeof(flouble));
 
   free(vec);
   free(cthv);
