@@ -3,11 +3,17 @@
 \usepackage{fullpage}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \usepackage{amssymb,amsmath} 
+\usepackage[colorlinks=true,linkcolor=Blue,linktoc=page,citecolor=Red,urlcolor=BrickRed]{hyperref}
 %\usepackage{color}
 %\usepackage[utf8x]{inputenc}
 \usepackage{enumitem}
 \usepackage{hyperref}
 \usepackage{listings}
+%\usepackage{makeidx}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{epigraph}
+\usepackage{titling}
 \lstset{
 language=C,
 basicstyle=\footnotesize,
@@ -26,6 +32,21 @@ breaklines=true,
 breakatwhitespace=false,
 escapeinside={\%*}{*)}
 }
+\pretitle{\begin{flushleft}\LARGE\bfseries\sffamily}
+\posttitle{\par\end{flushleft}\vskip 0.5em\vspace{-7ex}}
+\predate{\begin{flushleft}\sffamily\large}
+\postdate{\par\end{flushleft}\vskip 0.5em\vspace{-2ex}}
+\titleformat{\section}[hang]{\bfseries\sffamily\Large}
+{\thesection}
+{12pt}{\filright}
+
+\titleformat{\subsection}[hang]{\bfseries\sffamily}
+{\thesubsection}
+{12pt}{\filright}
+
+\titleformat{\subsubsection}[hang]{\bfseries}
+{\thesubsubsection}
+{12pt}{\filright}
 
 \newcommand{\vari}[2]{\textcolor{OliveGreen}{#1}{#2}}
 \newcommand{\macr}[1]{{\tt \textcolor{BrickRed}{#1}}}
@@ -39,13 +60,14 @@ escapeinside={\%*}{*)}
 {\par\leftskip=0pt\rightskip=0pt\vspace{12pt}}
 
 
-%opening
-\title{NaMaster: API documentation}
-%\author{Dr No}
+\title{NaMaster: C API and code documentation}
 
 \begin{document}
 
 \maketitle
+\noindent\makebox[\linewidth]{\rule{\textwidth}{1pt}}
+\tableofcontents
+\noindent\makebox[\linewidth]{\rule{\textwidth}{1pt}}
 
 \section{Introduction}
 
@@ -61,7 +83,7 @@ The following packages need to be installed before NaMaster.
 \end{itemize}
 
 
-\subsection{Compilation and usage}
+\subsection{Compilation and usage}\label{ssec:compile}
 \subsubsection*{Installing the C library and binaries}
 NaMaster uses {\tt autotools} for installation, which means that you should be able to install it by simply typing
 \begin{verbatim}
@@ -109,7 +131,49 @@ If you want to use NaMaster on your own C code you'll need to be able to link wi
 Section \ref{sec:sample} below contains a fully working C script that calls the NaMaster library.
 
 \section{NaMaster - the program}
-NaMaster comes with its own executable that computes the pseudo-$C_\ell$ power spectrum of two input masked fields with possible contaminants.
+NaMaster comes with its own executable that computes the pseudo-$C_\ell$ power spectrum of two input masked fields with possible contaminants. After installation (and assuming it has been installed in an accessible directory), the program can be invoked by typing {\tt namaster}.
+
+The user interacts with {\tt namaster} by providing parameters as command-line arguments in the form of a pair: {\tt -<param\_name> <param>}. After typing
+\begin{verbatim}
+  ~$ namaster -h
+\end{verbatim}
+the user is presented with a list of all available input parameters:
+\begin{verbatim}
+Usage: namaster -<opt-name> <option>
+Options:
+  -map      -> path to file containing map(s)
+  -map_2    -> path to file containing 2nd map(s) (optional)
+  -mask     -> path to file containing mask
+  -mask_2   -> path to file containing mask for 2nd map(s) (optional)
+  -temp     -> path to file containing contaminant templates (optional)
+  -temp_2   -> path to file containing contaminant templates
+               for 2nd map(s) (optional)
+  -pol      -> spin-0 (0) or spin-2 (1) input map(s)
+  -pol_2    -> spin-0 (0) or spin-2 (1) 2nd input map(s)
+  -cl_noise -> path to file containing noise Cl(s)
+  -cl_guess -> path to file containing initial guess for the Cl(s)
+  -coupling -> path to file containing coupling matrix (optional)
+  -out      -> output filename
+  -binning  -> path to file containing binning scheme
+  -nlb      -> number of ells per bin (used only if -binning isn't used)
+  -h        -> this help
+\end{verbatim}
+
+Some clarification is in order regarding some of these parameters:
+\begin{itemize}
+ \item {\tt map} and {\tt map\_2}: these arguments should point to FITS files containing the maps of the two fields to correlate. These files should contain one map if {\tt pol} (or {\tt pol\_2}) is 0 and two maps ($Q$ and $U$) if {\tt pol} (or {\tt pol\_2}) is 1. If {\tt map\_2} is not passed, the auto-correlation of {\tt map} will be computed (and all other {\tt \_2} options will be ignored).
+ \item {\tt mask} and {\tt mask\_2}: these arguments should point to FITS files containing the masks of the two fields to correlate (one map per file).
+ \item {\tt temp} and {\tt temp\_2}: these arguments should point to FITS files containing the contaminant templates you suspect are poluting your fields. The number of contaminants will be derived by the code based on the number of maps in the files. Note that an exception will occur if this number is not a multiple of the number of maps corresponding to the field's spin (see above).
+ \item {\tt cl\_noise}: this file should contain the expected noise bias (see discussion below Eq. \ref{eq:master_full}) to be subtracted from the estimated power spectrum. The format of this file should be $N+1$ columns, with the first column being the multipole number $\ell$ (starting at $\ell=0$), and the next $N$ being the different component of the power spectrum. $N$ should correspond to the number of power spectra expected given the spins of the two fields being correlated. I.e. $N=1$ if {\tt pol=pol\_2=0} ($(TT)$), $N=2$ if {\tt pol=0}, and {\tt pol\_2=1} (or vice-versa, $(TE,TB)$), and $N=4$ if {\tt pol=pol\_2=1} ($(EE,EB,BE,BB)$). If this option is not passed, it is assumed to be $0$. This file should contain $3{\tt nside}$ rows, where {\tt nside} is the HEALPix resolution parameter of the input maps.
+ \item {\tt cl\_guess}: proposal power spectrum (i.e. best guess of true power spectrum) used to compute the deprojection bias (same format as {\tt cl\_noise} above). This is only relevant for contaminated fields. If not passed, the proposal power spectrum is set to $0$.
+ \item {\tt out}: path to output ASCII file. First column will correspond to the effective $\ell$ in the bandpower. All subsequent columns correspond to the different components of the power spectrum (as described above depending on the field spins).
+ \item {\tt binning}: path to ASCII file describing the binning scheme defining the output bandpowers. This file should contain three columns: the first column should contain the bandpower index of the different multipoles, the second column should contain the multipoles and the third column should contain the weight corresponding to each multipole (the sum of weights in each bandpower is automatically normalized to $1$).
+ \item {\tt nlb}: number of multipoles per bandpower. In this case the output power spectrum will be computed by binning multipoles in sets of {\tt nlb} from $\ell=2$ to $\ell=3{\tt nside}-1$.
+\end{itemize}
+
+
+
+
 
 
 \section{C documentation}
@@ -140,7 +204,7 @@ The definition of the fields to be correlated (including their masks and possibl
    \item {\tt pol}: set to 0 if this is a spin-0 field. Set to 1 if it's a spin-2 field.
    \item {\tt fname\_mask}: file name pointing to a FITS file containing the sky mask (as a single scalar HEALPix map).
    \item {\tt fname\_maps}: file name pointing to a FITS file containing the maps of the observed field. This file should contain a single map for {\tt pol}=0 and two maps for {\tt pol}=1.
-   \item {\tt fname\_temp}: file name pointing to a FITS file containing the contaminant templates as HEALPix maps. Each template should contain $N$ maps with $N=1$ for {\tt pol}=0 and $N=2$ for {\tt pol}=1.
+   \item {\tt fname\_temp}: file name pointing to a FITS file containing the contaminant templates as HEALPix maps. Each template should contain $N$ maps with $N=1$ for {\tt pol}=0 and $N=2$ for {\tt pol}=1. Pass ``none'' if no contaminants are needed (in which case deprojection and debiasing will not take place).
  \end{itemize}
 \end{funcdef}
 
@@ -321,25 +385,8 @@ The second dimension runs through the different multipole indices or bandpowers.
 \newpage
 \section{Sample program}\label{sec:sample}
 
-Here's a sample code using this library. This code takes a redshift as a command-line argument and calculates
-several background quantities at that redshift, as well as the power spectrum and correlation functions (which
-are written into ASCII files):
+Here's a simple code using the NaMaster library. This code takes, as command-line options, filenames for two FITS files containing HEALPix maps for a spin-0 field and a mask, and writes the MASTER estimate of its power spectrum into an ASCII file. This file can be found in {\tt test/sample.c}, and can be compiled as described in Section \ref{ssec:compile}.
 
-\lstinputlisting[language=C]{../src/nmt_main.c}
-
-This code, together with its compilation script is included in the present version of CosmoMad
-in the directory {\tt sample}.
-
-\begin{thebibliography}{}
- \bibitem{bbks} Bardeen J.~M., Bond J.~R., Kaiser N., Szalay A.~S. (1986). {\sl The statistics of peaks of gaussian random fields}. ApJ, {\bf 304}:15
- \bibitem{rpt} Crocce M., Scoccimarro R. (2006) {\sl Renormalized cosmological perturbation theory}. PRD, {\bf 73}:063519
- \bibitem{eandhu} Eisenstein D.~J., Hu W. (1998). {\sl Baryonic features in the matter transfer function}. ApJ, {\bf 496}:605
-% \bibitem{jenkins} Jenkins A. {\sl et al.} 2001, MNRAS, 321, 372
- \bibitem{kai} Kaiser N. (1987). {\sl  Clustering in real space and in redshift space}. MNRAS {\bf 227}:1
- \bibitem{JAP} Peacock J.~A. 2007, MNRAS, 379, 1067
- \bibitem{pschech} Press W.~H., Schechter P., 1974, ApJ, 187, 425
- \bibitem{shethtormen} Sheth R.~K. \& Tormen G. 2002, MNRAS, 329, 61
- \bibitem{hfit} Smith R. et al. (2003) {\sl Stable clustering, the halo model and nonlinear cosmological power spectra}. MNRAS, {\bf 341}:1311
-\end{thebibliography}
+\lstinputlisting[language=C]{../test/sample.c}
 
 \end{document}

@@ -190,17 +190,19 @@ int main(int argc,char **argv)
     }
   }
 
-  if(!strcmp(fname_map_1,"none")) {
-    fprintf(stderr,"Must provide map to correlate!\n");
-    print_help=1;
-  }
-  if(!strcmp(fname_mask_1,"none")) {
-    fprintf(stderr,"Must provide mask\n");
-    print_help=1;
-  }
-  if(!strcmp(fname_out,"none")) {
-    fprintf(stderr,"Must provide output filename\n");
-    print_help=1;
+  if(!print_help) {
+    if(!strcmp(fname_map_1,"none")) {
+      fprintf(stderr,"Must provide map to correlate!\n");
+      print_help=1;
+    }
+    if(!strcmp(fname_mask_1,"none")) {
+      fprintf(stderr,"Must provide mask\n");
+      print_help=1;
+    }
+    if(!strcmp(fname_out,"none")) {
+      fprintf(stderr,"Must provide output filename\n");
+      print_help=1;
+    }
   }
 
   if(print_help) {

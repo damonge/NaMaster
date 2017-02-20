@@ -1,22 +1,57 @@
 \documentclass[a4paper,10pt]{article}
-\usepackage[utf8]{inputenc}
+\usepackage{graphicx} % Include figure files
 \usepackage{fullpage}
-\usepackage{amsmath}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{amssymb,amsmath} 
+\usepackage[colorlinks=true,linkcolor=Blue,linktoc=page,citecolor=Red,urlcolor=BrickRed]{hyperref}
+%\usepackage{color}
+%\usepackage[utf8x]{inputenc}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{listings}
+%\usepackage{makeidx}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{epigraph}
+\usepackage{titling}
+%\renewcommand{\familydefault}{\sfdefault}
+\newcommand{\apj}{ApJ}
+\newcommand{\apjs}{ApJS}
+\newcommand{\mnras}{MNRAS}
+
+\pretitle{\begin{flushleft}\LARGE\bfseries\sffamily}
+\posttitle{\par\end{flushleft}\vskip 0.5em\vspace{-7ex}}
+\predate{\begin{flushleft}\sffamily\large}
+\postdate{\par\end{flushleft}\vskip 0.5em\vspace{-2ex}}
+\titleformat{\section}[hang]{\bfseries\sffamily\Large}
+{\thesection}
+{12pt}{\filright}
+
+\titleformat{\subsection}[hang]{\bfseries\sffamily}
+{\thesubsection}
+{12pt}{\filright}
+
+\titleformat{\subsubsection}[hang]{\bfseries}
+{\thesubsubsection}
+{12pt}{\filright}
+
 \newcommand{\Tr}{{\rm Tr}}
 \newcommand{\nv}{\hat{\bf n}}
 \newcommand{\wtj}[6]{\left(\begin{array}{ccc} #1 & #2 & #3\\#4 & #5 & #6\end{array} \right)}
 
 
-%opening
 \title{NaMaster: Scientific Documentation}
-%\author{Dr. Frankenstein}
 
 \begin{document}
-
 \maketitle
+\noindent\makebox[\linewidth]{\rule{\textwidth}{1pt}}
+\tableofcontents
+\noindent\makebox[\linewidth]{\rule{\textwidth}{1pt}}
+
+\section{Introduction}
+NaMaster is a C library, python module and standalone program to compute the pseudo-$C_\ell$ estimator of the angular power spectrum between two masked and contaminated fields (this is also the so-called ``MASTER'' algorithm). The contents of this scientific documentation describe the algorithm, drawing heavily from the methods presented by \cite{2002ApJ...567....2H} and \cite{2017MNRAS.465.1847E}, extending their results to arbitrary cross-correlations between spin-0 and spin-2 fields (see also \cite{2003ApJS..148..161K}).
 
 \section{Generalities and SHTs}
-
 Let ${\bf a}(\nv)$ be a spin-$s_a$ quantity defined on the sphere, where $s_a$ can be either 0 or 2. Then we define its spherical harmonic coefficients as:
 \begin{equation}
  {\bf a}_{\ell m}\equiv{\rm SHT}({\bf a}(\nv))^{s_a}_{\ell m}\equiv\int d\nv\,\hat{\sf Y}^{s_a\dag}_{\ell m}(\nv)\,{\bf a}(\nv),\hspace{12pt}
@@ -266,7 +301,11 @@ Finally, the following orthogonality relation for the Wigner 3$j$ symbols is use
   \end{equation}
   where we the overline $\bar{\,}$ denotes theoretical predictions.
 
-
+\begin{thebibliography}{}
+ \bibitem{2002ApJ...567....2H} Hivon, E., G{\'o}rski, K.~M., Netterfield, C.~B., et al.\ 2002, \apj, 567, 2 
+ \bibitem{2017MNRAS.465.1847E} Elsner, F., Leistedt, B., \& Peiris, H.~V.\ 2017, \mnras, 465, 1847 
+ \bibitem{2003ApJS..148..161K} Kogut, A., Spergel, D.~N., Barnes, C., et al.\ 2003, \apjs, 148, 161 
+\end{thebibliography}
 
 \end{document}
 
@@ -384,7 +423,7 @@ The choice of prior covariance will define the type of estimator. Note that this
 formalism immediately encompasses cut-skies by setting to zero all elements of the
 full covariance matrix involving unobserved pixels (this would correspond to the
 limit of infinite uncorrelated noise for those pixels).
-
+2002ApJ × .567 ×  × 2H}
 \subsection{Strategies for the different terms}
 \begin{itemize}
 \item $\hat{C}^{-1}_{ii}\,{\bf d}_i$. This term can be computed by solving the
