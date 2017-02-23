@@ -184,7 +184,7 @@ The definition of the fields to be correlated (including their masks and possibl
 
 \begin{funcdef}[nmt\_field\_alloc]
  {\functi{nmt\_field *}{nmt\_field\_alloc}
- {\vari{long}{ nside},\vari{double *}{mask},\vari{int}{ pol},\vari{double **}{maps},\\\vari{int}{ ntemp},\vari{flouble ***}{temp}}}
+ {\vari{long}{ nside},\vari{double *}{mask},\vari{int}{ pol},\vari{double **}{maps},\\\vari{int}{ ntemp},\vari{double ***}{temp},\vari{double *}{beam}}}
  This is the constructor for {\tt nmt\_field}. The input variables are:
  \begin{itemize}[noitemsep]
    \item {\tt nside}: the HEALPix resolution of all maps involved
@@ -193,18 +193,20 @@ The definition of the fields to be correlated (including their masks and possibl
    \item {\tt maps}: set of maps corresponding to observed field. This would correspond to one map for a scalar field or two maps for spin-2 quantities (e.g. Q and U for polarization maps or $\gamma_1$, $\gamma_2$ for cosmic shear). The first dimension of this double array would correspond to the number of maps, while the second dimension runs through the different pixels of each map.
    \item {\tt ntemp}: number of contaminant templates for this field.
    \item {\tt temp}: contaminant templates as HEALPix maps. The first dimension should run through the different templates, the second dimension corresponds to the number of maps per template (e.g. 1 for spin-0 and 2 for spin-2) and the third dimension corresponds to the number of pixels.
+   \item {\tt beam}: spherical harmonic transform of the instrumental beam (assumed to be rotationally symmetric - i.e. no $m$ dependence). If {\tt NULL}, no beam will be corrected for. Otherwise, this array should have $3\times{\tt nside}$ elements, corresponding to multipoles $\ell\in[0,3\,{\tt nside}-1]$.
  \end{itemize}
  \end{funcdef}
 
 \begin{funcdef}[nmt\_field\_read]
  {\functi{nmt\_field *}{nmt\_field\_read}
- {\vari{char *}{fname\_mask},\vari{char *}{fname\_maps},\vari{char *}{fname\_temp},\vari{int }{pol}}}
+ {\vari{char *}{fname\_mask},\vari{char *}{fname\_maps},\vari{char *}{fname\_temp},\\\vari{char *}{fname\_beam},\vari{int }{pol}}}
  As {\tt nmt\_field\_alloc}, this returns a pointer to a {\tt nmt\_field} structure based on:
  \begin{itemize}[noitemsep]
    \item {\tt pol}: set to 0 if this is a spin-0 field. Set to 1 if it's a spin-2 field.
    \item {\tt fname\_mask}: file name pointing to a FITS file containing the sky mask (as a single scalar HEALPix map).
    \item {\tt fname\_maps}: file name pointing to a FITS file containing the maps of the observed field. This file should contain a single map for {\tt pol}=0 and two maps for {\tt pol}=1.
    \item {\tt fname\_temp}: file name pointing to a FITS file containing the contaminant templates as HEALPix maps. Each template should contain $N$ maps with $N=1$ for {\tt pol}=0 and $N=2$ for {\tt pol}=1. Pass ``none'' if no contaminants are needed (in which case deprojection and debiasing will not take place).
+   \item {\tt fname\_beam}: file name pointing to an ASCII file containing the spherical harmonic transform of the instrumental beam (assumed to be rotationally symmetric - i.e. no $m$ dependence). If {\tt ``none''}, no beam will be corrected for. Otherwise, this file should contain two columns ($\ell$ and $b_\ell$) and $3\times{\tt nside}$ columns, corresponding to multipoles $\ell\in[0,3\,{\tt nside}-1]$.
  \end{itemize}
 \end{funcdef}
 

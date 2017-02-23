@@ -11,7 +11,7 @@ void run_master(nmt_field *fl1,nmt_field *fl2,
   FILE *fi;
   int ii;
   int lmax=fl1->lmax;
-  int nspec=fl1->nmaps*fl1->nmaps;
+  int nspec=fl1->nmaps*fl2->nmaps;
   flouble **cl_noise,**cl_proposal,**cl_out,**cl_bias,**cl_data;
 
   if(fl1->nside!=fl2->nside)
@@ -138,6 +138,8 @@ int main(int argc,char **argv)
   int n_lbin=1,pol_1=0,pol_2=0,is_auto=0,print_help=0;
   char fname_map_1[256]="none";
   char fname_map_2[256]="none";
+  char fname_beam_1[256]="none";
+  char fname_beam_2[256]="none";
   char fname_mask_1[256]="none";
   char fname_mask_2[256]="none";
   char fname_temp_1[256]="none";
@@ -158,6 +160,10 @@ int main(int argc,char **argv)
       sprintf(fname_map_1,"%s",*++c);
     else if(!strcmp(*c,"-map_2"))
       sprintf(fname_map_2,"%s",*++c);
+    else if(!strcmp(*c,"-beam"))
+      sprintf(fname_beam_1,"%s",*++c);
+    else if(!strcmp(*c,"-beam_2"))
+      sprintf(fname_beam_2,"%s",*++c);
     else if(!strcmp(*c,"-mask"))
       sprintf(fname_mask_1,"%s",*++c);
     else if(!strcmp(*c,"-mask_2"))
@@ -210,6 +216,8 @@ int main(int argc,char **argv)
     fprintf(stderr,"Options:\n");
     fprintf(stderr,"  -map      -> path to file containing map(s)\n");
     fprintf(stderr,"  -map_2    -> path to file containing 2nd map(s) (optional)\n");
+    fprintf(stderr,"  -beam     -> path to file containing SHT of instrument beam for the first field\n");
+    fprintf(stderr,"  -beam_2   -> path to file containing 2nd beam (optional)\n");
     fprintf(stderr,"  -mask     -> path to file containing mask\n");
     fprintf(stderr,"  -mask_2   -> path to file containing mask for 2nd map(s) (optional)\n");
     fprintf(stderr,"  -temp     -> path to file containing contaminant templates (optional)\n");
@@ -230,7 +238,7 @@ int main(int argc,char **argv)
   if(n_lbin<=0)
     report_error(1,"#ell per bin must be positive\n");
 
-  fl1=nmt_field_read(fname_mask_1,fname_map_1,fname_temp_1,pol_1);
+  fl1=nmt_field_read(fname_mask_1,fname_map_1,fname_temp_1,fname_beam_1,pol_1);
 
   if(!strcmp(fname_map_2,"none")) {
     fl2=fl1;
@@ -239,9 +247,7 @@ int main(int argc,char **argv)
   else {
     if(!strcmp(fname_mask_2,"none"))
       sprintf(fname_mask_2,"%s",fname_mask_1);
-    if(!strcmp(fname_temp_2,"none"))
-      sprintf(fname_temp_2,"%s",fname_temp_1);
-    fl2=nmt_field_read(fname_mask_2,fname_map_2,fname_temp_2,pol_2);
+    fl2=nmt_field_read(fname_mask_2,fname_map_2,fname_temp_2,fname_beam_2,pol_2);
   }
 
   run_master(fl1,fl2,

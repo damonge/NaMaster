@@ -3,6 +3,7 @@
 void nmt_field_free(nmt_field *fl)
 {
   int imap;
+  free(fl->beam);
   for(imap=0;imap<fl->nmaps;imap++)
     free(fl->maps[imap]);
   free(fl->maps);
@@ -20,7 +21,8 @@ void nmt_field_free(nmt_field *fl)
   free(fl);
 }
 
-nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp)
+nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
+			   int ntemp,flouble ***temp,flouble *beam)
 {
   int ii,itemp,itemp2,imap;
   nmt_field *fl=my_malloc(sizeof(nmt_field));
@@ -31,6 +33,14 @@ nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,int n
   if(pol) fl->nmaps=2;
   else fl->nmaps=1;
   fl->ntemp=ntemp;
+
+  fl->beam=my_malloc(3*fl->nside*sizeof(flouble));
+  if(beam==NULL) {
+    for(ii=0;ii<3*fl->nside;ii++)
+      fl->beam[ii]=1.;
+  }
+  else
+    memcpy(fl->beam,beam,3*fl->nside*sizeof(flouble));
 
   fl->mask=my_malloc(fl->npix*sizeof(flouble));
   memcpy(fl->mask,mask,fl->npix*sizeof(flouble));
@@ -99,10 +109,11 @@ nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,int n
   return fl;
 }
 
-nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,int pol)
+nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,int pol)
 {
   long nside,nside_dum;
   nmt_field *fl;
+  flouble *beam;
   flouble *mask;
   flouble **maps;
   flouble ***temp;
@@ -111,6 +122,27 @@ nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,int
 
   //Read mask and compute nside, lmax etc.
   mask=he_read_healpix_map(fname_mask,&nside,0);
+
+  //Read beam
+  if(!strcmp(fname_beam,"none"))
+    beam=NULL;
+  else {
+    FILE *fi=my_fopen(fname_beam,"r");
+    int nlines=my_linecount(fi); rewind(fi);
+    if(nlines!=3*nside)
+      report_error(1,"Beam file must have 3*nside rows and two columns\n");
+    beam=my_malloc(3*nside*sizeof(flouble));
+    for(ii=0;ii<3*nside;ii) {
+      int l;
+      double b;
+      int stat=fscanf(fi,"%d %lf\n",&l,&b);
+      if(stat!=2)
+	report_error(1,"Error reading file %s, line %d\n",fname_beam,ii+1);
+      if((l>3*nside-1) || (l<0))
+	report_error(1,"Wrong multipole %d\n",l);
+      beam[l]=b;
+    }
+  }
 
   //Read data maps
   maps=my_malloc(nmaps*sizeof(flouble *));
@@ -141,8 +173,10 @@ nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,int
     temp=NULL;
   }
 
-  fl=nmt_field_alloc(nside,mask,pol,maps,ntemp,temp);
+  fl=nmt_field_alloc(nside,mask,pol,maps,ntemp,temp,beam);
 
+  if(beam!=NULL)
+    free(beam);
   free(mask);
   for(imap=0;imap<nmaps;imap++)
     free(maps[imap]);

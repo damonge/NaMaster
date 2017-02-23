@@ -58,10 +58,12 @@ typedef struct {
   flouble ***temp;
   fcomplex ***a_temp;
   gsl_matrix *matrix_M;
+  flouble *beam;
 } nmt_field;
 void nmt_field_free(nmt_field *fl);
-nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp);
-nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,int pol);
+nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
+			   int ntemp,flouble ***temp,flouble *beam);
+nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,int pol);
 void nmt_apodize_mask(long nside,flouble *mask_in,flouble *mask_out,flouble aposize,char *apotype);
 
 //Defined in master.c

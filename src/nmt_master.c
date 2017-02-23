@@ -363,15 +363,18 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
   int l2;
   nmt_workspace *w;
   int n_cl=fl1->nmaps*fl2->nmaps;
+  flouble *beam_prod=my_malloc((fl1->lmax+1)*sizeof(flouble));
   if(fl1->nside!=fl2->nside)
     report_error(1,"Can't correlate fields with different resolutions\n");
   w=master_workspace_new(fl1->lmax,n_cl,bin);
   he_anafast(&(fl1->mask),&(fl2->mask),0,0,&(w->pcl_masks),fl1->nside,fl1->lmax,HE_NITER_DEFAULT);
-  for(l2=0;l2<=fl1->lmax;l2++)
+  for(l2=0;l2<=fl1->lmax;l2++) {
     w->pcl_masks[l2]*=(2*l2+1.);
+    beam_prod[l2]=fl1->beam[l2]*fl2->beam[l2];
+  }
 
-#pragma omp parallel default(none)				\
-  shared(w)
+#pragma omp parallel default(none)		\
+  shared(w,beam_prod)
   {
     int ll2,ll3;
     double *wigner_00=NULL,*wigner_22=NULL;
@@ -435,7 +438,7 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
 	for(jj=0;jj<w->ncls;jj++) {
 	  int kk;
 	  for(kk=0;kk<w->ncls;kk++)
-	    w->coupling_matrix_unbinned[w->ncls*ll2+jj][w->ncls*ll3+kk]*=(2*ll3+1.)/(4*M_PI);
+	    w->coupling_matrix_unbinned[w->ncls*ll2+jj][w->ncls*ll3+kk]*=(2*ll3+1.)*beam_prod[ll3]/(4*M_PI);
 	}
       }
     } //end omp for
@@ -446,6 +449,7 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
   } //end omp parallel
 
   bin_coupling_matrix(w);
+  free(beam_prod);
 
   return w;
 }
@@ -551,7 +555,6 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
 
   if((fl1->ntemp>0) && (fl2->ntemp>0)) {
     int iti,itj,itp,itq,im1,im2;
-
     flouble *mat_prod=my_calloc(fl1->ntemp*fl2->ntemp,sizeof(flouble));
     for(itj=0;itj<fl1->ntemp;itj++) {
       for(itq=0;itq<fl2->ntemp;itq++) {

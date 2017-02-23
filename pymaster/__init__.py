@@ -32,19 +32,32 @@ class NmtField(object) :
     :param mask: array containing a HEALPix map corresponding to the field's mask.
     :param maps: 2D array containing the observed maps for this field. The first dimension corresponds to the number of maps, which should be 1 for a spin-0 field and 2 for a spin-2 field.
     :param templates: 3D array containing a set of contaminant templates for this field. This array should have shape [ntemp][nmap][npix], where ntemp is the number of templates, nmap should be 1 for spin-0 fields and 2 for spin-2 fields, and npix is the number of pixels per map. The best-fit contribution from each contaminant is automatically removed from the maps unless templates=None
+    :param beam: spherical harmonic transform of the instrumental beam (assumed to be rotationally symmetric - i.e. no m dependence). If None, no beam will be corrected for. Otherwise, this array should have 3*nside elements, corresponding to multipoles from 0 to 3*nside-1.
 
     """
-    def __init__(self,mask,maps,templates=None) :
+    def __init__(self,mask,maps,templates=None,beam=None) :
+        nside=2
+        while(12*nside*nside!=len(mask)) :
+            nside*=2
+            if(nside>65536) :
+                raise KeyError("Something is wrong with your input arrays")
+
         if((len(maps)!=1) and (len(maps)!=2)) :
             raise KeyError("Must supply 1 or 2 maps per field")
         if(templates!=None) :
             if((len(templates[0])!=1) and (len(templates[0])!=2)) :
                 raise KeyError("Must supply 1 or 2 maps per field")
+        if(beam==None) :
+            beam_use=np.ones(3*nside)
+        else :
+            if(len(beam)!=3*nside) :
+                raise KeyError("Input beam must have 3*nside elements")
+            beam_use=beam
 
         if(templates==None) :
-            self.fl=lib.field_alloc_new_notemp(mask,maps)
+            self.fl=lib.field_alloc_new_notemp(mask,maps,beam_use)
         else :
-            self.fl=lib.field_alloc_new(mask,maps,templates)
+            self.fl=lib.field_alloc_new(mask,maps,templates,beam_use)
 
     def __del__(self) :
         lib.field_free(self.fl)

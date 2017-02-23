@@ -12,7 +12,7 @@ int main(int argc,char **argv)
   }
 
   //Create spin-0 field
-  nmt_field *fl1=nmt_field_read(argv[2],argv[1],"none",0);
+  nmt_field *fl1=nmt_field_read(argv[2],argv[1],"none","none",0);
 
   //Create a binning scheme (20 multipoles per bandpower)
   nmt_binning_scheme *bin=nmt_bins_constant(20,fl1->lmax);

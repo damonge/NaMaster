@@ -114,7 +114,8 @@ void unbin_cl(nmt_binning_scheme *bins,
 
 nmt_field *field_alloc_new(int npix_1,double *mask,
 			   int nmap_2,int npix_2,double *mps,
-			   int ntmp_3,int nmap_3,int npix_3,double *tmp)
+			   int ntmp_3,int nmap_3,int npix_3,double *tmp,
+			   int nell3,double *weights)
 {
   int ii,jj;
   long nside=1;
@@ -129,7 +130,9 @@ nmt_field *field_alloc_new(int npix_1,double *mask,
 
   while(npix_1!=12*nside*nside)
     nside*=2;
-  
+
+  assert(nell3!=3*nside);
+
   if(nmap_2==2) pol=1;
 
   if(tmp!=NULL) {
@@ -146,7 +149,7 @@ nmt_field *field_alloc_new(int npix_1,double *mask,
   for(ii=0;ii<nmap_2;ii++)
     maps[ii]=mps+npix_2*ii;
 
-  fl=nmt_field_alloc(nside,mask,pol,maps,ntemp,temp);
+  fl=nmt_field_alloc(nside,mask,pol,maps,ntemp,temp,weights);
 
   if(tmp!=NULL) {
     for(ii=0;ii<ntmp_3;ii++)
@@ -159,7 +162,8 @@ nmt_field *field_alloc_new(int npix_1,double *mask,
 }
 
 nmt_field *field_alloc_new_notemp(int npix_1,double *mask,
-				  int nmap_2,int npix_2,double *mps)
+				  int nmap_2,int npix_2,double *mps,
+				  int nell3,double *weights)
 {
   int ii;
   long nside=1;
@@ -173,14 +177,16 @@ nmt_field *field_alloc_new_notemp(int npix_1,double *mask,
 
   while(npix_1!=12*nside*nside)
     nside*=2;
-  
+
+  assert(nell3!=3*nside);
+
   if(nmap_2==2) pol=1;
 
   maps=malloc(nmap_2*sizeof(double *));
   for(ii=0;ii<nmap_2;ii++)
     maps[ii]=mps+npix_2*ii;
 
-  fl=nmt_field_alloc(nside,mask,pol,maps,ntemp,NULL);
+  fl=nmt_field_alloc(nside,mask,pol,maps,ntemp,NULL,weights);
 
   free(maps);
 

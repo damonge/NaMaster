@@ -279,6 +279,13 @@ Finally, the following orthogonality relation for the Wigner 3$j$ symbols is use
       \end{array}\right)\\
       & \hspace{12pt}M^{\pm\pm}_{\ell\ell'}=\frac{2\ell'+1}{4\pi}\sum_{\ell''}(2\ell''+1)C^{vw}_{\ell''}\wtj{\ell}{\ell'}{\ell''}{2}{-2}{0}^2\frac{1\pm(-1)^{\ell+\ell'+\ell''}}{2}
     \end{align}
+
+\subsection{Beam}
+  Adding the effect of a beam amounts to redefining:
+  \begin{equation}
+    \mathsf{M}^{s_as_b}_{\ell_1\ell_2}\rightarrow\mathsf{M}^{s_as_b}_{\ell_1\ell_2}\,b^{ab}_{\ell_2},
+  \end{equation}
+  where $b^{ab}_\ell$ is the product of the harmonic transform of the beams for maps $a$ and $b$.
     
 \subsection{Binning into bandpowers}
   Given the loss of information implicit in masking the originally full-sky field, it is in general not possible to invert Eq. \ref{eq:cell_coupled} directly. De usual approach to doing so is by binning the pseudo-$C_\ell$ into bandpowers. A bandpower $k$ is defined by a set of $N_k$ multipoles $\vec{\ell}_k\equiv(\ell_k^1,...,\ell_k^{N_k})$ and a set of weights $\vec{w}_k\equiv(w_k^1,...,w_k^{N_k})$ normalized such that $\sum_{i=1}^{N_k}w_k^i=1$. The $k-$th bandpower for the coupled pseudo-$C_\ell$ is then defined as:
@@ -309,12 +316,6 @@ Finally, the following orthogonality relation for the Wigner 3$j$ symbols is use
 
 \end{document}
 
-\subsection{Beam}
-Adding the effect of a beam amounts to redefining:
-\begin{equation}
-  \mathsf{M}^{s_as_b}_{\ell_1\ell_2}\rightarrow\mathsf{M}^{s_as_b}_{\ell_1\ell_2}\,b^{ab}_{\ell_2},
-\end{equation}
-where $b^{ab}_\ell$ is the product of the harmonic transform of the beams for maps $a$ and $b$.
 
 \subsection{Bandpowers}
 Consider the case where you want to compute the power spectrum in band-powers given by
