@@ -239,7 +239,7 @@ static void apodize_mask_CX(long nside,flouble *mask_in,flouble *mask_out,floubl
   shared(nside,cthv,phiv,aporad,apotyp)
   {
     long ip;
-    int lenlist0=(int)(2*npix*(1-cos(1.2*aporad)));
+    int lenlist0=(int)(4*npix*(1-cos(1.2*aporad)));
     int *listpix=my_malloc(lenlist0*sizeof(int));
 
 #pragma omp for schedule(dynamic)
