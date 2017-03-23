@@ -11,13 +11,21 @@ try:
 except AttributeError:
     numpy_include = numpy.get_numpy_include()
 
-LIBCCL_LIBRARY_PATH = "/home/damonge/lib"
+
+use_icc=False #Set to True if you compiled libsharp with icc
+if use_icc :
+    libs=['nmt','sharp','fftpack','c_utils','chealpix','cfitsio','gsl','gslcblas','m','gomp','iomp5']
+    extra=['-openmp',],
+else :
+    libs=['nmt','sharp','fftpack','c_utils','chealpix','cfitsio','gsl','gslcblas','m','gomp']
+    extra=['-O4', '-fopenmp',],
+
 
 _nmtlib = Extension("_nmtlib",
                     ["pymaster/namaster.i"],
-                    libraries = ['nmt','sharp','fftpack','c_utils','chealpix','cfitsio','gsl','gslcblas','m','gomp'],
+                    libraries = libs,
                     include_dirs = [numpy_include, "../src/"],
-                    extra_compile_args=['-O4', '-fopenmp',],
+                    extra_compile_args=extra,
                     )
 
 setup(name = "pymaster",
