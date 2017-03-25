@@ -29,7 +29,7 @@ static void nmt_purify(nmt_field *fl)
   long ip;
   int imap,mm,ll;
   int purify[2]={0,0};
-  flouble *fl=my_malloc((fl->lmax+1)*sizeof(flouble));
+  flouble *f_l=my_malloc((fl->lmax+1)*sizeof(flouble));
   flouble  **pmap0=my_malloc(fl->nmaps*sizeof(flouble *));
   flouble  **pmap=my_malloc(fl->nmaps*sizeof(flouble *));
   flouble  **wmap=my_malloc(fl->nmaps*sizeof(flouble *));
@@ -64,8 +64,8 @@ static void nmt_purify(nmt_field *fl)
 
   //Compute spin-1 mask
   for(ll=0;ll<=fl->lmax;ll++)
-    fl[ll]=sqrt((ll+1.)*ll);
-  he_alter_alm(fl->lmax,-1.,walm[0],walm[0],fl); //TODO: There may be a -1 sign here
+    f_l[ll]=sqrt((ll+1.)*ll);
+  he_alter_alm(fl->lmax,-1.,walm[0],walm[0],f_l); //TODO: There may be a -1 sign here
   he_alm2map(fl->nside,fl->lmax,1,1,wmap,walm);
   //Product with spin-1 mask
   for(ip=0;ip<fl->npix;ip++) {
@@ -75,17 +75,17 @@ static void nmt_purify(nmt_field *fl)
   //Compute SHT, multiply by 2*sqrt((l+1)!(l-2)!/((l-1)!(l+2)!)) and add to alm_out
   he_map2alm(fl->nside,fl->lmax,1,1,pmap       ,palm  ,HE_NITER_DEFAULT);
   for(ll=0;ll<=fl->lmax;ll++) {
-    if(l>1)
-      fl[ll]=2./sqrt((ll+2.)*(ll-1.));
+    if(ll>1)
+      f_l[ll]=2./sqrt((ll+2.)*(ll-1.));
     else
-      fl[ll]=0;
+      f_l[ll]=0;
   }
   for(imap=0;imap<fl->nmaps;imap++) {
     if(purify[imap]) {
       for(mm=0;mm<=fl->lmax;mm++) {
 	for(ll=mm;ll<=fl->lmax;ll++) {
 	  long index=he_indexlm(ll,mm,fl->lmax);
-	  alm_out[imap][index]+=fl[ll]*palm[imap][index];
+	  alm_out[imap][index]+=f_l[ll]*palm[imap][index];
 	}
       }
     }
@@ -94,11 +94,11 @@ static void nmt_purify(nmt_field *fl)
   //Compute spin-2 mask
   for(ll=0;ll<=fl->lmax;ll++) {
     if(ll>1)
-      fl[ll]=sqrt((ll+2.)*(ll-1.));
+      f_l[ll]=sqrt((ll+2.)*(ll-1.));
     else
-      fl[ll]=0;
+      f_l[ll]=0;
   }
-  he_alter_alm(fl->lmax,-1.,walm[0],walm[0],fl); //TODO: There may be a -1 sign here
+  he_alter_alm(fl->lmax,-1.,walm[0],walm[0],f_l); //TODO: There may be a -1 sign here
   he_alm2map(fl->nside,fl->lmax,1,2,wmap,walm);
   //Product with spin-2 mask
   for(ip=0;ip<fl->npix;ip++) {
@@ -108,17 +108,17 @@ static void nmt_purify(nmt_field *fl)
   //Compute SHT, multiply by 2*sqrt((l+1)!(l-2)!/((l-1)!(l+2)!)) and add to alm_out
   he_map2alm(fl->nside,fl->lmax,1,2,pmap       ,palm  ,HE_NITER_DEFAULT);
   for(ll=0;ll<=fl->lmax;ll++) {
-    if(l>1)
-      fl[ll]=1./sqrt((ll+2.)*(ll+1.)*ll*(ll-1.));
+    if(ll>1)
+      f_l[ll]=1./sqrt((ll+2.)*(ll+1.)*ll*(ll-1.));
     else
-      fl[ll]=0;
+      f_l[ll]=0;
   }
   for(imap=0;imap<fl->nmaps;imap++) {
     if(purify[imap]) {
       for(mm=0;mm<=fl->lmax;mm++) {
 	for(ll=mm;ll<=fl->lmax;ll++) {
 	  long index=he_indexlm(ll,mm,fl->lmax);
-	  alm_out[imap][index]+=fl[ll]*palm[imap][index];
+	  alm_out[imap][index]+=f_l[ll]*palm[imap][index];
 	}
       }
     }
@@ -126,7 +126,7 @@ static void nmt_purify(nmt_field *fl)
 
   for(imap=0;imap<fl->nmaps;imap++)
     memcpy(fl->alms[imap],alm_out,he_nalms(fl->lmax)*sizeof(fcomplex));
-  he_alm2map(fl->nside,fl->lmax,1,2,fl->maps,fl->alms,HE_NITER_DEFAULT);
+  he_alm2map(fl->nside,fl->lmax,1,2,fl->maps,fl->alms);
 
   for(imap=0;imap<fl->nmaps;imap++) {
     free(pmap0[imap]);
@@ -249,7 +249,7 @@ nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
 }
 
 nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,
-			  int pol,int pure_b,int pure_b)
+			  int pol,int pure_e,int pure_b)
 {
   long nside,nside_dum;
   nmt_field *fl;
