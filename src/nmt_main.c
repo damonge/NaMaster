@@ -95,7 +95,7 @@ void run_master(nmt_field *fl1,nmt_field *fl2,
   }
 
   printf("Computing data pseudo-Cl\n");
-  he_anafast(fl1->maps,fl2->maps,fl1->pol,fl2->pol,cl_data,fl1->nside,fl1->lmax,3);
+  he_alm2cl(fl1->alms,fl2->alms,fl1->pol,fl2->pol,cl_data,fl1->lmax);
 
   printf("Computing deprojection bias\n");
   nmt_compute_deprojection_bias(fl1,fl2,cl_proposal,cl_bias);
@@ -136,6 +136,7 @@ void run_master(nmt_field *fl1,nmt_field *fl2,
 int main(int argc,char **argv)
 {
   int n_lbin=1,pol_1=0,pol_2=0,is_auto=0,print_help=0;
+  int pure_e_1=0,pure_b_1=0,pure_e_2=0,pure_b_2=0;
   char fname_map_1[256]="none";
   char fname_map_2[256]="none";
   char fname_beam_1[256]="none";
@@ -238,7 +239,7 @@ int main(int argc,char **argv)
   if(n_lbin<=0)
     report_error(1,"#ell per bin must be positive\n");
 
-  fl1=nmt_field_read(fname_mask_1,fname_map_1,fname_temp_1,fname_beam_1,pol_1);
+  fl1=nmt_field_read(fname_mask_1,fname_map_1,fname_temp_1,fname_beam_1,pol_1,pure_e_1,pure_b_1);
 
   if(!strcmp(fname_map_2,"none")) {
     fl2=fl1;
@@ -247,7 +248,7 @@ int main(int argc,char **argv)
   else {
     if(!strcmp(fname_mask_2,"none"))
       sprintf(fname_mask_2,"%s",fname_mask_1);
-    fl2=nmt_field_read(fname_mask_2,fname_map_2,fname_temp_2,fname_beam_2,pol_2);
+    fl2=nmt_field_read(fname_mask_2,fname_map_2,fname_temp_2,fname_beam_2,pol_2,pure_e_2,pure_b_2);
   }
 
   run_master(fl1,fl2,

@@ -496,19 +496,19 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
 	for(im2=0;im2<fl2->nmaps;im2++)
 	  he_map_product(fl2->nside,fl2->temp[itj][im2],fl2->mask,map_2_dum[im2]);
 	//SHT[w*g^j]
-	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
+	he_map2alm(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
 	//C^ab*SHT[w*g^j]
 	for(im1=0;im1<fl1->nmaps;im1++) {
 	  for(im2=0;im2<fl2->nmaps;im2++)
 	    he_alter_alm(lmax,-1.,alm_2_dum[im2],alm_1_dum[im1],cl_proposal[im1*fl2->nmaps+im2]);
 	}
 	//SHT^-1[C^ab*SHT[w*g^j]]
-	he_alm2map(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum);
+	he_alm2map(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum);
 	//v*SHT^-1[C^ab*SHT[w*g^j]]
 	for(im1=0;im1<fl1->nmaps;im1++)
 	  he_map_product(fl1->nside,map_1_dum[im1],fl1->mask,map_1_dum[im1]);
 	//SHT[v*SHT^-1[C^ab*SHT[w*g^j]]]
-	he_map2alm(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
+	he_map2alm(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
 	//Sum_m(SHT[v*SHT^-1[C^ab*SHT[w*g^j]]]*g^i*)/(2l+1)
 	he_alm2cl(alm_1_dum,fl2->a_temp[iti],fl1->pol,fl1->pol,cl_dum,lmax);
 	for(im1=0;im1<nspec;im1++) {
@@ -530,19 +530,19 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
 	for(im1=0;im1<fl1->nmaps;im1++)
 	  he_map_product(fl1->nside,fl1->temp[itj][im1],fl1->mask,map_1_dum[im1]);
 	//SHT[v*f^j]
-	he_map2alm(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
+	he_map2alm(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
 	//C^abT*SHT[v*f^j]
 	for(im2=0;im2<fl2->nmaps;im2++) {
 	  for(im1=0;im1<fl1->nmaps;im1++)
 	    he_alter_alm(lmax,-1.,alm_1_dum[im1],alm_2_dum[im2],cl_proposal[im1*fl2->nmaps+im2]);
 	}
 	//SHT^-1[C^abT*SHT[v*f^j]]
-	he_alm2map(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum);
+	he_alm2map(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum);
 	//w*SHT^-1[C^abT*SHT[v*f^j]]
 	for(im2=0;im2<fl2->nmaps;im2++)
 	  he_map_product(fl2->nside,map_2_dum[im2],fl2->mask,map_2_dum[im2]);
 	//SHT[w*SHT^-1[C^abT*SHT[v*f^j]]]
-	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
+	he_map2alm(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
 	//Sum_m(f^i*SHT[w*SHT^-1[C^abT*SHT[v*f^j]]]^*)/(2l+1)
 	he_alm2cl(fl1->a_temp[iti],alm_2_dum,fl1->pol,fl2->pol,cl_dum,lmax);
 	for(im1=0;im1<nspec;im1++) {
@@ -562,14 +562,14 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
 	for(im2=0;im2<fl2->nmaps;im2++)
 	  he_map_product(fl2->nside,fl2->temp[itq][im2],fl2->mask,map_2_dum[im2]);
 	//SHT[w*g^q]
-	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
+	he_map2alm(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
 	//C^ab*SHT[w*g^q]
 	for(im1=0;im1<fl1->nmaps;im1++) {
 	  for(im2=0;im2<fl2->nmaps;im2++)
 	    he_alter_alm(lmax,-1.,alm_2_dum[im2],alm_1_dum[im1],cl_proposal[im1*fl2->nmaps+im2]);
 	}
 	//SHT^-1[C^ab*SHT[w*g^q]]
-	he_alm2map(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum);
+	he_alm2map(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum);
 	for(im1=0;im1<fl1->nmaps;im1++) {
 	  //v*SHT^-1[C^ab*SHT[w*g^q]]
 	  he_map_product(fl1->nside,map_1_dum[im1],fl1->mask,map_1_dum[im1]);
@@ -667,7 +667,7 @@ void nmt_decouple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_noise_in,
 
 void nmt_compute_coupled_cell(nmt_field *fl1,nmt_field *fl2,flouble **cl_out,int iter)
 {
-  he_anafast(fl1->maps,fl2->maps,fl1->pol,fl2->pol,cl_out,fl1->nside,fl1->lmax,iter);
+  he_alm2cl(fl1->alms,fl2->alms,fl1->pol,fl2->pol,cl_out,fl1->lmax);
 }
 
 nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,

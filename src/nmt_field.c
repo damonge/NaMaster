@@ -4,8 +4,11 @@ void nmt_field_free(nmt_field *fl)
 {
   int imap;
   free(fl->beam);
-  for(imap=0;imap<fl->nmaps;imap++)
+  for(imap=0;imap<fl->nmaps;imap++) {
     free(fl->maps[imap]);
+    free(fl->alms[imap]);
+  }
+  free(fl->alms);
   free(fl->maps);
   free(fl->mask);
   if(fl->ntemp>0) {
@@ -21,8 +24,128 @@ void nmt_field_free(nmt_field *fl)
   free(fl);
 }
 
+static void nmt_purify(nmt_field *fl)
+{
+  long ip;
+  int imap,mm,ll;
+  int purify[2]={0,0};
+  flouble *fl=my_malloc((fl->lmax+1)*sizeof(flouble));
+  flouble  **pmap0=my_malloc(fl->nmaps*sizeof(flouble *));
+  flouble  **pmap=my_malloc(fl->nmaps*sizeof(flouble *));
+  flouble  **wmap=my_malloc(fl->nmaps*sizeof(flouble *));
+  fcomplex **walm=my_malloc(fl->nmaps*sizeof(fcomplex *));
+  fcomplex **palm=my_malloc(fl->nmaps*sizeof(fcomplex *));
+  fcomplex **alm_out=my_malloc(fl->nmaps*sizeof(fcomplex *));
+  for(imap=0;imap<fl->nmaps;imap++) {
+    walm[imap]=my_calloc(he_nalms(fl->lmax),sizeof(fcomplex));
+    palm[imap]=my_calloc(he_nalms(fl->lmax),sizeof(fcomplex));
+    pmap[imap]=my_calloc(fl->npix,sizeof(flouble));
+    pmap0[imap]=my_calloc(fl->npix,sizeof(flouble));
+    wmap[imap]=my_calloc(fl->npix,sizeof(flouble));
+    memcpy(pmap0[imap],fl->maps[imap],fl->npix*sizeof(flouble));
+    alm_out[imap]=my_calloc(he_nalms(fl->lmax),sizeof(fcomplex));
+  }
+
+  if(fl->pure_e)
+    purify[0]=1;
+  if(fl->pure_b)
+    purify[1]=1;
+
+  //Compute mask SHT (store in walm)
+  he_map2alm(fl->nside,fl->lmax,1,0,&(fl->mask),walm  ,HE_NITER_DEFAULT);
+
+  //Product with spin-0 mask
+  for(imap=0;imap<fl->nmaps;imap++) {
+    he_map_product(fl->nside,pmap0[imap],fl->mask,pmap[imap]);
+    memcpy(fl->maps[imap],pmap[imap],fl->npix*sizeof(flouble));
+  }
+  //Compute SHT and store in alm_out
+  he_map2alm(fl->nside,fl->lmax,1,2,pmap      ,alm_out,HE_NITER_DEFAULT);
+
+  //Compute spin-1 mask
+  for(ll=0;ll<=fl->lmax;ll++)
+    fl[ll]=sqrt((ll+1.)*ll);
+  he_alter_alm(fl->lmax,-1.,walm[0],walm[0],fl); //TODO: There may be a -1 sign here
+  he_alm2map(fl->nside,fl->lmax,1,1,wmap,walm);
+  //Product with spin-1 mask
+  for(ip=0;ip<fl->npix;ip++) {
+    pmap[0][ip]=wmap[0][ip]*pmap0[0][ip]+wmap[1][ip]*pmap0[1][ip];
+    pmap[1][ip]=wmap[0][ip]*pmap0[1][ip]-wmap[1][ip]*pmap0[0][ip];
+  }
+  //Compute SHT, multiply by 2*sqrt((l+1)!(l-2)!/((l-1)!(l+2)!)) and add to alm_out
+  he_map2alm(fl->nside,fl->lmax,1,1,pmap       ,palm  ,HE_NITER_DEFAULT);
+  for(ll=0;ll<=fl->lmax;ll++) {
+    if(l>1)
+      fl[ll]=2./sqrt((ll+2.)*(ll-1.));
+    else
+      fl[ll]=0;
+  }
+  for(imap=0;imap<fl->nmaps;imap++) {
+    if(purify[imap]) {
+      for(mm=0;mm<=fl->lmax;mm++) {
+	for(ll=mm;ll<=fl->lmax;ll++) {
+	  long index=he_indexlm(ll,mm,fl->lmax);
+	  alm_out[imap][index]+=fl[ll]*palm[imap][index];
+	}
+      }
+    }
+  }
+
+  //Compute spin-2 mask
+  for(ll=0;ll<=fl->lmax;ll++) {
+    if(ll>1)
+      fl[ll]=sqrt((ll+2.)*(ll-1.));
+    else
+      fl[ll]=0;
+  }
+  he_alter_alm(fl->lmax,-1.,walm[0],walm[0],fl); //TODO: There may be a -1 sign here
+  he_alm2map(fl->nside,fl->lmax,1,2,wmap,walm);
+  //Product with spin-2 mask
+  for(ip=0;ip<fl->npix;ip++) {
+    pmap[0][ip]=wmap[0][ip]*pmap0[0][ip]+wmap[1][ip]*pmap0[1][ip];
+    pmap[1][ip]=wmap[0][ip]*pmap0[1][ip]-wmap[1][ip]*pmap0[0][ip];
+  }
+  //Compute SHT, multiply by 2*sqrt((l+1)!(l-2)!/((l-1)!(l+2)!)) and add to alm_out
+  he_map2alm(fl->nside,fl->lmax,1,2,pmap       ,palm  ,HE_NITER_DEFAULT);
+  for(ll=0;ll<=fl->lmax;ll++) {
+    if(l>1)
+      fl[ll]=1./sqrt((ll+2.)*(ll+1.)*ll*(ll-1.));
+    else
+      fl[ll]=0;
+  }
+  for(imap=0;imap<fl->nmaps;imap++) {
+    if(purify[imap]) {
+      for(mm=0;mm<=fl->lmax;mm++) {
+	for(ll=mm;ll<=fl->lmax;ll++) {
+	  long index=he_indexlm(ll,mm,fl->lmax);
+	  alm_out[imap][index]+=fl[ll]*palm[imap][index];
+	}
+      }
+    }
+  }
+
+  for(imap=0;imap<fl->nmaps;imap++)
+    memcpy(fl->alms[imap],alm_out,he_nalms(fl->lmax)*sizeof(fcomplex));
+  he_alm2map(fl->nside,fl->lmax,1,2,fl->maps,fl->alms,HE_NITER_DEFAULT);
+
+  for(imap=0;imap<fl->nmaps;imap++) {
+    free(pmap0[imap]);
+    free(pmap[imap]);
+    free(wmap[imap]);
+    free(palm[imap]);
+    free(walm[imap]);
+    free(alm_out[imap]);
+  }
+  free(pmap0);
+  free(pmap);
+  free(wmap);
+  free(palm);
+  free(walm);
+  free(alm_out);
+}
+
 nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
-			   int ntemp,flouble ***temp,flouble *beam)
+			   int ntemp,flouble ***temp,flouble *beam,int pure_e,int pure_b)
 {
   int ii,itemp,itemp2,imap;
   nmt_field *fl=my_malloc(sizeof(nmt_field));
@@ -33,6 +156,8 @@ nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
   if(pol) fl->nmaps=2;
   else fl->nmaps=1;
   fl->ntemp=ntemp;
+  fl->pure_e=pure_e;
+  fl->pure_b=pure_b;
 
   fl->beam=my_malloc(3*fl->nside*sizeof(flouble));
   if(beam==NULL) {
@@ -64,7 +189,7 @@ nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
 	memcpy(fl->temp[itemp][imap],temp[itemp][imap],fl->npix*sizeof(flouble));
 	he_map_product(fl->nside,fl->temp[itemp][imap],fl->mask,fl->temp[itemp][imap]); //Multiply by mask
       }
-      he_map2alm(fl->nside,fl->lmax,1,fl->pol,fl->temp[itemp],fl->a_temp[itemp],HE_NITER_DEFAULT); //SHT
+      he_map2alm(fl->nside,fl->lmax,1,2*fl->pol,fl->temp[itemp],fl->a_temp[itemp],HE_NITER_DEFAULT); //SHT
     }
 
     //Compute normalization matrix
@@ -81,7 +206,21 @@ nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
     }
     gsl_linalg_cholesky_decomp(fl->matrix_M); //TODO: this won't necessarily be invertible
     gsl_linalg_cholesky_invert(fl->matrix_M);
+  }
 
+  fl->alms=my_malloc(fl->nmaps*sizeof(fcomplex *));
+  for(ii=0;ii<fl->nmaps;ii++)
+    fl->alms[ii]=my_malloc(he_nalms(fl->lmax)*sizeof(fcomplex));
+
+  if(fl->pol && (fl->pure_e || fl->pure_b))
+    nmt_purify(fl);
+  else {
+    for(ii=0;ii<fl->nmaps;ii++)
+      he_map_product(fl->nside,fl->maps[ii],fl->mask,fl->maps[ii]);
+    he_map2alm(fl->nside,fl->lmax,1,2*fl->pol,fl->maps,fl->alms,HE_NITER_DEFAULT);
+  }
+
+  if(fl->ntemp>0) {
     //Deproject
     flouble *prods=my_calloc(fl->ntemp,sizeof(flouble));
     for(itemp=0;itemp<fl->ntemp;itemp++) {
@@ -109,7 +248,8 @@ nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
   return fl;
 }
 
-nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,int pol)
+nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,
+			  int pol,int pure_b,int pure_b)
 {
   long nside,nside_dum;
   nmt_field *fl;
@@ -173,7 +313,7 @@ nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,cha
     temp=NULL;
   }
 
-  fl=nmt_field_alloc(nside,mask,pol,maps,ntemp,temp,beam);
+  fl=nmt_field_alloc(nside,mask,pol,maps,ntemp,temp,beam,pure_e,pure_b);
 
   if(beam!=NULL)
     free(beam);

@@ -15,10 +15,10 @@ except AttributeError:
 use_icc=False #Set to True if you compiled libsharp with icc
 if use_icc :
     libs=['nmt','sharp','fftpack','c_utils','chealpix','cfitsio','gsl','gslcblas','m','gomp','iomp5']
-    extra=['-openmp',],
+    extra=['-openmp',]
 else :
     libs=['nmt','sharp','fftpack','c_utils','chealpix','cfitsio','gsl','gslcblas','m','gomp']
-    extra=['-O4', '-fopenmp',],
+    extra=['-O4', '-fopenmp',]
 
 
 _nmtlib = Extension("_nmtlib",

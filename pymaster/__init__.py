@@ -35,7 +35,14 @@ class NmtField(object) :
     :param beam: spherical harmonic transform of the instrumental beam (assumed to be rotationally symmetric - i.e. no m dependence). If None, no beam will be corrected for. Otherwise, this array should have 3*nside elements, corresponding to multipoles from 0 to 3*nside-1.
 
     """
-    def __init__(self,mask,maps,templates=None,beam=None) :
+    def __init__(self,mask,maps,templates=None,beam=None,purify_e=False,purify_b=False) :
+        pure_e=0
+        if(purify_e) :
+            pure_e=1
+        pure_b=0
+        if(purify_b) :
+            pure_b=1
+
         nside=2
         while(12*nside*nside!=len(mask)) :
             nside*=2
@@ -55,9 +62,9 @@ class NmtField(object) :
             beam_use=beam
 
         if(templates==None) :
-            self.fl=lib.field_alloc_new_notemp(mask,maps,beam_use)
+            self.fl=lib.field_alloc_new_notemp(mask,maps,beam_use,pure_e,pure_b)
         else :
-            self.fl=lib.field_alloc_new(mask,maps,templates,beam_use)
+            self.fl=lib.field_alloc_new(mask,maps,templates,beam_use,pure_e,pure_b)
 
     def __del__(self) :
         lib.field_free(self.fl)
