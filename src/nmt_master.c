@@ -374,17 +374,23 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
   }
 
 #pragma omp parallel default(none)		\
-  shared(w,beam_prod)
+  shared(w,beam_prod,fl1,fl2)
   {
     int ll2,ll3;
-    double *wigner_00=NULL,*wigner_22=NULL;
+    double *wigner_00=NULL,*wigner_22=NULL,*wigner_12=NULL,*wigner_02;
     int lstart=0;
+    int pe1=fl1->pure_e,pe2=fl2->pure_e,pb1=fl1->pure_b,pb2=fl2->pure_b;
+    int pure_any=pe1 || pb1 || pe2 || pb2;
 
     if((w->ncls==1) || (w->ncls==2))
       wigner_00=my_malloc(2*(w->lmax+1)*sizeof(double));
     if((w->ncls==2) || (w->ncls==4))
       wigner_22=my_malloc(2*(w->lmax+1)*sizeof(double));
-   
+    if(pure_any) {
+      wigner_12=my_malloc(2*(w->lmax+1)*sizeof(double));
+      wigner_02=my_malloc(2*(w->lmax+1)*sizeof(double));
+    }
+
     if(w->ncls>1)
       lstart=2;
 
@@ -392,17 +398,41 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
     for(ll2=lstart;ll2<=w->lmax;ll2++) {
       for(ll3=lstart;ll3<=w->lmax;ll3++) {
 	int jj,l1,lmin_here,lmax_here;
+	flouble fac_12,fac_02;
 	int lmin_here_00=0,lmax_here_00=2*(w->lmax+1)+1;
 	int lmin_here_22=0,lmax_here_22=2*(w->lmax+1)+1;
+	int lmin_here_12=0,lmax_here_12=2*(w->lmax+1)+1;
+	int lmin_here_02=0,lmax_here_02=2*(w->lmax+1)+1;
 
 	if((w->ncls==1) || (w->ncls==2))
 	  drc3jj(ll2,ll3,0,0,&lmin_here_00,&lmax_here_00,wigner_00,2*(w->lmax+1));
 	if((w->ncls==2) || (w->ncls==4))
 	  drc3jj(ll2,ll3,2,-2,&lmin_here_22,&lmax_here_22,wigner_22,2*(w->lmax+1));
+	if(pure_any) {
+	  drc3jj(ll2,ll3,1,-2,&lmin_here_12,&lmax_here_12,wigner_12,2*(w->lmax+1));
+	  drc3jj(ll2,ll3,0, 2,&lmin_here_02,&lmax_here_02,wigner_02,2*(w->lmax+1));
+	}
 
 	lmin_here=NMT_MAX(lmin_here_00,lmin_here_22);
 	lmax_here=NMT_MIN(lmax_here_00,lmax_here_22);
-	  
+	if(pure_any) {
+	  lmin_here=NMT_MIN(lmin_here,lmin_here_12);
+	  lmin_here=NMT_MIN(lmin_here,lmin_here_02);
+	  lmax_here=NMT_MAX(lmax_here,lmax_here_12);
+	  lmax_here=NMT_MAX(lmax_here,lmax_here_02);
+	}
+
+	if(pure_any) {
+	  if(ll2>1) {
+	    fac_12=2*sqrt((ll3+1.)*(ll3+0.)/((ll2+2.)*(ll2-1.)));
+	    fac_02=sqrt((ll2+2.)*(ll2+1.)*(ll2+0.)*(ll2-1.)/((ll3+2.)*(ll3+1.)*(ll3+0.)*(ll3+1.)));
+	  }
+	  else {
+	    fac_12=0;
+	    fac_02=0;
+	  }
+	}
+
 	for(l1=lmin_here;l1<=lmax_here;l1++) {
 	  if(l1<=w->lmax) {
 	    double wfac;
@@ -413,24 +443,41 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
 	      w->coupling_matrix_unbinned[1*ll2+0][1*ll3+0]+=wfac; //TT,TT
 	    }
 	    if(w->ncls==2) {
-	      wfac=w->pcl_masks[l1]*wigner_00[j00]*wigner_22[j22];
+	      if(pure_any)
+		wfac=wigner_22[j22]+fac_12*wigner_12[j22]+fac_02*wigner_02[j22];
+	      else
+		wfac=wigner_22[j22];
+	      wfac*=w->pcl_masks[l1]*wigner_00[j00];
 	      w->coupling_matrix_unbinned[2*ll2+0][2*ll3+0]+=wfac; //TE,TE
 	      w->coupling_matrix_unbinned[2*ll2+1][2*ll3+1]+=wfac; //TB,TB
 	    }
 	    if(w->ncls==4) {
+	      double wfac_ispure[3];
 	      int suml=l1+ll2+ll3;
-	      wfac=w->pcl_masks[l1]*wigner_22[j22]*wigner_22[j22];
-	      if(suml & 1) { //Odd sum
-		w->coupling_matrix_unbinned[4*ll2+0][4*ll3+3]+=wfac; //EE,BB
-		w->coupling_matrix_unbinned[4*ll2+1][4*ll3+2]-=wfac; //EB,BE
-		w->coupling_matrix_unbinned[4*ll2+2][4*ll3+1]-=wfac; //BE,EB
-		w->coupling_matrix_unbinned[4*ll2+3][4*ll3+0]+=wfac; //BB,EE
+	      if(pure_any) {
+		wfac_ispure[0]=wigner_22[j22];
+		wfac_ispure[1]=wigner_22[j22]+fac_12*wigner_12[j22]+fac_02*wigner_02[j22];
+		wfac_ispure[2]=wfac_ispure[1]*wfac_ispure[1]*w->pcl_masks[l1];
+		wfac_ispure[1]*=wigner_22[j22]*w->pcl_masks[l1];
+		wfac_ispure[0]*=wigner_22[j22]*w->pcl_masks[l1];
 	      }
 	      else {
-		w->coupling_matrix_unbinned[4*ll2+0][4*ll3+0]+=wfac; //EE,EE
-		w->coupling_matrix_unbinned[4*ll2+1][4*ll3+1]+=wfac; //EB,EB
-		w->coupling_matrix_unbinned[4*ll2+2][4*ll3+2]+=wfac; //BE,BE
-		w->coupling_matrix_unbinned[4*ll2+3][4*ll3+3]+=wfac; //BB,BB
+		wfac_ispure[0]=wigner_22[j22]*wigner_22[j22]*w->pcl_masks[l1];
+		wfac_ispure[1]=wfac_ispure[0];
+		wfac_ispure[2]=wfac_ispure[0];
+	      }
+
+	      if(suml & 1) { //Odd sum
+		w->coupling_matrix_unbinned[4*ll2+0][4*ll3+3]+=wfac_ispure[pe1+pe2]; //EE,BB
+		w->coupling_matrix_unbinned[4*ll2+1][4*ll3+2]-=wfac_ispure[pe1+pb2]; //EB,BE
+		w->coupling_matrix_unbinned[4*ll2+2][4*ll3+1]-=wfac_ispure[pb1+pe2]; //BE,EB
+		w->coupling_matrix_unbinned[4*ll2+3][4*ll3+0]+=wfac_ispure[pb1+pb2]; //BB,EE
+	      }
+	      else {
+		w->coupling_matrix_unbinned[4*ll2+0][4*ll3+0]+=wfac_ispure[pe1+pe2]; //EE,EE
+		w->coupling_matrix_unbinned[4*ll2+1][4*ll3+1]+=wfac_ispure[pe1+pb2]; //EB,EB
+		w->coupling_matrix_unbinned[4*ll2+2][4*ll3+2]+=wfac_ispure[pb1+pe2]; //BE,BE
+		w->coupling_matrix_unbinned[4*ll2+3][4*ll3+3]+=wfac_ispure[pb1+pb2]; //BB,BB
 	      }
 	    }
 	  }
@@ -446,6 +493,10 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
       free(wigner_00);
     if((w->ncls==2) || (w->ncls==4))
       free(wigner_22);
+    if(pure_any) {
+      free(wigner_12);
+      free(wigner_02);
+    }
   } //end omp parallel
 
   bin_coupling_matrix(w);

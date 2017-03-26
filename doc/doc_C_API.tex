@@ -150,6 +150,10 @@ Options:
                for 2nd map(s) (optional)
   -pol      -> spin-0 (0) or spin-2 (1) input map(s)
   -pol_2    -> spin-0 (0) or spin-2 (1) 2nd input map(s)
+  -pure_e   -> use pure E-modes for 1st maps? (0-> no or 1-> yes (default->no))
+  -pure_b   -> use pure B-modes for 1st maps? (0-> no or 1-> yes (default->no))
+  -pure_e_2 -> use pure E-modes for 2nd maps? (0-> no or 1-> yes (default->no))
+  -pure_b_2 -> use pure B-modes for 2nd maps? (0-> no or 1-> yes (default->no))
   -cl_noise -> path to file containing noise Cl(s)
   -cl_guess -> path to file containing initial guess for the Cl(s)
   -coupling -> path to file containing coupling matrix (optional)
@@ -184,7 +188,7 @@ The definition of the fields to be correlated (including their masks and possibl
 
 \begin{funcdef}[nmt\_field\_alloc]
  {\functi{nmt\_field *}{nmt\_field\_alloc}
- {\vari{long}{ nside},\vari{double *}{mask},\vari{int}{ pol},\vari{double **}{maps},\\\vari{int}{ ntemp},\vari{double ***}{temp},\vari{double *}{beam}}}
+ {\vari{long}{ nside},\vari{double *}{mask},\vari{int}{ pol},\vari{double **}{maps},\\\vari{int}{ ntemp},\vari{double ***}{temp},\vari{double *}{beam},\vari{int }{pure\_e},\vari{int }{pure\_b}}}
  This is the constructor for {\tt nmt\_field}. The input variables are:
  \begin{itemize}[noitemsep]
    \item {\tt nside}: the HEALPix resolution of all maps involved
@@ -194,12 +198,13 @@ The definition of the fields to be correlated (including their masks and possibl
    \item {\tt ntemp}: number of contaminant templates for this field.
    \item {\tt temp}: contaminant templates as HEALPix maps. The first dimension should run through the different templates, the second dimension corresponds to the number of maps per template (e.g. 1 for spin-0 and 2 for spin-2) and the third dimension corresponds to the number of pixels.
    \item {\tt beam}: spherical harmonic transform of the instrumental beam (assumed to be rotationally symmetric - i.e. no $m$ dependence). If {\tt NULL}, no beam will be corrected for. Otherwise, this array should have $3\times{\tt nside}$ elements, corresponding to multipoles $\ell\in[0,3\,{\tt nside}-1]$.
+   \item {\tt pure\_e}, {\tt pure\_b}: set to a value different from 0 if you want to use pure-$E/B$ modes for this field. Note that, in this case you should make sure the mask and its first derivatives are continuous on its boundary (see {\tt nmt\_apodize\_mask} below).
  \end{itemize}
  \end{funcdef}
 
 \begin{funcdef}[nmt\_field\_read]
  {\functi{nmt\_field *}{nmt\_field\_read}
- {\vari{char *}{fname\_mask},\vari{char *}{fname\_maps},\vari{char *}{fname\_temp},\\\vari{char *}{fname\_beam},\vari{int }{pol}}}
+ {\vari{char *}{fname\_mask},\vari{char *}{fname\_maps},\vari{char *}{fname\_temp},\\\vari{char *}{fname\_beam},\vari{int }{pol},\vari{int }{pure\_e},\vari{int }{pure\_b}}}
  As {\tt nmt\_field\_alloc}, this returns a pointer to a {\tt nmt\_field} structure based on:
  \begin{itemize}[noitemsep]
    \item {\tt pol}: set to 0 if this is a spin-0 field. Set to 1 if it's a spin-2 field.
@@ -207,6 +212,7 @@ The definition of the fields to be correlated (including their masks and possibl
    \item {\tt fname\_maps}: file name pointing to a FITS file containing the maps of the observed field. This file should contain a single map for {\tt pol}=0 and two maps for {\tt pol}=1.
    \item {\tt fname\_temp}: file name pointing to a FITS file containing the contaminant templates as HEALPix maps. Each template should contain $N$ maps with $N=1$ for {\tt pol}=0 and $N=2$ for {\tt pol}=1. Pass ``none'' if no contaminants are needed (in which case deprojection and debiasing will not take place).
    \item {\tt fname\_beam}: file name pointing to an ASCII file containing the spherical harmonic transform of the instrumental beam (assumed to be rotationally symmetric - i.e. no $m$ dependence). If {\tt ``none''}, no beam will be corrected for. Otherwise, this file should contain two columns ($\ell$ and $b_\ell$) and $3\times{\tt nside}$ columns, corresponding to multipoles $\ell\in[0,3\,{\tt nside}-1]$.
+   \item {\tt pure\_e}, {\tt pure\_b}: set to a value different from 0 if you want to use pure-$E/B$ modes for this field. Note that, in this case you should make sure the mask and its first derivatives are continuous on its boundary (see {\tt nmt\_apodize\_mask} below).
  \end{itemize}
 \end{funcdef}
 
@@ -290,7 +296,7 @@ The implementation of the pseudo-$C_\ell$ estimator can be split into the follow
         \end{equation}
         When auto-correlating a field with noise, it is in general also desirable to remove the noise bias on the power spectrum. This has been included in Eq. \ref{eq:master_full} above as $\tilde{C}^{\rm noise}_\ell$. This should be the pseudo-$C_\ell$ of the noise component (i.e. the angular power spectrum of masked noise realizations), which can be computed from Monte-Carlo simulations (or analytically for sufficiently simple noise models).
 \end{enumerate}
-In NaMaster, these computations are carried out through a C structure called {\tt nmt\_workspace}. The relevant functions are described below.
+In NaMaster, these computations are carried out through a C structure called {\tt nmt\_workspace}. The relevant functions are described below. Once the pseudo-$C_\ell$ coupling matrix corresponding to two fields has been computed and stored in an {\tt nmt\_workspace}, the same workspace can be re-used to compute the pseudo-$C_\ell$ of any pair of fields as long as they have the same polarizations, masks and choices for $E$ and $B$ purification as the original fields.
 
 Note that the input and output power spectra are given as 2D arrays. The first dimension runs through $N_{\rm spec}$, the number of different cross-spectra:
 \begin{enumerate}

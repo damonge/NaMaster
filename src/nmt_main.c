@@ -173,6 +173,14 @@ int main(int argc,char **argv)
       sprintf(fname_temp_1,"%s",*++c);
     else if(!strcmp(*c,"-temp_2"))
       sprintf(fname_temp_2,"%s",*++c);
+    else if(!strcmp(*c,"-pure_e"))
+      pure_e_1=atoi(*++c);
+    else if(!strcmp(*c,"-pure_b"))
+      pure_b_1=atoi(*++c);
+    else if(!strcmp(*c,"-pure_e_2"))
+      pure_e_2=atoi(*++c);
+    else if(!strcmp(*c,"-pure_b_2"))
+      pure_b_2=atoi(*++c);
     else if(!strcmp(*c,"-pol"))
       pol_1=atoi(*++c);
     else if(!strcmp(*c,"-pol_2"))
@@ -226,6 +234,10 @@ int main(int argc,char **argv)
     fprintf(stderr,"               for 2nd map(s) (optional)\n");
     fprintf(stderr,"  -pol      -> spin-0 (0) or spin-2 (1) input map(s)\n");
     fprintf(stderr,"  -pol_2    -> spin-0 (0) or spin-2 (1) 2nd input map(s)\n");
+    fprintf(stderr,"  -pure_e   -> use pure E-modes for 1st maps? (0-> no or 1-> yes (default->no))\n");
+    fprintf(stderr,"  -pure_b   -> use pure B-modes for 1st maps? (0-> no or 1-> yes (default->no))\n");
+    fprintf(stderr,"  -pure_e_2 -> use pure E-modes for 2nd maps? (0-> no or 1-> yes (default->no))\n");
+    fprintf(stderr,"  -pure_b_2 -> use pure B-modes for 2nd maps? (0-> no or 1-> yes (default->no))\n");
     fprintf(stderr,"  -cl_noise -> path to file containing noise Cl(s)\n");
     fprintf(stderr,"  -cl_guess -> path to file containing initial guess for the Cl(s)\n");
     fprintf(stderr,"  -coupling -> path to file containing coupling matrix (optional)\n");

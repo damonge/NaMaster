@@ -156,8 +156,15 @@ nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
   if(pol) fl->nmaps=2;
   else fl->nmaps=1;
   fl->ntemp=ntemp;
-  fl->pure_e=pure_e;
-  fl->pure_b=pure_b;
+
+  fl->pure_e=0;
+  fl->pure_b=0;
+  if(pol) {
+    if(pure_e)
+      fl->pure_e=1;
+    if(pure_b)
+      fl->pure_b=1;
+  }
 
   fl->beam=my_malloc(3*fl->nside*sizeof(flouble));
   if(beam==NULL) {
