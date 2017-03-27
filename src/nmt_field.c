@@ -125,7 +125,7 @@ static void nmt_purify(nmt_field *fl)
   }
 
   for(imap=0;imap<fl->nmaps;imap++)
-    memcpy(fl->alms[imap],alm_out,he_nalms(fl->lmax)*sizeof(fcomplex));
+    memcpy(fl->alms[imap],alm_out[imap],he_nalms(fl->lmax)*sizeof(fcomplex));
   he_alm2map(fl->nside,fl->lmax,1,2,fl->maps,fl->alms);
 
   for(imap=0;imap<fl->nmaps;imap++) {
