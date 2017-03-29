@@ -398,7 +398,6 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
     for(ll2=lstart;ll2<=w->lmax;ll2++) {
       for(ll3=lstart;ll3<=w->lmax;ll3++) {
 	int jj,l1,lmin_here,lmax_here;
-	flouble fac_12,fac_02;
 	int lmin_here_00=0,lmax_here_00=2*(w->lmax+1)+1;
 	int lmin_here_22=0,lmax_here_22=2*(w->lmax+1)+1;
 	int lmin_here_12=0,lmax_here_12=2*(w->lmax+1)+1;
@@ -410,9 +409,9 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
 	  drc3jj(ll2,ll3,2,-2,&lmin_here_22,&lmax_here_22,wigner_22,2*(w->lmax+1));
 	if(pure_any) {
 	  drc3jj(ll2,ll3,1,-2,&lmin_here_12,&lmax_here_12,wigner_12,2*(w->lmax+1));
-	  drc3jj(ll2,ll3,0, 2,&lmin_here_02,&lmax_here_02,wigner_02,2*(w->lmax+1));
+	  drc3jj(ll2,ll3,0,-2,&lmin_here_02,&lmax_here_02,wigner_02,2*(w->lmax+1));
 	}
-
+	
 	lmin_here=NMT_MAX(lmin_here_00,lmin_here_22);
 	lmax_here=NMT_MIN(lmax_here_00,lmax_here_22);
 	if(pure_any) {
@@ -421,30 +420,42 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
 	  lmax_here=NMT_MAX(lmax_here,lmax_here_12);
 	  lmax_here=NMT_MAX(lmax_here,lmax_here_02);
 	}
-
-	if(pure_any) {
-	  if(ll2>1) {
-	    fac_12=2*sqrt((ll3+1.)*(ll3+0.)/((ll2+2.)*(ll2-1.)));
-	    fac_02=sqrt((ll2+2.)*(ll2+1.)*(ll2+0.)*(ll2-1.)/((ll3+2.)*(ll3+1.)*(ll3+0.)*(ll3+1.)));
-	  }
-	  else {
-	    fac_12=0;
-	    fac_02=0;
-	  }
-	}
+	//All lines regarding lmax are in principle unnecessary, since lmax is just l3+l2
 
 	for(l1=lmin_here;l1<=lmax_here;l1++) {
 	  if(l1<=w->lmax) {
-	    double wfac;
+	    flouble wfac,fac_12,fac_02;
+	    int j02,j12;
 	    int j00=l1-lmin_here_00;
 	    int j22=l1-lmin_here_22;
+	    if(pure_any) {
+	      j12=l1-lmin_here_12;
+	      j02=l1-lmin_here_02;
+	      if(l1>1) {
+		fac_12=2*sqrt((ll2+1.)*(ll2+0.)/((l1+2.)*(l1-1.)));
+		fac_02=sqrt((l1+2.)*(l1+1.)*(l1+0.)*(l1-1.)/((ll2+2.)*(ll2+1.)*(ll2+0.)*(ll2+1.)));
+	      }
+	      else {
+		fac_12=0;
+		fac_02=0;
+	      }
+	      if(j12<0) { //If out of range, w12 is just 0
+		fac_12=0;
+		j12=0;
+	      }
+	      if(j02<0) { //if out of range, w02 is just 0
+		fac_02=0;
+		j02=0;
+	      }
+	    }
+
 	    if(w->ncls==1) {
 	      wfac=w->pcl_masks[l1]*wigner_00[j00]*wigner_00[j00];
 	      w->coupling_matrix_unbinned[1*ll2+0][1*ll3+0]+=wfac; //TT,TT
 	    }
 	    if(w->ncls==2) {
 	      if(pure_any)
-		wfac=wigner_22[j22]+fac_12*wigner_12[j22]+fac_02*wigner_02[j22];
+		wfac=wigner_22[j22]+fac_12*wigner_12[j12]+fac_02*wigner_02[j02];
 	      else
 		wfac=wigner_22[j22];
 	      wfac*=w->pcl_masks[l1]*wigner_00[j00];
@@ -456,7 +467,7 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
 	      int suml=l1+ll2+ll3;
 	      if(pure_any) {
 		wfac_ispure[0]=wigner_22[j22];
-		wfac_ispure[1]=wigner_22[j22]+fac_12*wigner_12[j22]+fac_02*wigner_02[j22];
+		wfac_ispure[1]=wigner_22[j22]+fac_12*wigner_12[j12]+fac_02*wigner_02[j02];
 		wfac_ispure[2]=wfac_ispure[1]*wfac_ispure[1]*w->pcl_masks[l1];
 		wfac_ispure[1]*=wigner_22[j22]*w->pcl_masks[l1];
 		wfac_ispure[0]*=wigner_22[j22]*w->pcl_masks[l1];
