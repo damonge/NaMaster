@@ -52,7 +52,10 @@ static void nmt_purify(nmt_field *fl)
     purify[1]=1;
 
   //Compute mask SHT (store in walm)
-  he_map2alm(fl->nside,fl->lmax,1,0,&(fl->mask),walm  ,HE_NITER_DEFAULT);
+  he_map2alm(fl->nside,fl->lmax,1,0,&(fl->mask),walm  ,10);
+
+  //  he_alm2map(fl->nside,fl->lmax,1,0,&(fl->mask),walm);
+  //  he_write_healpix_map(&(fl->mask),1,fl->nside,"!mask0.fits");
 
   //Product with spin-0 mask
   for(imap=0;imap<fl->nmaps;imap++) {
@@ -64,9 +67,10 @@ static void nmt_purify(nmt_field *fl)
 
   //Compute spin-1 mask
   for(ll=0;ll<=fl->lmax;ll++)
-    f_l[ll]=sqrt((ll+1.)*ll);
+    f_l[ll]=-sqrt((ll+1.)*ll);
   he_alter_alm(fl->lmax,-1.,walm[0],walm[0],f_l); //TODO: There may be a -1 sign here
   he_alm2map(fl->nside,fl->lmax,1,1,wmap,walm);
+  //  he_write_healpix_map(wmap,2,fl->nside,"!mask1.fits");
   //Product with spin-1 mask
   for(ip=0;ip<fl->npix;ip++) {
     pmap[0][ip]=wmap[0][ip]*pmap0[0][ip]+wmap[1][ip]*pmap0[1][ip];
@@ -94,19 +98,21 @@ static void nmt_purify(nmt_field *fl)
   //Compute spin-2 mask
   for(ll=0;ll<=fl->lmax;ll++) {
     if(ll>1)
-      f_l[ll]=sqrt((ll+2.)*(ll-1.));
+      f_l[ll]=-sqrt((ll+2.)*(ll-1.));
     else
       f_l[ll]=0;
   }
   he_alter_alm(fl->lmax,-1.,walm[0],walm[0],f_l); //TODO: There may be a -1 sign here
   he_alm2map(fl->nside,fl->lmax,1,2,wmap,walm);
+  //  he_write_healpix_map(wmap,2,fl->nside,"!mask2.fits");
   //Product with spin-2 mask
   for(ip=0;ip<fl->npix;ip++) {
     pmap[0][ip]=wmap[0][ip]*pmap0[0][ip]+wmap[1][ip]*pmap0[1][ip];
     pmap[1][ip]=wmap[0][ip]*pmap0[1][ip]-wmap[1][ip]*pmap0[0][ip];
   }
   //Compute SHT, multiply by 2*sqrt((l+1)!(l-2)!/((l-1)!(l+2)!)) and add to alm_out
-  he_map2alm(fl->nside,fl->lmax,1,2,pmap       ,palm  ,HE_NITER_DEFAULT);
+  he_map2alm(fl->nside,fl->lmax,1,0,&(pmap[0]),&(palm[0]),HE_NITER_DEFAULT);
+  he_map2alm(fl->nside,fl->lmax,1,0,&(pmap[1]),&(palm[1]),HE_NITER_DEFAULT);
   for(ll=0;ll<=fl->lmax;ll++) {
     if(ll>1)
       f_l[ll]=1./sqrt((ll+2.)*(ll+1.)*ll*(ll-1.));
@@ -181,7 +187,6 @@ nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
   for(ii=0;ii<fl->nmaps;ii++) {
     fl->maps[ii]=my_malloc(fl->npix*sizeof(flouble));
     memcpy(fl->maps[ii],maps[ii],fl->npix*sizeof(flouble));
-    he_map_product(fl->nside,fl->maps[ii],fl->mask,fl->maps[ii]);
   }
 
   if(fl->ntemp>0) {

@@ -431,9 +431,12 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
 	    if(pure_any) {
 	      j12=l1-lmin_here_12;
 	      j02=l1-lmin_here_02;
-	      if(l1>1) {
-		fac_12=2*sqrt((ll2+1.)*(ll2+0.)/((l1+2.)*(l1-1.)));
-		fac_02=sqrt((l1+2.)*(l1+1.)*(l1+0.)*(l1-1.)/((ll2+2.)*(ll2+1.)*(ll2+0.)*(ll2+1.)));
+	      if(ll2>1.) {
+		fac_12=2*sqrt((l1+1.)*(l1+0.)/((ll2+2)*(ll2-1.)));
+		if(l1>1.)
+		  fac_02=sqrt((l1+2.)*(l1+1.)*(l1+0.)*(l1-1.)/((ll2+2.)*(ll2+1.)*(ll2+0.)*(ll2-1.)));
+		else
+		  fac_02=0;
 	      }
 	      else {
 		fac_12=0;
