@@ -369,14 +369,9 @@ static void apodize_mask_CX(long nside,flouble *mask_in,flouble *mask_out,floubl
       flouble *v=vec+3*ip;
       he_pix2vec_ring(nside,ip,v);
       cthv[ip]=v[2];
-      if(v[2]==0)
-	phiv[ip]=0;
-      else {
-	if(v[0]==0 && v[1]==0)
-	  phiv[ip]=0;
-	else
-	  phiv[ip]=atan2(v[1],v[0]);
-      }
+      phiv[ip]=atan2(v[1],v[0]);
+      if(phiv[ip]<0)
+	phiv[ip]+=2*M_PI;
     } //end omp for
   }//end omp parallel
 
@@ -431,51 +426,33 @@ static void apodize_mask_smooth(long nside,flouble *mask_in,flouble *mask_out,fl
 {
   long ip,npix=he_nside2npix(nside);
   double aporad=aposize*M_PI/180;
-  flouble *vec=my_malloc(3*npix*sizeof(flouble));
-  flouble *cthv=my_malloc(npix*sizeof(flouble));
-  flouble *phiv=my_malloc(npix*sizeof(flouble));
   flouble *mask_dum=my_malloc(npix*sizeof(flouble));
   fcomplex *alms_dum=my_malloc(he_nalms(3*nside-1)*sizeof(fcomplex));
   memcpy(mask_dum,mask_in,npix*sizeof(flouble));
 
-  //Get coords for each pixel
 #pragma omp parallel default(none)		\
-  shared(vec,npix,nside,cthv,phiv)
+  shared(npix,mask_in,mask_dum,nside,aporad)
   {
     long ip;
-#pragma omp for
-    for(ip=0;ip<npix;ip++) {
-      flouble *v=vec+3*ip;
-      he_pix2vec_ring(nside,ip,v);
-      cthv[ip]=v[2];
-      if(v[2]==0)
-	phiv[ip]=0;
-      else {
-	if(v[0]==0 && v[1]==0)
-	  phiv[ip]=0;
-	else
-	  phiv[ip]=atan2(v[1],v[0]);
-      }
-    } //end omp for
-  }//end omp parallel
-
-#pragma omp parallel default(none)	\
-  shared(vec,npix,mask_in,mask_dum)	\
-  shared(nside,cthv,phiv,aporad)
-  {
-    long ip;
-    int lenlist0=(int)(2*npix*(1-cos(2.5*aporad)));
+    int lenlist0=(int)(4*npix*(1-cos(2.5*aporad)));
     int *listpix=my_malloc(lenlist0*sizeof(int));
 
 #pragma omp for schedule(dynamic)
     for(ip=0;ip<npix;ip++) {
       if(mask_in[ip]<=0) {
 	int j;
+	flouble v[3],cthv,phiv;
 	int lenlist_half=lenlist0/2;
-	he_query_disc(nside,cthv[ip],phiv[ip],2.5*aporad,listpix,&lenlist_half,1);
+	he_pix2vec_ring(nside,ip,v);
+	cthv=v[2];
+	phiv=atan2(v[1],v[0]);
+	if(phiv<0)
+	  phiv+=2*M_PI;
+	he_query_disc(nside,cthv,phiv,2.5*aporad,listpix,&lenlist_half,1);
 	for(j=0;j<lenlist_half;j++) {
 	  int ip2=listpix[j];
-	  mask_dum[ip2]=0;
+#pragma omp atomic
+	  mask_dum[ip2]*=0;
 	}
       }
     } //end omp for
@@ -487,9 +464,6 @@ static void apodize_mask_smooth(long nside,flouble *mask_in,flouble *mask_out,fl
   he_alm2map(nside,3*nside-1,1,0,&mask_dum,&alms_dum);
   he_map_product(nside,mask_in,mask_dum,mask_out);
 
-  free(vec);
-  free(cthv);
-  free(phiv);
   free(mask_dum);
   free(alms_dum);
 }
