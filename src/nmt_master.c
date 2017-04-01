@@ -374,17 +374,23 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
   }
 
 #pragma omp parallel default(none)		\
-  shared(w,beam_prod)
+  shared(w,beam_prod,fl1,fl2)
   {
     int ll2,ll3;
-    double *wigner_00=NULL,*wigner_22=NULL;
+    double *wigner_00=NULL,*wigner_22=NULL,*wigner_12=NULL,*wigner_02;
     int lstart=0;
+    int pe1=fl1->pure_e,pe2=fl2->pure_e,pb1=fl1->pure_b,pb2=fl2->pure_b;
+    int pure_any=pe1 || pb1 || pe2 || pb2;
 
     if((w->ncls==1) || (w->ncls==2))
       wigner_00=my_malloc(2*(w->lmax+1)*sizeof(double));
     if((w->ncls==2) || (w->ncls==4))
       wigner_22=my_malloc(2*(w->lmax+1)*sizeof(double));
-   
+    if(pure_any) {
+      wigner_12=my_malloc(2*(w->lmax+1)*sizeof(double));
+      wigner_02=my_malloc(2*(w->lmax+1)*sizeof(double));
+    }
+
     if(w->ncls>1)
       lstart=2;
 
@@ -394,43 +400,98 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
 	int jj,l1,lmin_here,lmax_here;
 	int lmin_here_00=0,lmax_here_00=2*(w->lmax+1)+1;
 	int lmin_here_22=0,lmax_here_22=2*(w->lmax+1)+1;
+	int lmin_here_12=0,lmax_here_12=2*(w->lmax+1)+1;
+	int lmin_here_02=0,lmax_here_02=2*(w->lmax+1)+1;
 
 	if((w->ncls==1) || (w->ncls==2))
 	  drc3jj(ll2,ll3,0,0,&lmin_here_00,&lmax_here_00,wigner_00,2*(w->lmax+1));
 	if((w->ncls==2) || (w->ncls==4))
 	  drc3jj(ll2,ll3,2,-2,&lmin_here_22,&lmax_here_22,wigner_22,2*(w->lmax+1));
-
+	if(pure_any) {
+	  drc3jj(ll2,ll3,1,-2,&lmin_here_12,&lmax_here_12,wigner_12,2*(w->lmax+1));
+	  drc3jj(ll2,ll3,0,-2,&lmin_here_02,&lmax_here_02,wigner_02,2*(w->lmax+1));
+	}
+	
 	lmin_here=NMT_MAX(lmin_here_00,lmin_here_22);
 	lmax_here=NMT_MIN(lmax_here_00,lmax_here_22);
-	  
+	if(pure_any) {
+	  lmin_here=NMT_MIN(lmin_here,lmin_here_12);
+	  lmin_here=NMT_MIN(lmin_here,lmin_here_02);
+	  lmax_here=NMT_MAX(lmax_here,lmax_here_12);
+	  lmax_here=NMT_MAX(lmax_here,lmax_here_02);
+	}
+	//All lines regarding lmax are in principle unnecessary, since lmax is just l3+l2
+
 	for(l1=lmin_here;l1<=lmax_here;l1++) {
 	  if(l1<=w->lmax) {
-	    double wfac;
+	    flouble wfac,fac_12,fac_02;
+	    int j02,j12;
 	    int j00=l1-lmin_here_00;
 	    int j22=l1-lmin_here_22;
+	    if(pure_any) {
+	      j12=l1-lmin_here_12;
+	      j02=l1-lmin_here_02;
+	      if(ll2>1.) {
+		fac_12=2*sqrt((l1+1.)*(l1+0.)/((ll2+2)*(ll2-1.)));
+		if(l1>1.)
+		  fac_02=sqrt((l1+2.)*(l1+1.)*(l1+0.)*(l1-1.)/((ll2+2.)*(ll2+1.)*(ll2+0.)*(ll2-1.)));
+		else
+		  fac_02=0;
+	      }
+	      else {
+		fac_12=0;
+		fac_02=0;
+	      }
+	      if(j12<0) { //If out of range, w12 is just 0
+		fac_12=0;
+		j12=0;
+	      }
+	      if(j02<0) { //if out of range, w02 is just 0
+		fac_02=0;
+		j02=0;
+	      }
+	    }
+
 	    if(w->ncls==1) {
 	      wfac=w->pcl_masks[l1]*wigner_00[j00]*wigner_00[j00];
 	      w->coupling_matrix_unbinned[1*ll2+0][1*ll3+0]+=wfac; //TT,TT
 	    }
 	    if(w->ncls==2) {
-	      wfac=w->pcl_masks[l1]*wigner_00[j00]*wigner_22[j22];
+	      if(pure_any)
+		wfac=wigner_22[j22]+fac_12*wigner_12[j12]+fac_02*wigner_02[j02];
+	      else
+		wfac=wigner_22[j22];
+	      wfac*=w->pcl_masks[l1]*wigner_00[j00];
 	      w->coupling_matrix_unbinned[2*ll2+0][2*ll3+0]+=wfac; //TE,TE
 	      w->coupling_matrix_unbinned[2*ll2+1][2*ll3+1]+=wfac; //TB,TB
 	    }
 	    if(w->ncls==4) {
+	      double wfac_ispure[3];
 	      int suml=l1+ll2+ll3;
-	      wfac=w->pcl_masks[l1]*wigner_22[j22]*wigner_22[j22];
-	      if(suml & 1) { //Odd sum
-		w->coupling_matrix_unbinned[4*ll2+0][4*ll3+3]+=wfac; //EE,BB
-		w->coupling_matrix_unbinned[4*ll2+1][4*ll3+2]-=wfac; //EB,BE
-		w->coupling_matrix_unbinned[4*ll2+2][4*ll3+1]-=wfac; //BE,EB
-		w->coupling_matrix_unbinned[4*ll2+3][4*ll3+0]+=wfac; //BB,EE
+	      if(pure_any) {
+		wfac_ispure[0]=wigner_22[j22];
+		wfac_ispure[1]=wigner_22[j22]+fac_12*wigner_12[j12]+fac_02*wigner_02[j02];
+		wfac_ispure[2]=wfac_ispure[1]*wfac_ispure[1]*w->pcl_masks[l1];
+		wfac_ispure[1]*=wigner_22[j22]*w->pcl_masks[l1];
+		wfac_ispure[0]*=wigner_22[j22]*w->pcl_masks[l1];
 	      }
 	      else {
-		w->coupling_matrix_unbinned[4*ll2+0][4*ll3+0]+=wfac; //EE,EE
-		w->coupling_matrix_unbinned[4*ll2+1][4*ll3+1]+=wfac; //EB,EB
-		w->coupling_matrix_unbinned[4*ll2+2][4*ll3+2]+=wfac; //BE,BE
-		w->coupling_matrix_unbinned[4*ll2+3][4*ll3+3]+=wfac; //BB,BB
+		wfac_ispure[0]=wigner_22[j22]*wigner_22[j22]*w->pcl_masks[l1];
+		wfac_ispure[1]=wfac_ispure[0];
+		wfac_ispure[2]=wfac_ispure[0];
+	      }
+
+	      if(suml & 1) { //Odd sum
+		w->coupling_matrix_unbinned[4*ll2+0][4*ll3+3]+=wfac_ispure[pe1+pe2]; //EE,BB
+		w->coupling_matrix_unbinned[4*ll2+1][4*ll3+2]-=wfac_ispure[pe1+pb2]; //EB,BE
+		w->coupling_matrix_unbinned[4*ll2+2][4*ll3+1]-=wfac_ispure[pb1+pe2]; //BE,EB
+		w->coupling_matrix_unbinned[4*ll2+3][4*ll3+0]+=wfac_ispure[pb1+pb2]; //BB,EE
+	      }
+	      else {
+		w->coupling_matrix_unbinned[4*ll2+0][4*ll3+0]+=wfac_ispure[pe1+pe2]; //EE,EE
+		w->coupling_matrix_unbinned[4*ll2+1][4*ll3+1]+=wfac_ispure[pe1+pb2]; //EB,EB
+		w->coupling_matrix_unbinned[4*ll2+2][4*ll3+2]+=wfac_ispure[pb1+pe2]; //BE,BE
+		w->coupling_matrix_unbinned[4*ll2+3][4*ll3+3]+=wfac_ispure[pb1+pb2]; //BB,BB
 	      }
 	    }
 	  }
@@ -446,6 +507,10 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
       free(wigner_00);
     if((w->ncls==2) || (w->ncls==4))
       free(wigner_22);
+    if(pure_any) {
+      free(wigner_12);
+      free(wigner_02);
+    }
   } //end omp parallel
 
   bin_coupling_matrix(w);
@@ -496,19 +561,19 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
 	for(im2=0;im2<fl2->nmaps;im2++)
 	  he_map_product(fl2->nside,fl2->temp[itj][im2],fl2->mask,map_2_dum[im2]);
 	//SHT[w*g^j]
-	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
+	he_map2alm(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
 	//C^ab*SHT[w*g^j]
 	for(im1=0;im1<fl1->nmaps;im1++) {
 	  for(im2=0;im2<fl2->nmaps;im2++)
 	    he_alter_alm(lmax,-1.,alm_2_dum[im2],alm_1_dum[im1],cl_proposal[im1*fl2->nmaps+im2]);
 	}
 	//SHT^-1[C^ab*SHT[w*g^j]]
-	he_alm2map(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum);
+	he_alm2map(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum);
 	//v*SHT^-1[C^ab*SHT[w*g^j]]
 	for(im1=0;im1<fl1->nmaps;im1++)
 	  he_map_product(fl1->nside,map_1_dum[im1],fl1->mask,map_1_dum[im1]);
 	//SHT[v*SHT^-1[C^ab*SHT[w*g^j]]]
-	he_map2alm(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
+	he_map2alm(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
 	//Sum_m(SHT[v*SHT^-1[C^ab*SHT[w*g^j]]]*g^i*)/(2l+1)
 	he_alm2cl(alm_1_dum,fl2->a_temp[iti],fl1->pol,fl1->pol,cl_dum,lmax);
 	for(im1=0;im1<nspec;im1++) {
@@ -530,19 +595,19 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
 	for(im1=0;im1<fl1->nmaps;im1++)
 	  he_map_product(fl1->nside,fl1->temp[itj][im1],fl1->mask,map_1_dum[im1]);
 	//SHT[v*f^j]
-	he_map2alm(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
+	he_map2alm(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
 	//C^abT*SHT[v*f^j]
 	for(im2=0;im2<fl2->nmaps;im2++) {
 	  for(im1=0;im1<fl1->nmaps;im1++)
 	    he_alter_alm(lmax,-1.,alm_1_dum[im1],alm_2_dum[im2],cl_proposal[im1*fl2->nmaps+im2]);
 	}
 	//SHT^-1[C^abT*SHT[v*f^j]]
-	he_alm2map(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum);
+	he_alm2map(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum);
 	//w*SHT^-1[C^abT*SHT[v*f^j]]
 	for(im2=0;im2<fl2->nmaps;im2++)
 	  he_map_product(fl2->nside,map_2_dum[im2],fl2->mask,map_2_dum[im2]);
 	//SHT[w*SHT^-1[C^abT*SHT[v*f^j]]]
-	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
+	he_map2alm(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
 	//Sum_m(f^i*SHT[w*SHT^-1[C^abT*SHT[v*f^j]]]^*)/(2l+1)
 	he_alm2cl(fl1->a_temp[iti],alm_2_dum,fl1->pol,fl2->pol,cl_dum,lmax);
 	for(im1=0;im1<nspec;im1++) {
@@ -562,14 +627,14 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
 	for(im2=0;im2<fl2->nmaps;im2++)
 	  he_map_product(fl2->nside,fl2->temp[itq][im2],fl2->mask,map_2_dum[im2]);
 	//SHT[w*g^q]
-	he_map2alm(fl2->nside,fl2->lmax,1,fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
+	he_map2alm(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
 	//C^ab*SHT[w*g^q]
 	for(im1=0;im1<fl1->nmaps;im1++) {
 	  for(im2=0;im2<fl2->nmaps;im2++)
 	    he_alter_alm(lmax,-1.,alm_2_dum[im2],alm_1_dum[im1],cl_proposal[im1*fl2->nmaps+im2]);
 	}
 	//SHT^-1[C^ab*SHT[w*g^q]]
-	he_alm2map(fl1->nside,fl1->lmax,1,fl1->pol,map_1_dum,alm_1_dum);
+	he_alm2map(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum);
 	for(im1=0;im1<fl1->nmaps;im1++) {
 	  //v*SHT^-1[C^ab*SHT[w*g^q]]
 	  he_map_product(fl1->nside,map_1_dum[im1],fl1->mask,map_1_dum[im1]);
@@ -667,7 +732,7 @@ void nmt_decouple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_noise_in,
 
 void nmt_compute_coupled_cell(nmt_field *fl1,nmt_field *fl2,flouble **cl_out,int iter)
 {
-  he_anafast(fl1->maps,fl2->maps,fl1->pol,fl2->pol,cl_out,fl1->nside,fl1->lmax,iter);
+  he_alm2cl(fl1->alms,fl2->alms,fl1->pol,fl2->pol,cl_out,fl1->lmax);
 }
 
 nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,

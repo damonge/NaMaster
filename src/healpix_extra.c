@@ -52,13 +52,11 @@ static void sht_wrapper(int spin,int lmax,int nside,int ntrans,flouble **maps,fc
   sharp_destroy_alm_info(alm_info);
 }
 
-void he_alm2map(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms)
+void he_alm2map(int nside,int lmax,int ntrans,int spin,flouble **maps,fcomplex **alms)
 {
-  int nbatches,nodd,itrans,nmaps=1,spin=0;
-  if(pol) {
+  int nbatches,nodd,itrans,nmaps=1;
+  if(spin)
     nmaps=2;
-    spin=2;
-  }
   nbatches=ntrans/MAX_SHT;
   nodd=ntrans%MAX_SHT;
 
@@ -72,13 +70,11 @@ void he_alm2map(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **
   }
 }
 
-void he_map2alm(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms,int niter)
+void he_map2alm(int nside,int lmax,int ntrans,int spin,flouble **maps,fcomplex **alms,int niter)
 {
-  int nbatches,nodd,itrans,nmaps=1,spin=0;
-  if(pol) {
+  int nbatches,nodd,itrans,nmaps=1;
+  if(spin)
     nmaps=2;
-    spin=2;
-  }
   nbatches=ntrans/MAX_SHT;
   nodd=ntrans%MAX_SHT;
 
@@ -193,7 +189,7 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
   alms_1=my_malloc(nmaps_1*sizeof(fcomplex *));
   for(i1=0;i1<nmaps_1;i1++)
     alms_1[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
-  he_map2alm(nside,lmax,1,pol_1,maps_1,alms_1,iter);
+  he_map2alm(nside,lmax,1,2*pol_1,maps_1,alms_1,iter);
 
   if(maps_1==maps_2)
     alms_2=alms_1;
@@ -201,7 +197,7 @@ void he_anafast(flouble **maps_1,flouble **maps_2,
     alms_2=my_malloc(nmaps_2*sizeof(fcomplex *));
     for(i1=0;i1<nmaps_2;i1++)
       alms_2[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
-    he_map2alm(nside,lmax,1,pol_2,maps_2,alms_2,iter);
+    he_map2alm(nside,lmax,1,2*pol_2,maps_2,alms_2,iter);
   }
 
   he_alm2cl(alms_1,alms_2,pol_1,pol_2,cls,lmax);

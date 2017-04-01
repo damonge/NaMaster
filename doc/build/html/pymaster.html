@@ -287,7 +287,7 @@
 
 <dl class="class">
 <dt id="pymaster.NmtField">
-<em class="property">class </em><code class="descclassname">pymaster.</code><code class="descname">NmtField</code><span class="sig-paren">(</span><em>mask</em>, <em>maps</em>, <em>templates=None</em>, <em>beam=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.NmtField" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pymaster.</code><code class="descname">NmtField</code><span class="sig-paren">(</span><em>mask</em>, <em>maps</em>, <em>templates=None</em>, <em>beam=None</em>, <em>purify_e=False</em>, <em>purify_b=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.NmtField" title="Permalink to this definition">¶</a></dt>
 <dd><p>An NmtField object contains all the information describing the fields to correlate, including their observed maps, masks and contaminant templates.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -298,6 +298,8 @@
 <li><strong>maps</strong> &#8211; 2D array containing the observed maps for this field. The first dimension corresponds to the number of maps, which should be 1 for a spin-0 field and 2 for a spin-2 field.</li>
 <li><strong>templates</strong> &#8211; 3D array containing a set of contaminant templates for this field. This array should have shape [ntemp][nmap][npix], where ntemp is the number of templates, nmap should be 1 for spin-0 fields and 2 for spin-2 fields, and npix is the number of pixels per map. The best-fit contribution from each contaminant is automatically removed from the maps unless templates=None</li>
 <li><strong>beam</strong> &#8211; spherical harmonic transform of the instrumental beam (assumed to be rotationally symmetric - i.e. no m dependence). If None, no beam will be corrected for. Otherwise, this array should have 3*nside elements, corresponding to multipoles from 0 to 3*nside-1.</li>
+<li><strong>purify_e</strong> &#8211; use pure E-modes?</li>
+<li><strong>purify_b</strong> &#8211; use pure B-modes?</li>
 </ul>
 </td>
 </tr>

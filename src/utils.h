@@ -18,8 +18,8 @@ void he_pix2vec_ring(long nside, long ipix, double *vec);
 long he_ang2pix(long nside,double cth,double phi);
 long he_nalms(int lmax);
 long he_indexlm(int l,int m,int lmax);
-void he_alm2map(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms);
-void he_map2alm(int nside,int lmax,int ntrans,int pol,flouble **maps,fcomplex **alms,int niter);
+void he_alm2map(int nside,int lmax,int ntrans,int spin,flouble **maps,fcomplex **alms);
+void he_map2alm(int nside,int lmax,int ntrans,int spin,flouble **maps,fcomplex **alms,int niter);
 void he_alm2cl(fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls,int lmax);
 void he_anafast(flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls,
 		int nside,int lmax,int iter);
