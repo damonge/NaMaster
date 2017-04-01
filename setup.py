@@ -22,7 +22,8 @@ else :
 
 
 _nmtlib = Extension("_nmtlib",
-                    ["pymaster/namaster.i"],
+#                    ["pymaster/namaster.i"],
+                    ["pymaster/namaster_wrap.c"],
                     libraries = libs,
                     include_dirs = [numpy_include, "../src/"],
                     extra_compile_args=extra,
