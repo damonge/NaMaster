@@ -124,6 +124,39 @@ unbin_cls = _nmtlib.unbin_cls
 def ell_eff(*args):
   return _nmtlib.ell_eff(*args)
 ell_eff = _nmtlib.ell_eff
+class flatsky_info(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, flatsky_info, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, flatsky_info, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["nx"] = _nmtlib.flatsky_info_nx_set
+    __swig_getmethods__["nx"] = _nmtlib.flatsky_info_nx_get
+    if _newclass:nx = _swig_property(_nmtlib.flatsky_info_nx_get, _nmtlib.flatsky_info_nx_set)
+    __swig_setmethods__["ny"] = _nmtlib.flatsky_info_ny_set
+    __swig_getmethods__["ny"] = _nmtlib.flatsky_info_ny_get
+    if _newclass:ny = _swig_property(_nmtlib.flatsky_info_ny_get, _nmtlib.flatsky_info_ny_set)
+    __swig_setmethods__["npix"] = _nmtlib.flatsky_info_npix_set
+    __swig_getmethods__["npix"] = _nmtlib.flatsky_info_npix_get
+    if _newclass:npix = _swig_property(_nmtlib.flatsky_info_npix_get, _nmtlib.flatsky_info_npix_set)
+    __swig_setmethods__["lx"] = _nmtlib.flatsky_info_lx_set
+    __swig_getmethods__["lx"] = _nmtlib.flatsky_info_lx_get
+    if _newclass:lx = _swig_property(_nmtlib.flatsky_info_lx_get, _nmtlib.flatsky_info_lx_set)
+    __swig_setmethods__["ly"] = _nmtlib.flatsky_info_ly_set
+    __swig_getmethods__["ly"] = _nmtlib.flatsky_info_ly_get
+    if _newclass:ly = _swig_property(_nmtlib.flatsky_info_ly_get, _nmtlib.flatsky_info_ly_set)
+    __swig_setmethods__["pixsize"] = _nmtlib.flatsky_info_pixsize_set
+    __swig_getmethods__["pixsize"] = _nmtlib.flatsky_info_pixsize_get
+    if _newclass:pixsize = _swig_property(_nmtlib.flatsky_info_pixsize_get, _nmtlib.flatsky_info_pixsize_set)
+    def __init__(self): 
+        this = _nmtlib.new_flatsky_info()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _nmtlib.delete_flatsky_info
+    __del__ = lambda self : None;
+flatsky_info_swigregister = _nmtlib.flatsky_info_swigregister
+flatsky_info_swigregister(flatsky_info)
+
 class field(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, field, name, value)
@@ -175,6 +208,12 @@ class field(_object):
     __swig_setmethods__["beam"] = _nmtlib.field_beam_set
     __swig_getmethods__["beam"] = _nmtlib.field_beam_get
     if _newclass:beam = _swig_property(_nmtlib.field_beam_get, _nmtlib.field_beam_set)
+    __swig_setmethods__["is_flatsky"] = _nmtlib.field_is_flatsky_set
+    __swig_getmethods__["is_flatsky"] = _nmtlib.field_is_flatsky_get
+    if _newclass:is_flatsky = _swig_property(_nmtlib.field_is_flatsky_get, _nmtlib.field_is_flatsky_set)
+    __swig_setmethods__["fs"] = _nmtlib.field_fs_set
+    __swig_getmethods__["fs"] = _nmtlib.field_fs_get
+    if _newclass:fs = _swig_property(_nmtlib.field_fs_get, _nmtlib.field_fs_set)
     def __init__(self): 
         this = _nmtlib.new_field()
         try: self.this.append(this)
@@ -185,13 +224,21 @@ field_swigregister = _nmtlib.field_swigregister
 field_swigregister(field)
 
 
+def flatsky_info_free(*args):
+  return _nmtlib.flatsky_info_free(*args)
+flatsky_info_free = _nmtlib.flatsky_info_free
+
+def flatsky_info_alloc(*args):
+  return _nmtlib.flatsky_info_alloc(*args)
+flatsky_info_alloc = _nmtlib.flatsky_info_alloc
+
 def field_free(*args):
   return _nmtlib.field_free(*args)
 field_free = _nmtlib.field_free
 
-def field_alloc(*args):
-  return _nmtlib.field_alloc(*args)
-field_alloc = _nmtlib.field_alloc
+def field_alloc_sph(*args):
+  return _nmtlib.field_alloc_sph(*args)
+field_alloc_sph = _nmtlib.field_alloc_sph
 
 def field_read(*args):
   return _nmtlib.field_read(*args)

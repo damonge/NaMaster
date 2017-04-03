@@ -11,6 +11,14 @@ FILE *my_fopen(const char *path,const char *mode);
 size_t my_fwrite(const void *ptr, size_t size, size_t nmemb,FILE *stream);
 size_t my_fread(void *ptr,size_t size,size_t count,FILE *stream);
 
+//Defined in flatsky_utils.c
+void *dftw_malloc(size_t n);
+void dftw_free(void *p);
+void fs_map_product(nmt_flatsky_info *fs,flouble *mp1,flouble *mp2,flouble *mp_out);
+flouble fs_map_dot(nmt_flatsky_info *fs,flouble *mp1,flouble *mp2);
+void fs_map2alm(nmt_flatsky_info *fs,int ntrans,int spin,flouble **map,fcomplex **alm);
+void fs_alm2map(nmt_flatsky_info *fs,int ntrans,int spin,flouble **map,fcomplex **alm);
+
 //Defined in healpix_extra.c
 #define HE_NITER_DEFAULT 3
 long he_nside2npix(long nside);

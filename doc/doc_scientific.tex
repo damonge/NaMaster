@@ -57,7 +57,7 @@ Let ${\bf a}(\nv)$ be a spin-$s_a$ quantity defined on the sphere. Then we defin
  {\bf a}_{\ell m}\equiv{\rm SHT}({\bf a}(\nv))^{s_a}_{\ell m}\equiv\int d\nv\,\hat{\sf Y}^{s_a\dag}_{\ell m}(\nv)\,{\bf a}(\nv),\hspace{12pt}
  {\bf a}(\nv)={\rm SHT}^{-1}({\bf a}_{\ell m})^{s_a}_{\nv}\equiv\sum_{\ell m}\,\hat{\sf Y}^{s_a}_{\ell m}(\nv)\,{\bf a}_{\ell m}.
 \end{equation}
-Note that here we will use a vector notation, such that for a complex spin-$s_a$ field $a$ we form the vector ${\bf a}\equiv({\rm Re}(a),{\rm Im}(a))$. The harmonic coefficients above are decomposed in a similar manner into $E$ and $B$ modes: ${\bf a}_{\ell m}\equiv(a^E_{\ell m},a^B_{\ell m}$. The spherical harmonic operators $\hat{\sf Y}^s$ are therefore matrix that we define in the following subsection.
+Note that here we will use a vector notation, such that for a complex spin-$s_a$ field $a$ we form the vector ${\bf a}\equiv({\rm Re}(a),{\rm Im}(a))$. The harmonic coefficients above are decomposed in a similar manner into $E$ and $B$ modes: ${\bf a}_{\ell m}\equiv(a^E_{\ell m},a^B_{\ell m})$. The spherical harmonic operators $\hat{\sf Y}^s$ are therefore matrix that we define in the following subsection.
 
 \subsection{Spin-weighed spherical harmonics}
   Let $\eth$ and $\bar{\eth}$ be the following complex differential operators defined on the sphere when acting on a spin-$s$ quantity $f_s$:
@@ -83,20 +83,20 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
   which have the property: $(_sY_{\ell m})^*=(-1)^{s+m}\,_{-s}Y_{\ell-m}$. We then define the $E$-mode and $B$-mode spherical harmonic vectors as:
   \begin{align}
     &_s{\bf Y}^E_{\ell m}\equiv {\bf D}^E_sY_{\ell m}
-     \equiv\frac{\alpha_{\ell,s}}{2}\left(\begin{array}{c}
+     \equiv-\frac{\alpha_{\ell,s}}{2}\left(\begin{array}{c}
                               \eth^s+\bar{\eth}^s\\
                               -i(\eth^s-\bar{\eth}^s)
                             \end{array}\right)Y_{\ell m}
-     \equiv\frac{1}{2}\left(\begin{array}{c}
+     \equiv-\frac{1}{2}\left(\begin{array}{c}
                               _sY_{\ell m}+(-1)^s\,_{-s}Y_{\ell m}\\
                               -i(_sY_{\ell m}-(-1)^s\,_{-s}Y_{\ell m})
                             \end{array}\right) \\
     &_s{\bf Y}^B_{\ell m}\equiv {\bf D}^B_sY_{\ell m}
-     \equiv\frac{\alpha_{\ell,s}}{2}\left(\begin{array}{c}
+     \equiv-\frac{\alpha_{\ell,s}}{2}\left(\begin{array}{c}
                               i(\eth^s-\bar{\eth}^s)\\
                               \eth^s+\bar{\eth}^s
                             \end{array}\right)Y_{\ell m}
-     \equiv\frac{1}{2}\left(\begin{array}{c}
+     \equiv-\frac{1}{2}\left(\begin{array}{c}
                               i(_sY_{\ell m}-(-1)^s\,_{-s}Y_{\ell m})\\
                               _sY_{\ell m}+(-1)^s\,_{-s}Y_{\ell m}
                             \end{array}\right),
@@ -106,7 +106,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
   The matrix operator $\hat{\sf Y}^s_{\ell m}$ is then defined as having $_s{\bf Y}^{E,B}_{\ell m}$ as columns:
   \begin{equation}
     \hat{\sf Y}^s_{\ell m}\equiv\left(_s{\bf Y}^E_{\ell m},_s{\bf Y}^B_{\ell m},\right)
-    \equiv\frac{1}{2}
+    \equiv-\frac{1}{2}
     \left(\begin{array}{cc}
             _sY_{\ell m}+(-1)^s\,_{-s}Y_{\ell m}     & i(_sY_{\ell m}-(-1)^s\,_{-s}Y_{\ell m})\\                
             -i(_sY_{\ell m}-(-1)^s\,_{-s}Y_{\ell m}) & _sY_{\ell m}+(-1)^s\,_{-s}Y_{\ell m}                
@@ -173,7 +173,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
   \end{equation}
 
 
-\section{Contaminant cleaning}
+\section{Contaminant cleaning}\label{sec:contaminant}
   Let ${\bf a}$ be a random field defined on the sphere, let $v(\nv)$ a mask for ${\bf a}$ and let ${\bf f}^i$ be a set of $N_a$ contaminants of ${\bf a}$ such that the observed version of ${\bf a}$ be:
   \begin{equation}
     {\bf d}_a(\nv)={\bf a}^v(\nv)+\sum_{i=1}^{N_a}\alpha_i{\bf f}^i(\nv),
@@ -392,6 +392,125 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
   \end{equation}
   where we the overline $\bar{\,}$ denotes theoretical predictions.
 
+\section{Flat-sky}
+  \subsection{Fourier transforms}
+    In the flat sky we will write the directional vector $\nv$ as ${\bf x}$. Let ${\bf a}({\bf x})$ be a spin-$s_a$ quantity. Under the approximation $\sin\theta\sim1$, $\Delta\theta\rightarrow \Delta x$, $\Delta\phi\rightarrow\Delta y$, the differential operator $\eth$ now takes the form:
+    \begin{equation}
+      \eth=-(\partial_x+i\partial_y),\hspace{12pt}\bar{\eth}=-(\partial_x-i\partial_y),
+    \end{equation}
+    and acts on a plane wave $e^{i{\bf k}{\bf x}}$ as:
+    \begin{equation}
+      \eth^s e^{i{\bf k}{\bf x}}=(-ik)^se^{i\,s\phi_k}e^{i{\bf k}{\bf x}},\hspace{12pt}
+      \bar{\eth}e^{i{\bf k}{\bf x}}=(-ik)^se^{-i\,s\phi_k}e^{i{\bf k}{\bf x}}
+    \end{equation}
+
+    Let us define the basis functions:
+    \begin{equation}
+      \,_s{\cal Y}_{\bf k}({\bf x})\equiv k^{-s}\eth^se^{i{\bf k}{\bf x}}=(-i)^se^{is\phi_k}e^{i{\bf k}{\bf x}},\hspace{12pt}\,
+      _{-s}{\cal Y}_{\bf k}({\bf x})\equiv (-k)^{-s}\bar{\eth}^se^{i{\bf k}{\bf x}}=i^se^{-is\phi_k}e^{i{\bf k}{\bf x}},
+    \end{equation}
+    and the spin-$s$ Fourier coefficients:
+    \begin{align}
+      a({\bf x})  =\int\frac{d{\bf l}^2}{2\pi}\,_s{\cal Y}_{\bf l}({\bf x})_sa_{\bf l},\hspace{12pt}
+      a^*({\bf x})=\int\frac{d{\bf l}^2}{2\pi}\,_{-s}{\cal Y}_{\bf l}({\bf x})_{-s}a_{\bf l},\\
+      \,_sa_{\bf l}\equiv\int\frac{d{\bf x}^2}{2\pi}\,_s{\cal Y}^*_{\bf l}({\bf x})a({\bf x}),\hspace{12pt}
+      \,_{-s}a_{\bf l}\equiv\int\frac{d{\bf x}^2}{2\pi}\,_{-s}{\cal Y}^*_{\bf l}({\bf x})a^*({\bf x}).
+    \end{align}
+    The $E$ and $B$-mode coefficients are then defined as:
+    \begin{align}
+      _sE_{\bf l}\equiv-\frac{1}{2}\left[_sa_{\bf l}+(-1)^s\,_{-s}a_{\bf l}\right],\hspace{12pt}
+      i\,_sB_{\bf l}\equiv-\frac{1}{2}\left[_sa_{\bf l}-(-1)^s\,_{-s}a_{\bf l}\right]
+    \end{align}
+    
+    Let us now write $a$ as a vector such that in real space ${\bf a}({\bf x})\equiv({\rm Re}(a),{\rm Im}(a))$, and in Fourier space ${\bf a}_{\bf l}\equiv(\,_sE_{\bf l},\,_sB_{\bf l})$. We can rewrite the equations above in vectorial form:
+    \begin{equation}
+      {\bf a}({\bf x})\equiv\int\frac{d{\bf l}^2}{2\pi}\,_s{\sf E}_{\bf l}({\bf x}){\bf a}_{\bf l},\hspace{12pt}{\bf a}_{\bf l}\equiv\int\frac{d{\bf x}^2}{2\pi}\,_s{\sf E}^\dag_{\bf l}({\bf x}){\bf a}({\bf x}),
+    \end{equation}
+    where we have defined the matrix basis functions:
+    \begin{align}
+      \,_s{\sf E}_{\bf l}({\bf x})
+      &\equiv-\frac{1}{2}
+      \left(\begin{array}{cc}
+                 \,_s{\cal Y}_{\bf l}+(-1)^s\,_{-s}{\cal Y}_{\bf l}  & i(\,_s{\cal Y}_{\bf l}-(-1)^s\,_{-s}{\cal Y}_{\bf l}) \\
+              -i(\,_s{\cal Y}_{\bf l}-(-1)^s\,_{-s}{\cal Y}_{\bf l}) &   \,_s{\cal Y}_{\bf l}+(-1)^s\,_{-s}{\cal Y}_{\bf l}
+            \end{array}\right)\\
+      &=-\frac{1}{2l^s}
+      \left(\begin{array}{cc}
+                 \eth^s+\bar{\eth}^s & i(\eth^s-\bar{\eth}^s) \\
+              -i(\eth^s-\bar{\eth}^s) &  \eth^s+\bar{\eth}^s
+            \end{array}\right)e^{i{\bf l}{\bf x}}\\
+      &=-(-i)^s
+      \left(\begin{array}{cc}
+                 \cos(s\phi_l) & \sin(s\phi_l) \\
+                -\sin(s\phi_l) & \cos(s\phi_l)
+            \end{array}\right)e^{i{\bf l}{\bf x}}\\
+      &=-(-i)^s{\sf R}(\phi_l)e^{i{\bf l}{\bf x}},
+    \end{align}
+    where ${\sf R}(\phi)$ is a rotation matrix.
+    
+    Thus:
+    \begin{align}
+      \left(\begin{array}{c}
+       Q({\bf x}) \\ U({\bf x})
+      \end{array}\right)
+      &=-(-i)^s
+      \int\frac{d{\bf l}^2}{2\pi}
+      \left(\begin{array}{cc}
+              \cos(s\phi_l) & \sin(s\phi_l) \\
+             -\sin(s\phi_l) & \cos(s\phi_l) \\
+            \end{array}\right)
+      \left(\begin{array}{c}
+       _sE_{\bf l} \\ _sB_{\bf l}
+      \end{array}\right)e^{i{\bf l}{\bf x}}\\
+      \left(\begin{array}{c}
+       _sE_{\bf l} \\ _sB_{\bf l}
+      \end{array}\right)
+      &=-i^s
+      \left(\begin{array}{cc}
+              \cos(s\phi_l) & -\sin(s\phi_l) \\
+              \sin(s\phi_l) &  \cos(s\phi_l) \\
+            \end{array}\right)
+      \left(\begin{array}{c}
+       Q_{\bf l} \\ U_{\bf l}
+      \end{array}\right),
+    \end{align}
+    where $Q_{\bf l}$ and $U_{\bf l}$ are the standard Fourier transforms of $Q$ and $U$.
+    
+    The functions $\,_s{\sf E}_{\bf l}({\bf x})$ satisfy the following orthogonality and completeness relations:
+    \begin{equation}
+      \int \frac{d{\bf x}^2}{(2\pi)^2}\,_s{\sf E}_{\bf l}({\bf x})_s{\sf E}^\dag_{{\bf l}'}({\bf x})={\sf 1}\,\delta({\bf l}-{\bf l}'),\hspace{12pt}
+      \int \frac{d{\bf l}^2}{(2\pi)^2}\,_s{\sf E}_{\bf l}({\bf x})_s{\sf E}^\dag_{{\bf l}}({\bf x}')={\sf 1}\,\delta({\bf x}-{\bf x}').
+    \end{equation}
+
+
+  \subsection{Contaminant cleaning}
+    Using the same notation as in Section \ref{sec:contaminant}, the contaminant-cleaned version of ${\bf a}$ is:
+    \begin{equation}
+      \tilde{\bf a}({\bf x})={\bf a}^v({\bf x})-{\bf f}^i({\bf x})M_{ij}\int d{\bf x}^2\,{\bf f}^{j\dag}({\bf x}'){\bf a}^v({\bf x}'),\hspace{12pt}
+      \tilde{\bf a}_{\bf l}={\bf a}^v_{\bf l}-{\bf f}^i_{\bf l}M_{ij}\int d{\bf k}^2\,{\bf f}^{j\dag}_{\bf k}{\bf a}^v_{\bf k}
+    \end{equation}
+
+  \subsection{Pseudo-$C_\ell$ estimator}
+    The Fourier coefficients of the masked field are:
+    \begin{align}
+      {\bf a}^v_{\bf l}&=\int\int\frac{d{\bf k}^2d{\bf q}^2}{2\pi}\left[\int\frac{d{\bf x}^2}{(2\pi)^2}\,_{s_a}{\sf E}^\dag_{\bf l}({\bf x})\,_{s_a}{\sf E}_{\bf k}({\bf x})\,_0E_{\bf q}({\bf x})\right]{\bf a}_{\bf k}\,v_{\bf q}\\
+                       &=\int\frac{d{\bf k}^2}{2\pi}{\sf R}^\dag\left(s(\phi_{\bf l}-\phi_{\bf k})\right)\,{\bf a}_{\bf k}v_{{\bf l}-{\bf k}}
+    \end{align}
+    Then:
+    \begin{align}
+      \left\langle\tilde{\bf a}_{\bf l}\,\tilde{\bf b}^\dag_{\bf l}\right\rangle
+      &=\int\int\frac{dk^Ddq^D}{(2\pi)^D}{\sf R}^\dag(s_a(\phi_{\bf l}-\phi_{\bf k}))\left\langle{\bf a}_{\bf k}{\bf b}^\dag_{\bf q}\right\rangle{\sf R}(s_b(\phi_{\bf l}-\phi_{\bf q}))v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf q}}\\
+      &=\int\frac{dk^D}{(2\pi)^D}{\sf R}^\dag(s_a(\phi_{\bf l}-\phi_{\bf k})){\sf C}^{ab}_k{\sf R}(s_b(\phi_{\bf l}-\phi_{\bf k}))v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
+    \end{align}
+    \begin{align}
+      \left(\frac{L}{2\pi}\right)^D\tilde{\sf C}^{\tilde{a}\tilde{b}}_\ell&\equiv\int\frac{d\phi_{\bf l}}{2\pi}\left\langle\tilde{\bf a}_{\bf l}\,\tilde{\bf b}^\dag_{\bf l}\right\rangle\\
+      &=\int\frac{kdk\,qdq}{(2\pi)^D}\left[\int d\phi_{\bf l}d\phi_{\bf k}d\phi_{\bf q}{\sf R}^\dag(s_a(\phi_{\bf l}-\phi_{\bf k})){\sf C}^{ab}_k{\sf R}(s_b(\phi_{\bf l}-\phi_{\bf k}))v_{{\bf q}}w^*_{{\bf q}}\delta({\bf l}-{\bf k}-{\bf q})\right]
+    \end{align}
+
+
+
+    
+  
 \begin{thebibliography}{}
  \bibitem{2002ApJ...567....2H} Hivon, E., G{\'o}rski, K.~M., Netterfield, C.~B., et al.\ 2002, \apj, 567, 2 
  \bibitem{2017MNRAS.465.1847E} Elsner, F., Leistedt, B., \& Peiris, H.~V.\ 2017, \mnras, 465, 1847 
@@ -508,7 +627,6 @@ The choice of prior covariance will define the type of estimator. Note that this
 formalism immediately encompasses cut-skies by setting to zero all elements of the
 full covariance matrix involving unobserved pixels (this would correspond to the
 limit of infinite uncorrelated noise for those pixels).
-2002ApJ × .567 ×  × 2H}
 \subsection{Strategies for the different terms}
 \begin{itemize}
 \item $\hat{C}^{-1}_{ii}\,{\bf d}_i$. This term can be computed by solving the

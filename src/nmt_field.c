@@ -1,27 +1,73 @@
 #include "utils.h"
 
+nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
+{
+  nmt_flatsky_info *fs=my_malloc(sizeof(nmt_flatsky_info));
+  fs->nx=nx;
+  fs->ny=ny;
+  fs->npix=nx*ny;
+  fs->lx=lx;
+  fs->ly=ly;
+  fs->pixsize=lx*ly/(nx*ny);
+}
+
+void nmt_flatsky_info_free(nmt_flatsky_info *fs)
+{
+  free(fs);
+}
+
 void nmt_field_free(nmt_field *fl)
 {
-  int imap;
+  int imap,itemp;
   free(fl->beam);
-  for(imap=0;imap<fl->nmaps;imap++) {
-    free(fl->maps[imap]);
-    free(fl->alms[imap]);
+
+  if(fl->is_flatsky) {
+    nmt_flatsky_info_free(fl->fs);
+    for(imap=0;imap<fl->nmaps;imap++) {
+      dftw_free(fl->maps[imap]);
+      dftw_free(fl->alms[imap]);
+    }
+    dftw_free(fl->mask);
+    if(fl->ntemp>0) {
+      for(itemp=0;itemp<fl->ntemp;itemp++) {
+	for(imap=0;imap<fl->nmaps;imap++)
+	  dftw_free(fl->temp[itemp][imap]);
+      }
+    }
   }
+  else {
+    for(imap=0;imap<fl->nmaps;imap++) {
+      free(fl->maps[imap]);
+      free(fl->alms[imap]);
+    }
+    free(fl->mask);
+    if(fl->ntemp>0) {
+      for(itemp=0;itemp<fl->ntemp;itemp++) {
+	for(imap=0;imap<fl->nmaps;imap++) {
+	  free(fl->temp[itemp][imap]);
+	  free(fl->a_temp[itemp][imap]);
+	}
+      }
+    }
+  }
+
   free(fl->alms);
   free(fl->maps);
-  free(fl->mask);
   if(fl->ntemp>0) {
-    int itemp;
     for(itemp=0;itemp<fl->ntemp;itemp++) {
-      for(imap=0;imap<fl->nmaps;imap++)
-	free(fl->temp[itemp][imap]);
       free(fl->temp[itemp]);
+      free(fl->a_temp[itemp]);
     }
     free(fl->temp);
+    free(fl->a_temp);
     gsl_matrix_free(fl->matrix_M);
   }
   free(fl);
+}
+
+static void nmt_purify_flat(nmt_field *fl)
+{
+  return; //Placeholder
 }
 
 static void nmt_purify(nmt_field *fl)
@@ -144,11 +190,12 @@ static void nmt_purify(nmt_field *fl)
   free(alm_out);
 }
 
-nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
-			   int ntemp,flouble ***temp,flouble *beam,int pure_e,int pure_b)
+nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
+			       int ntemp,flouble ***temp,flouble *beam,int pure_e,int pure_b)
 {
   int ii,itemp,itemp2,imap;
   nmt_field *fl=my_malloc(sizeof(nmt_field));
+  fl->is_flatsky=0;
   fl->nside=nside;
   fl->lmax=3*fl->nside-1;
   fl->npix=12*fl->nside*fl->nside;
@@ -254,6 +301,121 @@ nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
   return fl;
 }
 
+nmt_field *nmt_field_alloc_flat(int nx,int ny,flouble lx,flouble ly,flouble *mask,int pol,flouble **maps,
+				int ntemp,flouble ***temp,int lmax,flouble *beam,int pure_e,int pure_b)
+{
+  long ip;
+  int ii,itemp,itemp2,imap;
+  nmt_field *fl=my_malloc(sizeof(nmt_field));
+  fl->is_flatsky=1;
+  fl->fs=nmt_flatsky_info_alloc(nx,ny,lx,ly);
+  fl->npix=nx*ny;
+  fl->lmax=lmax;
+  fl->pol=pol;
+  if(pol) fl->nmaps=2;
+  else fl->nmaps=1;
+  fl->ntemp=ntemp;
+
+  fl->pure_e=0;
+  fl->pure_b=0;
+  if(pol) {
+    if(pure_e)
+      fl->pure_e=1;
+    if(pure_b)
+      fl->pure_b=1;
+  }
+
+  fl->beam=my_malloc((fl->lmax+1)*sizeof(flouble));
+  if(beam==NULL) {
+    for(ii=0;ii<=fl->lmax;ii++)
+      fl->beam[ii]=1.;
+  }
+  else
+    memcpy(fl->beam,beam,(fl->lmax+1)*sizeof(flouble));
+
+  fl->mask=dftw_malloc(fl->npix*sizeof(flouble));
+  for(ip=0;ip<fl->npix;ip++)
+    fl->mask[ip]=mask[ip];
+
+  fl->maps=my_malloc(fl->nmaps*sizeof(flouble *));
+  for(ii=0;ii<fl->nmaps;ii++) {
+    fl->maps[ii]=dftw_malloc(fl->npix*sizeof(flouble));
+    for(ip=0;ip<fl->npix;ip++)
+      fl->maps[ii][ip]=maps[ii][ip];
+  }
+
+  if(fl->ntemp>0) {
+    fl->temp=my_malloc(fl->ntemp*sizeof(flouble **));
+    fl->a_temp=my_malloc(fl->ntemp*sizeof(fcomplex **));
+    for(itemp=0;itemp<fl->ntemp;itemp++) {
+      fl->temp[itemp]=my_malloc(fl->nmaps*sizeof(flouble *));
+      fl->a_temp[itemp]=my_malloc(fl->nmaps*sizeof(fcomplex *));
+      for(imap=0;imap<fl->nmaps;imap++) {
+	fl->temp[itemp][imap]=dftw_malloc(fl->npix*sizeof(flouble));
+	fl->a_temp[itemp][imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+	for(ip=0;ip<fl->npix;ip++)
+	  fl->temp[itemp][imap][ip]=temp[itemp][imap][ip];
+	fs_map_product(fl->fs,fl->temp[itemp][imap],fl->mask,fl->temp[itemp][imap]); //Multiply by mask
+      }
+      fs_map2alm(fl->fs,1,2*fl->pol,fl->temp[itemp],fl->a_temp[itemp]);
+    }
+    
+    //Compute normalization matrix
+    fl->matrix_M=gsl_matrix_alloc(fl->ntemp,fl->ntemp);
+    for(itemp=0;itemp<fl->ntemp;itemp++) {
+      for(itemp2=itemp;itemp2<fl->ntemp;itemp2++) {
+	flouble matrix_element=0;
+	for(imap=0;imap<fl->nmaps;imap++)
+	  matrix_element+=fs_map_dot(fl->fs,fl->temp[itemp][imap],fl->temp[itemp2][imap]);
+	gsl_matrix_set(fl->matrix_M,itemp,itemp2,matrix_element);
+	if(itemp2!=itemp)
+	  gsl_matrix_set(fl->matrix_M,itemp2,itemp,matrix_element);
+      }
+    }
+    gsl_linalg_cholesky_decomp(fl->matrix_M); //TODO: this won't necessarily be invertible
+    gsl_linalg_cholesky_invert(fl->matrix_M);
+  }
+
+  fl->alms=my_malloc(fl->nmaps*sizeof(fcomplex *));
+  for(ii=0;ii<fl->nmaps;ii++)
+    fl->alms[ii]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+
+  if(fl->pol && (fl->pure_e || fl->pure_b))
+    nmt_purify_flat(fl);
+  else {
+    for(ii=0;ii<fl->nmaps;ii++)
+      fs_map_product(fl->fs,fl->maps[ii],fl->mask,fl->maps[ii]);
+    fs_map2alm(fl->fs,1,2*fl->pol,fl->maps,fl->alms);
+  }
+
+  if(fl->ntemp>0) {
+    //Deproject
+    flouble *prods=my_calloc(fl->ntemp,sizeof(flouble));
+    for(itemp=0;itemp<fl->ntemp;itemp++) {
+      for(imap=0;imap<fl->nmaps;imap++) 
+	prods[itemp]+=fs_map_dot(fl->fs,fl->temp[itemp][imap],fl->maps[imap]);
+    }
+    for(itemp=0;itemp<fl->ntemp;itemp++) {
+      flouble alpha=0;
+      for(itemp2=0;itemp2<fl->ntemp;itemp2++) {
+	double mij=gsl_matrix_get(fl->matrix_M,itemp,itemp2);
+	alpha+=mij*prods[itemp2];
+      }
+#ifdef _DEBUG
+      printf("alpha_%d = %lE\n",itemp,alpha);
+#endif //_DEBUG
+      for(imap=0;imap<fl->nmaps;imap++) {
+	long ip;
+	for(ip=0;ip<fl->npix;ip++)
+	  fl->maps[imap][ip]-=alpha*fl->temp[itemp][imap][ip];
+      }
+    }
+    free(prods);
+  }
+
+  return fl;
+}
+
 nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,
 			  int pol,int pure_e,int pure_b)
 {
@@ -319,7 +481,7 @@ nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,cha
     temp=NULL;
   }
 
-  fl=nmt_field_alloc(nside,mask,pol,maps,ntemp,temp,beam,pure_e,pure_b);
+  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,temp,beam,pure_e,pure_b);
 
   if(beam!=NULL)
     free(beam);

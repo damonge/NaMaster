@@ -18,6 +18,7 @@
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_spline.h>
 #endif //_WITH_NEEDLET
+#include <fftw3.h>
 
 #define NMT_MAX(a,b)  (((a)>(b)) ? (a) : (b)) // maximum
 #define NMT_MIN(a,b)  (((a)<(b)) ? (a) : (b)) // minimum
@@ -47,6 +48,15 @@ void nmt_ell_eff(nmt_binning_scheme *bin,flouble *larr);
 
 //Defined in field.c
 typedef struct {
+  int nx;
+  int ny;
+  long npix;
+  flouble lx;
+  flouble ly;
+  flouble pixsize;
+} nmt_flatsky_info;
+
+typedef struct {
   long nside;
   long npix;
   int lmax;
@@ -62,10 +72,14 @@ typedef struct {
   fcomplex ***a_temp;
   gsl_matrix *matrix_M;
   flouble *beam;
+  int is_flatsky;
+  nmt_flatsky_info *fs;
 } nmt_field;
+void nmt_flatsky_info_free(nmt_flatsky_info *fs);
+nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly);
 void nmt_field_free(nmt_field *fl);
-nmt_field *nmt_field_alloc(long nside,flouble *mask,int pol,flouble **maps,
-			   int ntemp,flouble ***temp,flouble *beam,int pure_e,int pure_b);
+nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
+			       int ntemp,flouble ***temp,flouble *beam,int pure_e,int pure_b);
 nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,
 			  int pol,int pure_e,int pure_b);
 void nmt_apodize_mask(long nside,flouble *mask_in,flouble *mask_out,flouble aposize,char *apotype);
