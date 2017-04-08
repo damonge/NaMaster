@@ -62,8 +62,8 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
 \subsection{Spin-weighed spherical harmonics}
   Let $\eth$ and $\bar{\eth}$ be the following complex differential operators defined on the sphere when acting on a spin-$s$ quantity $f_s$:
   \begin{equation}
-    \eth f_s\equiv-(\sin\theta)^s\left(\partial_\theta+i\frac{\partial_\phi}{\sin\theta}\right)(\sin\theta)^{-s}\,f_s(\theta,\phi),\hspace{12pt}
-    \bar{\eth} f_s\equiv-(\sin\theta)^{-s}\left(\partial_\theta-i\frac{\partial_\phi}{\sin\theta}\right)(\sin\theta)^{s}\,f_s(\theta,\phi).
+    \eth f_s\equiv-(\sin\theta)^s\left(\partial_\theta+i\frac{\partial_\varphi}{\sin\theta}\right)(\sin\theta)^{-s}\,f_s(\theta,\varphi),\hspace{12pt}
+    \bar{\eth} f_s\equiv-(\sin\theta)^{-s}\left(\partial_\theta-i\frac{\partial_\varphi}{\sin\theta}\right)(\sin\theta)^{s}\,f_s(\theta,\varphi).
   \end{equation}
   The following properties can be easily derived for the action of these operators:
   \begin{itemize}
@@ -140,7 +140,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
   
   Since ${\bf D}^{E\dag}_s{\bf D}^B_s=0$, one can always generate a $B$ ($E$) mode by applying ${\bf D}^{B(E)}_s$ to a scalar field. It is then possible to show that $E$ and $B$ modes thus defined are orthogonal in the full sky:
   \begin{equation}
-    ({\bf D}^E_s\phi,{\bf D}^B_s\psi)=\int d\nv\,({\bf D}^E_s\phi)^\dag{\bf D}^B_s\psi=0
+    ({\bf D}^E_s\varphi,{\bf D}^B_s\psi)=\int d\nv\,({\bf D}^E_s\varphi)^\dag{\bf D}^B_s\psi=0
   \end{equation}
   This can be done by integrating by parts and noting that the celestial sphere has no boundaries. On a cut sky, however, and for $s=2$, this is only true if the fields satisfy Neumann and Dirichlet boundary conditions simultaneously (i.e. vanishing value and first derivative on the boundary of the cut sky region).
   
@@ -394,20 +394,20 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
 
 \section{Flat-sky}
   \subsection{Fourier transforms}
-    In the flat sky we will write the directional vector $\nv$ as ${\bf x}$. Let ${\bf a}({\bf x})$ be a spin-$s_a$ quantity. Under the approximation $\sin\theta\sim1$, $\Delta\theta\rightarrow \Delta x$, $\Delta\phi\rightarrow\Delta y$, the differential operator $\eth$ now takes the form:
+    In the flat sky we will write the directional vector $\nv$ as ${\bf x}$. Let ${\bf a}({\bf x})$ be a spin-$s_a$ quantity. Under the approximation $\sin\theta\sim1$, $\Delta\theta\rightarrow \Delta x$, $\Delta\varphi\rightarrow\Delta y$, the differential operator $\eth$ now takes the form:
     \begin{equation}
       \eth=-(\partial_x+i\partial_y),\hspace{12pt}\bar{\eth}=-(\partial_x-i\partial_y),
     \end{equation}
     and acts on a plane wave $e^{i{\bf k}{\bf x}}$ as:
     \begin{equation}
-      \eth^s e^{i{\bf k}{\bf x}}=(-ik)^se^{i\,s\phi_k}e^{i{\bf k}{\bf x}},\hspace{12pt}
-      \bar{\eth}e^{i{\bf k}{\bf x}}=(-ik)^se^{-i\,s\phi_k}e^{i{\bf k}{\bf x}}
+      \eth^s e^{i{\bf k}{\bf x}}=(-ik)^se^{i\,s\varphi_k}e^{i{\bf k}{\bf x}},\hspace{12pt}
+      \bar{\eth}e^{i{\bf k}{\bf x}}=(-ik)^se^{-i\,s\varphi_k}e^{i{\bf k}{\bf x}}
     \end{equation}
 
     Let us define the basis functions:
     \begin{equation}
-      \,_s{\cal Y}_{\bf k}({\bf x})\equiv k^{-s}\eth^se^{i{\bf k}{\bf x}}=(-i)^se^{is\phi_k}e^{i{\bf k}{\bf x}},\hspace{12pt}\,
-      _{-s}{\cal Y}_{\bf k}({\bf x})\equiv (-k)^{-s}\bar{\eth}^se^{i{\bf k}{\bf x}}=i^se^{-is\phi_k}e^{i{\bf k}{\bf x}},
+      \,_s{\cal Y}_{\bf k}({\bf x})\equiv k^{-s}\eth^se^{i{\bf k}{\bf x}}=(-i)^se^{is\varphi_k}e^{i{\bf k}{\bf x}},\hspace{12pt}\,
+      _{-s}{\cal Y}_{\bf k}({\bf x})\equiv (-k)^{-s}\bar{\eth}^se^{i{\bf k}{\bf x}}=i^se^{-is\varphi_k}e^{i{\bf k}{\bf x}},
     \end{equation}
     and the spin-$s$ Fourier coefficients:
     \begin{align}
@@ -441,12 +441,12 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
             \end{array}\right)e^{i{\bf l}{\bf x}}\\
       &=-(-i)^s
       \left(\begin{array}{cc}
-                 \cos(s\phi_l) & \sin(s\phi_l) \\
-                -\sin(s\phi_l) & \cos(s\phi_l)
+                 \cos(s\varphi_l) & \sin(s\varphi_l) \\
+                -\sin(s\varphi_l) & \cos(s\varphi_l)
             \end{array}\right)e^{i{\bf l}{\bf x}}\\
-      &=-(-i)^s{\sf R}(\phi_l)e^{i{\bf l}{\bf x}},
+      &=-(-i)^s{\sf R}(\varphi_l)e^{i{\bf l}{\bf x}},
     \end{align}
-    where ${\sf R}(\phi)$ is a rotation matrix.
+    where ${\sf R}(\varphi)$ is a rotation matrix.
     
     Thus:
     \begin{align}
@@ -456,8 +456,8 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
       &=-(-i)^s
       \int\frac{d{\bf l}^2}{2\pi}
       \left(\begin{array}{cc}
-              \cos(s\phi_l) & \sin(s\phi_l) \\
-             -\sin(s\phi_l) & \cos(s\phi_l) \\
+              \cos(s\varphi_l) & \sin(s\varphi_l) \\
+             -\sin(s\varphi_l) & \cos(s\varphi_l) \\
             \end{array}\right)
       \left(\begin{array}{c}
        _sE_{\bf l} \\ _sB_{\bf l}
@@ -467,8 +467,8 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
       \end{array}\right)
       &=-i^s
       \left(\begin{array}{cc}
-              \cos(s\phi_l) & -\sin(s\phi_l) \\
-              \sin(s\phi_l) &  \cos(s\phi_l) \\
+              \cos(s\varphi_l) & -\sin(s\varphi_l) \\
+              \sin(s\varphi_l) &  \cos(s\varphi_l) \\
             \end{array}\right)
       \left(\begin{array}{c}
        Q_{\bf l} \\ U_{\bf l}
@@ -494,22 +494,176 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
     The Fourier coefficients of the masked field are:
     \begin{align}
       {\bf a}^v_{\bf l}&=\int\int\frac{d{\bf k}^2d{\bf q}^2}{2\pi}\left[\int\frac{d{\bf x}^2}{(2\pi)^2}\,_{s_a}{\sf E}^\dag_{\bf l}({\bf x})\,_{s_a}{\sf E}_{\bf k}({\bf x})\,_0E_{\bf q}({\bf x})\right]{\bf a}_{\bf k}\,v_{\bf q}\\
-                       &=\int\frac{d{\bf k}^2}{2\pi}{\sf R}^\dag\left(s(\phi_{\bf l}-\phi_{\bf k})\right)\,{\bf a}_{\bf k}v_{{\bf l}-{\bf k}}
+                       &=\int\frac{d{\bf k}^2}{2\pi}{\sf R}^\dag\left(s_a(\varphi_\ell-\varphi_k)\right)\,{\bf a}_{\bf k}v_{{\bf l}-{\bf k}}
     \end{align}
     Then:
     \begin{align}
       \left\langle\tilde{\bf a}_{\bf l}\,\tilde{\bf b}^\dag_{\bf l}\right\rangle
-      &=\int\int\frac{dk^Ddq^D}{(2\pi)^D}{\sf R}^\dag(s_a(\phi_{\bf l}-\phi_{\bf k}))\left\langle{\bf a}_{\bf k}{\bf b}^\dag_{\bf q}\right\rangle{\sf R}(s_b(\phi_{\bf l}-\phi_{\bf q}))v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf q}}\\
-      &=\int\frac{dk^D}{(2\pi)^D}{\sf R}^\dag(s_a(\phi_{\bf l}-\phi_{\bf k})){\sf C}^{ab}_k{\sf R}(s_b(\phi_{\bf l}-\phi_{\bf k}))v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
+      &=\int\int\frac{d{\bf k}^2d{\bf q}^2}{(2\pi)^2}{\sf R}^\dag(s_a(\varphi_\ell-\varphi_k))\left\langle{\bf a}_{\bf k}{\bf b}^\dag_{\bf q}\right\rangle{\sf R}(s_b(\varphi_\ell-\varphi_q))v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf q}}\\
+      &=\int\frac{d{\bf k}^2}{(2\pi)^2}{\sf R}^\dag(s_a\Delta\varphi){\sf C}^{ab}_k{\sf R}(s_b\Delta\varphi)v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
     \end{align}
-    \begin{align}
-      \left(\frac{L}{2\pi}\right)^D\tilde{\sf C}^{\tilde{a}\tilde{b}}_\ell&\equiv\int\frac{d\phi_{\bf l}}{2\pi}\left\langle\tilde{\bf a}_{\bf l}\,\tilde{\bf b}^\dag_{\bf l}\right\rangle\\
-      &=\int\frac{kdk\,qdq}{(2\pi)^D}\left[\int d\phi_{\bf l}d\phi_{\bf k}d\phi_{\bf q}{\sf R}^\dag(s_a(\phi_{\bf l}-\phi_{\bf k})){\sf C}^{ab}_k{\sf R}(s_b(\phi_{\bf l}-\phi_{\bf k}))v_{{\bf q}}w^*_{{\bf q}}\delta({\bf l}-{\bf k}-{\bf q})\right]
-    \end{align}
-
-
-
+    where $\Delta\varphi\equiv\varphi_\ell-\varphi_k$.
     
+    The pseudo-$C_\ell$ is defined as the nomalized angular average of ${\bf a}_{\bf l}{\bf b}^\dag_{\bf l}$:
+    \begin{align}
+      \tilde{\sf C}^{\tilde{a}\tilde{b}}_\ell
+      &\equiv\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_\ell}{2\pi}\left\langle\tilde{\bf a}_{\bf l}\,\tilde{\bf b}^\dag_{\bf l}\right\rangle\\
+      &=\int\frac{kdk\,qdq}{(2\pi)^2}\left[\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{{\bf q}}w^*_{{\bf q}}
+      \int d\varphi_\ell d\varphi_k{\sf R}^\dag(s_a\Delta\varphi){\sf C}^{ab}_k{\sf R}(s_b\Delta\varphi)\delta({\bf l}-{\bf k}-{\bf q})\right]
+    \end{align}
+
+    Let's start by defining the function:
+    \begin{align}
+      A\left[f(\varphi_\ell,\varphi_k);\ell,k,q\right]
+      &\equiv\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int d\varphi_\ell d\varphi_kf(\varphi_\ell,\varphi_k)\,\delta({\bf l}-{\bf k}-{\bf q})\\
+      &= \left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q} \int d\varphi_kf(\varphi_{{\bf k}+{\bf q}},\varphi_k)\,\frac{\delta\left(\ell-\sqrt{k^2+q^2+2kq\cos\varphi_k}\right)}{\ell}\\
+      &= \left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q} \int d\varphi_k\frac{f(\varphi_{{\bf k}+{\bf q}},\varphi_k)}{kq|\sin\varphi_k|}\,\left[\delta(\varphi_k-\varphi_*)+\delta(\varphi_k+\varphi_*)\right]\\
+      &= \tilde{C}^{vw}_q\left(\left.\frac{f(\varphi_{{\bf k}+{\bf q}},\varphi_k)}{kq|\sin\varphi_k|}\right|_{\varphi_k=\varphi_*}+\left.\frac{f(\varphi_{{\bf k}+{\bf q}},\varphi_k)}{kq|\sin\varphi_k|}\right|_{\varphi_k=-\varphi_*}\right)
+    \end{align}
+    where $\varphi_*$ is defined as the positive root of:
+    \begin{equation}
+     \ell^2-k^2-q^2-2kq\cos\varphi_*=0.
+    \end{equation}
+
+    Then we can write:
+    \begin{itemize}
+      \item {\bf Case $s_a=s_b=0$:}
+        \begin{equation}
+          \tilde{C}^{\tilde{a}\tilde{b}}_\ell=\int\frac{kdk\,qdq}{(2\pi)^2}C^{ab}_kA\left[1\right]
+        \end{equation}
+        \begin{align}
+          &A[1]=\frac{2\tilde{C}^{vw}_q}{kq\sin\varphi_*}=\tilde{C}^{vw}_qJ(\ell,k,q)\\
+          &J(\ell,k,q)\equiv\left\{
+          \begin{array}{cl}
+            4\,(2\ell^2k^2+2k^2q^2+2q^2\ell^2-\ell^4-k^4-q^4)^{-1/2} & {\rm if} |k-q|<\ell<k+q\\
+            0 & {\rm otherwise}
+          \end{array}\right.
+        \end{align}
+        Thus:
+        \begin{equation}
+          \tilde{C}^{\tilde{a}\tilde{b}}_\ell=\int dkM^{00}_{\ell k}C^{ab}_k,\hspace{12pt}
+          M^{00}_{\ell k}\equiv\frac{k}{2\pi}\int\frac{q\,dq}{2\pi}\tilde{C}^{vw}_qJ(\ell,k,q),
+        \end{equation}
+
+      \item {\bf Case $s_a=0,\,\,s_b=2$:}
+        \begin{equation}
+          \left(
+          \begin{array}{c}
+	    \tilde{C}^{\tilde{a}\tilde{E}_b}_\ell\\
+	    \tilde{C}^{\tilde{a}\tilde{B}_b}_\ell
+	  \end{array}\right)=\int\frac{kdk\,qdq}{(2\pi)^2}
+          A\left[\left(
+          \begin{array}{cc}
+            \cos & -\sin\\
+            \sin &  \cos
+          \end{array}\right)2\Delta\varphi\right]
+          \left(
+          \begin{array}{c}
+           C^{aE_b}_k \\
+           C^{aB_b}_k \\
+          \end{array}\right)
+        \end{equation}
+        To begin with, let us choose $\varphi_k$ such that ${\bf k}\cdot{\bf q}=kq\cos\varphi_k$. Then:
+        \begin{align}
+          &\cos\varphi_{{\bf k}+{\bf q}}=\frac{k\cos\varphi_k+q}{|{\bf k}+{\bf q}|}=\frac{k}{\ell}\cos\varphi_k+\frac{q}{\ell},\hspace{12pt}
+          \sin\varphi_{{\bf k}+{\bf q}}=\frac{k}{\ell}\sin\varphi_k\\
+          &\cos(\varphi_{{\bf k}+{\bf q}}-\varphi_{\bf k})=\cos\varphi_{{\bf k}+{\bf q}}\cos\varphi_k+\sin\varphi_{{\bf k}+{\bf q}}\sin\varphi_k=\frac{k}{\ell}+\frac{q}{\ell}\cos\varphi_k\\
+          &\sin(\varphi_{{\bf k}+{\bf q}}-\varphi_{\bf k})=\sin\varphi_{{\bf k}+{\bf q}}\cos\varphi_k-\cos\varphi_{{\bf k}+{\bf q}}\sin\varphi_k=-\frac{q}{\ell}\sin\varphi_k\\
+          &\cos2(\varphi_{{\bf k}+{\bf q}}-\varphi_{\bf k})=\cos^2(\varphi_{{\bf k}+{\bf q}}-\varphi_k)-\sin^2(\varphi_{{\bf k}+{\bf q}}-\varphi_k)=\frac{k^2}{\ell^2}+2\frac{kq}{\ell^2}\cos\varphi_k+\frac{q^2}{\ell^2}\left[2\cos^2\varphi_k-1\right]\\
+          &\sin2(\varphi_{{\bf k}+{\bf q}}-\varphi_{\bf k})=2\sin(\varphi_{{\bf k}+{\bf q}}-\varphi_k)\cos(\varphi_{{\bf k}+{\bf q}}-\varphi_k)=-2\frac{q}{\ell}\sin\varphi_k\left[\frac{k}{\ell}+\frac{q}{\ell}\cos\varphi_k\right]
+        \end{align}
+        Then
+        \begin{align}
+          A\left[\cos2(\varphi_{{\bf k}+{\bf q}}-\varphi_k)\right]
+          &=\tilde{C}^{vw}_q\,J(\ell,k,q)\,\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\\
+          A\left[\sin2(\varphi_{{\bf k}+{\bf q}}-\varphi_k)\right]&=0
+        \end{align}
+        Thus
+        \begin{equation}
+          \left(
+          \begin{array}{c}
+	    \tilde{C}^{\tilde{a}\tilde{E}_b}_\ell\\
+	    \tilde{C}^{\tilde{a}\tilde{B}_b}_\ell
+	  \end{array}\right)=\int dk\,
+	  \left(
+	  \begin{array}{cc}
+	   M^{0+}_{\ell k} & 0 \\
+	   0 & M^{0+}_{\ell k}
+	  \end{array}\right)
+          \left(
+          \begin{array}{c}
+           C^{aE_b}_k \\
+           C^{aB_b}_k \\
+          \end{array}\right)
+        \end{equation}
+        where
+        \begin{align}
+          M^{0+}_{\ell k}\equiv\frac{k}{2\pi}\int\frac{q\,dq}{2\pi}\tilde{C}^{vw}_qJ(\ell,k,q)\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}
+        \end{align}
+
+      \item {\bf Case $s_a=s_b=2$:}
+        \begin{equation}
+          \left(
+            \begin{array}{c}
+	      \tilde{C}^{\tilde{E}_a\tilde{E}_b}_\ell\\
+	      \tilde{C}^{\tilde{E}_a\tilde{B}_b}_\ell\\
+	      \tilde{C}^{\tilde{B}_a\tilde{E}_b}_\ell\\
+	      \tilde{C}^{\tilde{B}_a\tilde{B}_b}_\ell\\
+	    \end{array}\right)=\int\frac{kdk\,qdq}{(2\pi)^D}
+	    A\left[
+            \left(
+            \begin{array}{cccc}
+              \cos^2   & -\sin\cos & -\sin\cos &  \sin^2  \\
+              \cos\sin & \cos^2    & -\sin^2   & -\sin\cos\\
+              \cos\sin & -\sin^2   &  \cos^2   & -\sin\cos\\
+              \sin^2   & \sin\cos  &  \sin\cos &  \cos^2
+            \end{array}\right)2\Delta\varphi\right]
+            \left(
+            \begin{array}{c}
+              C^{E_aE_b}_k \\
+              C^{E_aB_b}_k \\
+              C^{B_aE_b}_k \\
+              C^{B_aB_b}_k \\
+            \end{array}\right)
+       \end{equation}
+       Now
+       \begin{align}
+         &A\left[\cos^22\Delta\varphi\right]
+         =\tilde{C}^{vw}_qJ(\ell,k,q)\left[\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\right]^2\\
+         &A\left[\sin^22\Delta\varphi\right]
+         =\tilde{C}^{vw}_qJ(\ell,k,q)\left(1-\left[\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\right]^2\right)\\
+         &A\left[\cos2\Delta\varphi\sin2\Delta\varphi\right]=0
+       \end{align}
+       Thus
+       \begin{equation}
+         \left(
+         \begin{array}{c}
+	   \tilde{C}^{\tilde{E}_a\tilde{E}_b}_\ell\\
+	   \tilde{C}^{\tilde{E}_a\tilde{B}_b}_\ell\\
+	   \tilde{C}^{\tilde{B}_a\tilde{E}_b}_\ell\\
+	   \tilde{C}^{\tilde{B}_a\tilde{B}_b}_\ell
+	 \end{array}\right)=\int dk\,
+	 \left(
+	 \begin{array}{cccc}
+	   M^{++}_{\ell k} & 0 & 0 & M^{--}_{\ell k}\\
+	   0 & M^{++}_{\ell k} & -M^{--}_{\ell k} & 0\\
+	   0 & -M^{--}_{\ell k} & M^{++}_{\ell k} & 0\\
+	   M^{--}_{\ell k} & 0 & 0 & M^{++}_{\ell k}
+	 \end{array}\right)
+         \left(
+         \begin{array}{c}
+           C^{E_aE_b}_k \\
+           C^{E_aB_b}_k \\
+           C^{B_aE_b}_k \\
+           C^{B_aB_b}_k
+          \end{array}\right)
+        \end{equation}
+        where
+        \begin{align}
+          M^{++}_{\ell k}&\equiv\frac{k}{2\pi}\int\frac{q\,dq}{2\pi}\tilde{C}^{vw}_qJ(\ell,k,q)\left[\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\right]^2\\
+          M^{--}_{\ell k}&\equiv\frac{k}{2\pi}\int\frac{q\,dq}{2\pi}\tilde{C}^{vw}_qJ(\ell,k,q)\left(1-\left[\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\right]^2\right)
+        \end{align}
+    \end{itemize}
   
 \begin{thebibliography}{}
  \bibitem{2002ApJ...567....2H} Hivon, E., G{\'o}rski, K.~M., Netterfield, C.~B., et al.\ 2002, \apj, 567, 2 
