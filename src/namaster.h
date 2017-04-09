@@ -54,6 +54,11 @@ typedef struct {
   flouble lx;
   flouble ly;
   flouble pixsize;
+  int n_ell;
+  flouble i_dell;
+  flouble dell;
+  flouble *ell_min;
+  int *n_cells;
 } nmt_flatsky_info;
 
 typedef struct {

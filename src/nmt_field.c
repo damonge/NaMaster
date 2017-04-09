@@ -1,5 +1,6 @@
 #include "utils.h"
 
+#define N_DELL 2
 nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
 {
   nmt_flatsky_info *fs=my_malloc(sizeof(nmt_flatsky_info));
@@ -9,10 +10,55 @@ nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
   fs->lx=lx;
   fs->ly=ly;
   fs->pixsize=lx*ly/(nx*ny);
+
+  int ii;
+  flouble dkx=2*M_PI/lx;
+  flouble dky=2*M_PI/ly;
+  flouble kmax_x=dkx*(nx/2);
+  flouble kmax_y=dky*(ny/2);
+  double dk=NMT_MAX(dkx,dky);
+  double kmax=NMT_MAX(kmax_y,kmax_x);
+  fs->dell=N_DELL*dk;
+  fs->i_dell=1./fs->dell;
+  fs->n_ell=0;
+  while((fs->n_ell+1)*fs->dell<=kmax)
+    fs->n_ell++;
+  fs->ell_min=my_malloc(fs->n_ell*sizeof(flouble));
+  fs->n_cells=my_calloc(fs->n_ell,sizeof(int));
+  for(ii=0;ii<fs->n_ell;ii++)
+    fs->ell_min[ii]=ii*fs->dell;
+
+#pragma omp parallel default(none) \
+  shared(fs,dkx,dky)
+  {
+    int iy;
+
+#pragma omp for
+    for(iy=0;iy<fs->ny;iy++) {
+      int ix;
+      flouble ky;
+      if(2*iy<=fs->ny)
+	ky=iy*dky;
+      else
+	ky=-(fs->ny-iy)*dky;
+      for(ix=0;ix<=fs->nx/2;ix++) {
+	int s=0;
+	flouble kx=ix*dkx;
+	flouble kmod=sqrt(kx*kx+ky*ky);
+	int ik=(int)(kmod*fs->i_dell);
+	if(ik<fs->n_ell) {
+#pragma omp atomic
+	  fs->n_cells[ik]++;
+	}
+      }
+    } //end omp for
+  } //end omp parallel
 }
 
 void nmt_flatsky_info_free(nmt_flatsky_info *fs)
 {
+  free(fs->ell_min);
+  free(fs->n_cells);
   free(fs);
 }
 
