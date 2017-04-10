@@ -65,7 +65,7 @@ static void qu2eb(nmt_flatsky_info *fs,int spin,fcomplex **alm)
   shared(fs,spin,alm)
   {
     int iy;
-    fcomplex sig=-pow(I,spin);
+    fcomplex sig=-cpow(I,spin);
     flouble dkx=2*M_PI/fs->lx;
     flouble dky=2*M_PI/fs->ly;
 
@@ -78,7 +78,8 @@ static void qu2eb(nmt_flatsky_info *fs,int spin,fcomplex **alm)
       else
 	ky=-(fs->ny-iy)*dky;
       for(ix=0;ix<=fs->nx/2;ix++) {
-	flouble e,b,csphi,ssphi,cph,sph;
+	flouble csphi,ssphi,cph,sph;
+	fcomplex e,b;
 	int s=0;
 	flouble kx=ix*dkx;
 	long index=ix+(fs->nx/2+1)*iy;
@@ -117,7 +118,7 @@ static void eb2qu(nmt_flatsky_info *fs,int spin,fcomplex **alm)
   shared(fs,spin,alm)
   { 
     int iy;
-    fcomplex sig=-pow(-I,spin);
+    fcomplex sig=-cpow(-I,spin);
     flouble dkx=2*M_PI/fs->lx;
     flouble dky=2*M_PI/fs->ly;
 
@@ -130,7 +131,8 @@ static void eb2qu(nmt_flatsky_info *fs,int spin,fcomplex **alm)
       else
 	ky=-(fs->ny-iy)*dky;
       for(ix=0;ix<=fs->nx/2;ix++) {
-	flouble q,u,csphi,ssphi,cph,sph;
+	flouble csphi,ssphi,cph,sph;
+	fcomplex q,u;
 	int s=0;
 	flouble kx=ix*dkx;
 	long index=ix+(fs->nx/2+1)*iy;
