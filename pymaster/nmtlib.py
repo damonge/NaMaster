@@ -69,6 +69,58 @@ except AttributeError:
     _newclass = 0
 
 
+class binning_scheme_flat(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, binning_scheme_flat, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, binning_scheme_flat, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["n_bands"] = _nmtlib.binning_scheme_flat_n_bands_set
+    __swig_getmethods__["n_bands"] = _nmtlib.binning_scheme_flat_n_bands_get
+    if _newclass:n_bands = _swig_property(_nmtlib.binning_scheme_flat_n_bands_get, _nmtlib.binning_scheme_flat_n_bands_set)
+    __swig_setmethods__["ell_0_list"] = _nmtlib.binning_scheme_flat_ell_0_list_set
+    __swig_getmethods__["ell_0_list"] = _nmtlib.binning_scheme_flat_ell_0_list_get
+    if _newclass:ell_0_list = _swig_property(_nmtlib.binning_scheme_flat_ell_0_list_get, _nmtlib.binning_scheme_flat_ell_0_list_set)
+    __swig_setmethods__["ell_f_list"] = _nmtlib.binning_scheme_flat_ell_f_list_set
+    __swig_getmethods__["ell_f_list"] = _nmtlib.binning_scheme_flat_ell_f_list_get
+    if _newclass:ell_f_list = _swig_property(_nmtlib.binning_scheme_flat_ell_f_list_get, _nmtlib.binning_scheme_flat_ell_f_list_set)
+    def __init__(self): 
+        this = _nmtlib.new_binning_scheme_flat()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _nmtlib.delete_binning_scheme_flat
+    __del__ = lambda self : None;
+binning_scheme_flat_swigregister = _nmtlib.binning_scheme_flat_swigregister
+binning_scheme_flat_swigregister(binning_scheme_flat)
+
+
+def bins_flat_constant(*args):
+  return _nmtlib.bins_flat_constant(*args)
+bins_flat_constant = _nmtlib.bins_flat_constant
+
+def bins_flat_create(*args):
+  return _nmtlib.bins_flat_create(*args)
+bins_flat_create = _nmtlib.bins_flat_create
+
+def bins_flat_free(*args):
+  return _nmtlib.bins_flat_free(*args)
+bins_flat_free = _nmtlib.bins_flat_free
+
+def bin_cls_flat(*args):
+  return _nmtlib.bin_cls_flat(*args)
+bin_cls_flat = _nmtlib.bin_cls_flat
+
+def unbin_cls_flat(*args):
+  return _nmtlib.unbin_cls_flat(*args)
+unbin_cls_flat = _nmtlib.unbin_cls_flat
+
+def ell_eff_flat(*args):
+  return _nmtlib.ell_eff_flat(*args)
+ell_eff_flat = _nmtlib.ell_eff_flat
+
+def bins_flat_search_fast(*args):
+  return _nmtlib.bins_flat_search_fast(*args)
+bins_flat_search_fast = _nmtlib.bins_flat_search_fast
 class binning_scheme(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, binning_scheme, name, value)
@@ -377,6 +429,90 @@ synfast_sph = _nmtlib.synfast_sph
 def apodize_mask(*args):
   return _nmtlib.apodize_mask(*args)
 apodize_mask = _nmtlib.apodize_mask
+class workspace_flat(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, workspace_flat, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, workspace_flat, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["ncls"] = _nmtlib.workspace_flat_ncls_set
+    __swig_getmethods__["ncls"] = _nmtlib.workspace_flat_ncls_get
+    if _newclass:ncls = _swig_property(_nmtlib.workspace_flat_ncls_get, _nmtlib.workspace_flat_ncls_set)
+    __swig_setmethods__["nl_rebin"] = _nmtlib.workspace_flat_nl_rebin_set
+    __swig_getmethods__["nl_rebin"] = _nmtlib.workspace_flat_nl_rebin_get
+    if _newclass:nl_rebin = _swig_property(_nmtlib.workspace_flat_nl_rebin_get, _nmtlib.workspace_flat_nl_rebin_set)
+    __swig_setmethods__["nells"] = _nmtlib.workspace_flat_nells_set
+    __swig_getmethods__["nells"] = _nmtlib.workspace_flat_nells_get
+    if _newclass:nells = _swig_property(_nmtlib.workspace_flat_nells_get, _nmtlib.workspace_flat_nells_set)
+    __swig_setmethods__["fs"] = _nmtlib.workspace_flat_fs_set
+    __swig_getmethods__["fs"] = _nmtlib.workspace_flat_fs_get
+    if _newclass:fs = _swig_property(_nmtlib.workspace_flat_fs_get, _nmtlib.workspace_flat_fs_set)
+    __swig_setmethods__["pcl_masks"] = _nmtlib.workspace_flat_pcl_masks_set
+    __swig_getmethods__["pcl_masks"] = _nmtlib.workspace_flat_pcl_masks_get
+    if _newclass:pcl_masks = _swig_property(_nmtlib.workspace_flat_pcl_masks_get, _nmtlib.workspace_flat_pcl_masks_set)
+    __swig_setmethods__["l_arr"] = _nmtlib.workspace_flat_l_arr_set
+    __swig_getmethods__["l_arr"] = _nmtlib.workspace_flat_l_arr_get
+    if _newclass:l_arr = _swig_property(_nmtlib.workspace_flat_l_arr_get, _nmtlib.workspace_flat_l_arr_set)
+    __swig_setmethods__["i_band"] = _nmtlib.workspace_flat_i_band_set
+    __swig_getmethods__["i_band"] = _nmtlib.workspace_flat_i_band_get
+    if _newclass:i_band = _swig_property(_nmtlib.workspace_flat_i_band_get, _nmtlib.workspace_flat_i_band_set)
+    __swig_setmethods__["coupling_matrix_unbinned"] = _nmtlib.workspace_flat_coupling_matrix_unbinned_set
+    __swig_getmethods__["coupling_matrix_unbinned"] = _nmtlib.workspace_flat_coupling_matrix_unbinned_get
+    if _newclass:coupling_matrix_unbinned = _swig_property(_nmtlib.workspace_flat_coupling_matrix_unbinned_get, _nmtlib.workspace_flat_coupling_matrix_unbinned_set)
+    __swig_setmethods__["bin"] = _nmtlib.workspace_flat_bin_set
+    __swig_getmethods__["bin"] = _nmtlib.workspace_flat_bin_get
+    if _newclass:bin = _swig_property(_nmtlib.workspace_flat_bin_get, _nmtlib.workspace_flat_bin_set)
+    __swig_setmethods__["coupling_matrix_binned"] = _nmtlib.workspace_flat_coupling_matrix_binned_set
+    __swig_getmethods__["coupling_matrix_binned"] = _nmtlib.workspace_flat_coupling_matrix_binned_get
+    if _newclass:coupling_matrix_binned = _swig_property(_nmtlib.workspace_flat_coupling_matrix_binned_get, _nmtlib.workspace_flat_coupling_matrix_binned_set)
+    __swig_setmethods__["coupling_matrix_perm"] = _nmtlib.workspace_flat_coupling_matrix_perm_set
+    __swig_getmethods__["coupling_matrix_perm"] = _nmtlib.workspace_flat_coupling_matrix_perm_get
+    if _newclass:coupling_matrix_perm = _swig_property(_nmtlib.workspace_flat_coupling_matrix_perm_get, _nmtlib.workspace_flat_coupling_matrix_perm_set)
+    def __init__(self): 
+        this = _nmtlib.new_workspace_flat()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _nmtlib.delete_workspace_flat
+    __del__ = lambda self : None;
+workspace_flat_swigregister = _nmtlib.workspace_flat_swigregister
+workspace_flat_swigregister(workspace_flat)
+
+
+def workspace_flat_free(*args):
+  return _nmtlib.workspace_flat_free(*args)
+workspace_flat_free = _nmtlib.workspace_flat_free
+
+def workspace_flat_read(*args):
+  return _nmtlib.workspace_flat_read(*args)
+workspace_flat_read = _nmtlib.workspace_flat_read
+
+def workspace_flat_write(*args):
+  return _nmtlib.workspace_flat_write(*args)
+workspace_flat_write = _nmtlib.workspace_flat_write
+
+def compute_coupling_matrix_flat(*args):
+  return _nmtlib.compute_coupling_matrix_flat(*args)
+compute_coupling_matrix_flat = _nmtlib.compute_coupling_matrix_flat
+
+def compute_deprojection_bias_flat(*args):
+  return _nmtlib.compute_deprojection_bias_flat(*args)
+compute_deprojection_bias_flat = _nmtlib.compute_deprojection_bias_flat
+
+def couple_cl_l_flat(*args):
+  return _nmtlib.couple_cl_l_flat(*args)
+couple_cl_l_flat = _nmtlib.couple_cl_l_flat
+
+def decouple_cl_l_flat(*args):
+  return _nmtlib.decouple_cl_l_flat(*args)
+decouple_cl_l_flat = _nmtlib.decouple_cl_l_flat
+
+def compute_coupled_cell_flat(*args):
+  return _nmtlib.compute_coupled_cell_flat(*args)
+compute_coupled_cell_flat = _nmtlib.compute_coupled_cell_flat
+
+def compute_power_spectra_flat(*args):
+  return _nmtlib.compute_power_spectra_flat(*args)
+compute_power_spectra_flat = _nmtlib.compute_power_spectra_flat
 class workspace(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, workspace, name, value)

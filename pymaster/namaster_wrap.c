@@ -2920,18 +2920,20 @@ SWIG_Python_NonDynamicSetAttr(PyObject *obj, PyObject *name, PyObject *value) {
 #define SWIGTYPE_p_gsl_spline swig_types[6]
 #define SWIGTYPE_p_int swig_types[7]
 #define SWIGTYPE_p_nmt_binning_scheme swig_types[8]
-#define SWIGTYPE_p_nmt_field swig_types[9]
-#define SWIGTYPE_p_nmt_field_flat swig_types[10]
-#define SWIGTYPE_p_nmt_flatsky_info swig_types[11]
-#define SWIGTYPE_p_nmt_k_function swig_types[12]
-#define SWIGTYPE_p_nmt_workspace swig_types[13]
-#define SWIGTYPE_p_p_double swig_types[14]
-#define SWIGTYPE_p_p_double_complex swig_types[15]
-#define SWIGTYPE_p_p_int swig_types[16]
-#define SWIGTYPE_p_p_p_double swig_types[17]
-#define SWIGTYPE_p_p_p_double_complex swig_types[18]
-static swig_type_info *swig_types[20];
-static swig_module_info swig_module = {swig_types, 19, 0, 0, 0, 0};
+#define SWIGTYPE_p_nmt_binning_scheme_flat swig_types[9]
+#define SWIGTYPE_p_nmt_field swig_types[10]
+#define SWIGTYPE_p_nmt_field_flat swig_types[11]
+#define SWIGTYPE_p_nmt_flatsky_info swig_types[12]
+#define SWIGTYPE_p_nmt_k_function swig_types[13]
+#define SWIGTYPE_p_nmt_workspace swig_types[14]
+#define SWIGTYPE_p_nmt_workspace_flat swig_types[15]
+#define SWIGTYPE_p_p_double swig_types[16]
+#define SWIGTYPE_p_p_double_complex swig_types[17]
+#define SWIGTYPE_p_p_int swig_types[18]
+#define SWIGTYPE_p_p_p_double swig_types[19]
+#define SWIGTYPE_p_p_p_double_complex swig_types[20]
+static swig_type_info *swig_types[22];
+static swig_module_info swig_module = {swig_types, 21, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -4172,6 +4174,557 @@ void comp_pspec(nmt_field *fl1,nmt_field *fl2,
 #ifdef __cplusplus
 extern "C" {
 #endif
+SWIGINTERN PyObject *_wrap_binning_scheme_flat_n_bands_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *arg1 = (nmt_binning_scheme_flat *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:binning_scheme_flat_n_bands_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "binning_scheme_flat_n_bands_set" "', argument " "1"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg1 = (nmt_binning_scheme_flat *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "binning_scheme_flat_n_bands_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->n_bands = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_binning_scheme_flat_n_bands_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *arg1 = (nmt_binning_scheme_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:binning_scheme_flat_n_bands_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "binning_scheme_flat_n_bands_get" "', argument " "1"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg1 = (nmt_binning_scheme_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->n_bands);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_binning_scheme_flat_ell_0_list_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *arg1 = (nmt_binning_scheme_flat *) 0 ;
+  flouble *arg2 = (flouble *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:binning_scheme_flat_ell_0_list_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "binning_scheme_flat_ell_0_list_set" "', argument " "1"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg1 = (nmt_binning_scheme_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "binning_scheme_flat_ell_0_list_set" "', argument " "2"" of type '" "flouble *""'"); 
+  }
+  arg2 = (flouble *)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->ell_0_list = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_binning_scheme_flat_ell_0_list_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *arg1 = (nmt_binning_scheme_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  flouble *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:binning_scheme_flat_ell_0_list_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "binning_scheme_flat_ell_0_list_get" "', argument " "1"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg1 = (nmt_binning_scheme_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (flouble *) ((arg1)->ell_0_list);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_binning_scheme_flat_ell_f_list_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *arg1 = (nmt_binning_scheme_flat *) 0 ;
+  flouble *arg2 = (flouble *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:binning_scheme_flat_ell_f_list_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "binning_scheme_flat_ell_f_list_set" "', argument " "1"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg1 = (nmt_binning_scheme_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "binning_scheme_flat_ell_f_list_set" "', argument " "2"" of type '" "flouble *""'"); 
+  }
+  arg2 = (flouble *)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->ell_f_list = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_binning_scheme_flat_ell_f_list_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *arg1 = (nmt_binning_scheme_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  flouble *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:binning_scheme_flat_ell_f_list_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "binning_scheme_flat_ell_f_list_get" "', argument " "1"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg1 = (nmt_binning_scheme_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (flouble *) ((arg1)->ell_f_list);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_binning_scheme_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_binning_scheme_flat")) SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (nmt_binning_scheme_flat *)calloc(1, sizeof(nmt_binning_scheme_flat));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_nmt_binning_scheme_flat, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_binning_scheme_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *arg1 = (nmt_binning_scheme_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_binning_scheme_flat",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_binning_scheme_flat, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_binning_scheme_flat" "', argument " "1"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg1 = (nmt_binning_scheme_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    free((char *) arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *binning_scheme_flat_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_nmt_binning_scheme_flat, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_bins_flat_constant(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  int arg2 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  nmt_binning_scheme_flat *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:bins_flat_constant",&obj0,&obj1)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "bins_flat_constant" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = (int)(val1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "bins_flat_constant" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (nmt_binning_scheme_flat *)nmt_bins_flat_constant(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_bins_flat_create(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  int arg1 ;
+  flouble *arg2 = (flouble *) 0 ;
+  flouble *arg3 = (flouble *) 0 ;
+  int val1 ;
+  int ecode1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  nmt_binning_scheme_flat *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:bins_flat_create",&obj0,&obj1,&obj2)) SWIG_fail;
+  ecode1 = SWIG_AsVal_int(obj0, &val1);
+  if (!SWIG_IsOK(ecode1)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode1), "in method '" "bins_flat_create" "', argument " "1"" of type '" "int""'");
+  } 
+  arg1 = (int)(val1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "bins_flat_create" "', argument " "2"" of type '" "flouble *""'"); 
+  }
+  arg2 = (flouble *)(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "bins_flat_create" "', argument " "3"" of type '" "flouble *""'"); 
+  }
+  arg3 = (flouble *)(argp3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (nmt_binning_scheme_flat *)nmt_bins_flat_create(arg1,arg2,arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_bins_flat_free(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *arg1 = (nmt_binning_scheme_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:bins_flat_free",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "bins_flat_free" "', argument " "1"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg1 = (nmt_binning_scheme_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_bins_flat_free(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_bin_cls_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *arg1 = (nmt_binning_scheme_flat *) 0 ;
+  int arg2 ;
+  flouble *arg3 = (flouble *) 0 ;
+  flouble **arg4 = (flouble **) 0 ;
+  flouble **arg5 = (flouble **) 0 ;
+  int arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  int val6 ;
+  int ecode6 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:bin_cls_flat",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "bin_cls_flat" "', argument " "1"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg1 = (nmt_binning_scheme_flat *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "bin_cls_flat" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "bin_cls_flat" "', argument " "3"" of type '" "flouble *""'"); 
+  }
+  arg3 = (flouble *)(argp3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "bin_cls_flat" "', argument " "4"" of type '" "flouble **""'"); 
+  }
+  arg4 = (flouble **)(argp4);
+  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "bin_cls_flat" "', argument " "5"" of type '" "flouble **""'"); 
+  }
+  arg5 = (flouble **)(argp5);
+  ecode6 = SWIG_AsVal_int(obj5, &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "bin_cls_flat" "', argument " "6"" of type '" "int""'");
+  } 
+  arg6 = (int)(val6);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_bin_cls_flat(arg1,arg2,arg3,arg4,arg5,arg6);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_unbin_cls_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *arg1 = (nmt_binning_scheme_flat *) 0 ;
+  flouble **arg2 = (flouble **) 0 ;
+  int arg3 ;
+  flouble *arg4 = (flouble *) 0 ;
+  flouble **arg5 = (flouble **) 0 ;
+  int arg6 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  int val6 ;
+  int ecode6 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:unbin_cls_flat",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "unbin_cls_flat" "', argument " "1"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg1 = (nmt_binning_scheme_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "unbin_cls_flat" "', argument " "2"" of type '" "flouble **""'"); 
+  }
+  arg2 = (flouble **)(argp2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "unbin_cls_flat" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "unbin_cls_flat" "', argument " "4"" of type '" "flouble *""'"); 
+  }
+  arg4 = (flouble *)(argp4);
+  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "unbin_cls_flat" "', argument " "5"" of type '" "flouble **""'"); 
+  }
+  arg5 = (flouble **)(argp5);
+  ecode6 = SWIG_AsVal_int(obj5, &val6);
+  if (!SWIG_IsOK(ecode6)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode6), "in method '" "unbin_cls_flat" "', argument " "6"" of type '" "int""'");
+  } 
+  arg6 = (int)(val6);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_unbin_cls_flat(arg1,arg2,arg3,arg4,arg5,arg6);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_ell_eff_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *arg1 = (nmt_binning_scheme_flat *) 0 ;
+  flouble *arg2 = (flouble *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:ell_eff_flat",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "ell_eff_flat" "', argument " "1"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg1 = (nmt_binning_scheme_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "ell_eff_flat" "', argument " "2"" of type '" "flouble *""'"); 
+  }
+  arg2 = (flouble *)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_ell_eff_flat(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_bins_flat_search_fast(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_binning_scheme_flat *arg1 = (nmt_binning_scheme_flat *) 0 ;
+  flouble arg2 ;
+  int arg3 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  double val2 ;
+  int ecode2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:bins_flat_search_fast",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "bins_flat_search_fast" "', argument " "1"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg1 = (nmt_binning_scheme_flat *)(argp1);
+  ecode2 = SWIG_AsVal_double(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "bins_flat_search_fast" "', argument " "2"" of type '" "flouble""'");
+  } 
+  arg2 = (flouble)(val2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "bins_flat_search_fast" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int)nmt_bins_flat_search_fast(arg1,arg2,arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_binning_scheme_n_bands_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   nmt_binning_scheme *arg1 = (nmt_binning_scheme *) 0 ;
@@ -8654,6 +9207,1210 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_workspace_flat_ncls_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:workspace_flat_ncls_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_ncls_set" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "workspace_flat_ncls_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->ncls = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_ncls_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_ncls_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_ncls_get" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->ncls);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_nl_rebin_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:workspace_flat_nl_rebin_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_nl_rebin_set" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "workspace_flat_nl_rebin_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->nl_rebin = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_nl_rebin_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_nl_rebin_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_nl_rebin_get" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->nl_rebin);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_nells_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  int arg2 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:workspace_flat_nells_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_nells_set" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "workspace_flat_nells_set" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->nells = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_nells_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int result;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_nells_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_nells_get" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int) ((arg1)->nells);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_From_int((int)(result));
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_fs_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  nmt_flatsky_info *arg2 = (nmt_flatsky_info *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:workspace_flat_fs_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_fs_set" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_nmt_flatsky_info, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "workspace_flat_fs_set" "', argument " "2"" of type '" "nmt_flatsky_info *""'"); 
+  }
+  arg2 = (nmt_flatsky_info *)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->fs = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_fs_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  nmt_flatsky_info *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_fs_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_fs_get" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (nmt_flatsky_info *) ((arg1)->fs);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_nmt_flatsky_info, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_pcl_masks_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  flouble *arg2 = (flouble *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:workspace_flat_pcl_masks_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_pcl_masks_set" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "workspace_flat_pcl_masks_set" "', argument " "2"" of type '" "flouble *""'"); 
+  }
+  arg2 = (flouble *)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->pcl_masks = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_pcl_masks_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  flouble *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_pcl_masks_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_pcl_masks_get" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (flouble *) ((arg1)->pcl_masks);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_l_arr_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  flouble *arg2 = (flouble *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:workspace_flat_l_arr_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_l_arr_set" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "workspace_flat_l_arr_set" "', argument " "2"" of type '" "flouble *""'"); 
+  }
+  arg2 = (flouble *)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->l_arr = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_l_arr_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  flouble *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_l_arr_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_l_arr_get" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (flouble *) ((arg1)->l_arr);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_i_band_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  int *arg2 = (int *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:workspace_flat_i_band_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_i_band_set" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_int, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "workspace_flat_i_band_set" "', argument " "2"" of type '" "int *""'"); 
+  }
+  arg2 = (int *)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->i_band = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_i_band_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  int *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_i_band_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_i_band_get" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (int *) ((arg1)->i_band);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_int, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_coupling_matrix_unbinned_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  flouble **arg2 = (flouble **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:workspace_flat_coupling_matrix_unbinned_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_coupling_matrix_unbinned_set" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "workspace_flat_coupling_matrix_unbinned_set" "', argument " "2"" of type '" "flouble **""'"); 
+  }
+  arg2 = (flouble **)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->coupling_matrix_unbinned = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_coupling_matrix_unbinned_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  flouble **result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_coupling_matrix_unbinned_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_coupling_matrix_unbinned_get" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (flouble **) ((arg1)->coupling_matrix_unbinned);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_double, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_bin_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  nmt_binning_scheme_flat *arg2 = (nmt_binning_scheme_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:workspace_flat_bin_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_bin_set" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_nmt_binning_scheme_flat, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "workspace_flat_bin_set" "', argument " "2"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg2 = (nmt_binning_scheme_flat *)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->bin = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_bin_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  nmt_binning_scheme_flat *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_bin_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_bin_get" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (nmt_binning_scheme_flat *) ((arg1)->bin);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_coupling_matrix_binned_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  gsl_matrix *arg2 = (gsl_matrix *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:workspace_flat_coupling_matrix_binned_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_coupling_matrix_binned_set" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_gsl_matrix, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "workspace_flat_coupling_matrix_binned_set" "', argument " "2"" of type '" "gsl_matrix *""'"); 
+  }
+  arg2 = (gsl_matrix *)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->coupling_matrix_binned = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_coupling_matrix_binned_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  gsl_matrix *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_coupling_matrix_binned_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_coupling_matrix_binned_get" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (gsl_matrix *) ((arg1)->coupling_matrix_binned);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_gsl_matrix, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_coupling_matrix_perm_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  gsl_permutation *arg2 = (gsl_permutation *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:workspace_flat_coupling_matrix_perm_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_coupling_matrix_perm_set" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_gsl_permutation, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "workspace_flat_coupling_matrix_perm_set" "', argument " "2"" of type '" "gsl_permutation *""'"); 
+  }
+  arg2 = (gsl_permutation *)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->coupling_matrix_perm = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_coupling_matrix_perm_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  gsl_permutation *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_coupling_matrix_perm_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_coupling_matrix_perm_get" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (gsl_permutation *) ((arg1)->coupling_matrix_perm);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_gsl_permutation, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_new_workspace_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)":new_workspace_flat")) SWIG_fail;
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (nmt_workspace_flat *)calloc(1, sizeof(nmt_workspace_flat));
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_nmt_workspace_flat, SWIG_POINTER_NEW |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_delete_workspace_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:delete_workspace_flat",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, SWIG_POINTER_DISOWN |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "delete_workspace_flat" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    free((char *) arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *workspace_flat_swigregister(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *obj;
+  if (!PyArg_ParseTuple(args,(char*)"O:swigregister", &obj)) return NULL;
+  SWIG_TypeNewClientData(SWIGTYPE_p_nmt_workspace_flat, SWIG_NewClientData(obj));
+  return SWIG_Py_Void();
+}
+
+SWIGINTERN PyObject *_wrap_workspace_flat_free(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_free",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_free" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_workspace_flat_free(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_read(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  char *arg1 = (char *) 0 ;
+  int res1 ;
+  char *buf1 = 0 ;
+  int alloc1 = 0 ;
+  PyObject * obj0 = 0 ;
+  nmt_workspace_flat *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:workspace_flat_read",&obj0)) SWIG_fail;
+  res1 = SWIG_AsCharPtrAndSize(obj0, &buf1, NULL, &alloc1);
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_read" "', argument " "1"" of type '" "char *""'");
+  }
+  arg1 = (char *)(buf1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (nmt_workspace_flat *)nmt_workspace_flat_read(arg1);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
+  return resultobj;
+fail:
+  if (alloc1 == SWIG_NEWOBJ) free((char*)buf1);
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_workspace_flat_write(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  char *arg2 = (char *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int res2 ;
+  char *buf2 = 0 ;
+  int alloc2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:workspace_flat_write",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "workspace_flat_write" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  res2 = SWIG_AsCharPtrAndSize(obj1, &buf2, NULL, &alloc2);
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "workspace_flat_write" "', argument " "2"" of type '" "char *""'");
+  }
+  arg2 = (char *)(buf2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_workspace_flat_write(arg1,arg2);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+  return resultobj;
+fail:
+  if (alloc2 == SWIG_NEWOBJ) free((char*)buf2);
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_compute_coupling_matrix_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_field_flat *arg1 = (nmt_field_flat *) 0 ;
+  nmt_field_flat *arg2 = (nmt_field_flat *) 0 ;
+  nmt_binning_scheme_flat *arg3 = (nmt_binning_scheme_flat *) 0 ;
+  int arg4 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  nmt_workspace_flat *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:compute_coupling_matrix_flat",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "compute_coupling_matrix_flat" "', argument " "1"" of type '" "nmt_field_flat *""'"); 
+  }
+  arg1 = (nmt_field_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_nmt_field_flat, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "compute_coupling_matrix_flat" "', argument " "2"" of type '" "nmt_field_flat *""'"); 
+  }
+  arg2 = (nmt_field_flat *)(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "compute_coupling_matrix_flat" "', argument " "3"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg3 = (nmt_binning_scheme_flat *)(argp3);
+  ecode4 = SWIG_AsVal_int(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "compute_coupling_matrix_flat" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = (int)(val4);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (nmt_workspace_flat *)nmt_compute_coupling_matrix_flat(arg1,arg2,arg3,arg4);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_compute_deprojection_bias_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_field_flat *arg1 = (nmt_field_flat *) 0 ;
+  nmt_field_flat *arg2 = (nmt_field_flat *) 0 ;
+  int arg3 ;
+  flouble *arg4 = (flouble *) 0 ;
+  flouble **arg5 = (flouble **) 0 ;
+  flouble **arg6 = (flouble **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  int val3 ;
+  int ecode3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  void *argp6 = 0 ;
+  int res6 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:compute_deprojection_bias_flat",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "compute_deprojection_bias_flat" "', argument " "1"" of type '" "nmt_field_flat *""'"); 
+  }
+  arg1 = (nmt_field_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_nmt_field_flat, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "compute_deprojection_bias_flat" "', argument " "2"" of type '" "nmt_field_flat *""'"); 
+  }
+  arg2 = (nmt_field_flat *)(argp2);
+  ecode3 = SWIG_AsVal_int(obj2, &val3);
+  if (!SWIG_IsOK(ecode3)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "compute_deprojection_bias_flat" "', argument " "3"" of type '" "int""'");
+  } 
+  arg3 = (int)(val3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "compute_deprojection_bias_flat" "', argument " "4"" of type '" "flouble *""'"); 
+  }
+  arg4 = (flouble *)(argp4);
+  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "compute_deprojection_bias_flat" "', argument " "5"" of type '" "flouble **""'"); 
+  }
+  arg5 = (flouble **)(argp5);
+  res6 = SWIG_ConvertPtr(obj5, &argp6,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res6)) {
+    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "compute_deprojection_bias_flat" "', argument " "6"" of type '" "flouble **""'"); 
+  }
+  arg6 = (flouble **)(argp6);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_compute_deprojection_bias_flat(arg1,arg2,arg3,arg4,arg5,arg6);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_couple_cl_l_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  int arg2 ;
+  flouble *arg3 = (flouble *) 0 ;
+  flouble **arg4 = (flouble **) 0 ;
+  flouble **arg5 = (flouble **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  int val2 ;
+  int ecode2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:couple_cl_l_flat",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "couple_cl_l_flat" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  ecode2 = SWIG_AsVal_int(obj1, &val2);
+  if (!SWIG_IsOK(ecode2)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "couple_cl_l_flat" "', argument " "2"" of type '" "int""'");
+  } 
+  arg2 = (int)(val2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "couple_cl_l_flat" "', argument " "3"" of type '" "flouble *""'"); 
+  }
+  arg3 = (flouble *)(argp3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "couple_cl_l_flat" "', argument " "4"" of type '" "flouble **""'"); 
+  }
+  arg4 = (flouble **)(argp4);
+  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "couple_cl_l_flat" "', argument " "5"" of type '" "flouble **""'"); 
+  }
+  arg5 = (flouble **)(argp5);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_couple_cl_l_flat(arg1,arg2,arg3,arg4,arg5);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_decouple_cl_l_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_workspace_flat *arg1 = (nmt_workspace_flat *) 0 ;
+  flouble **arg2 = (flouble **) 0 ;
+  flouble **arg3 = (flouble **) 0 ;
+  flouble **arg4 = (flouble **) 0 ;
+  flouble **arg5 = (flouble **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOO:decouple_cl_l_flat",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "decouple_cl_l_flat" "', argument " "1"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg1 = (nmt_workspace_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "decouple_cl_l_flat" "', argument " "2"" of type '" "flouble **""'"); 
+  }
+  arg2 = (flouble **)(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "decouple_cl_l_flat" "', argument " "3"" of type '" "flouble **""'"); 
+  }
+  arg3 = (flouble **)(argp3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "decouple_cl_l_flat" "', argument " "4"" of type '" "flouble **""'"); 
+  }
+  arg4 = (flouble **)(argp4);
+  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "decouple_cl_l_flat" "', argument " "5"" of type '" "flouble **""'"); 
+  }
+  arg5 = (flouble **)(argp5);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_decouple_cl_l_flat(arg1,arg2,arg3,arg4,arg5);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_compute_coupled_cell_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_field_flat *arg1 = (nmt_field_flat *) 0 ;
+  nmt_field_flat *arg2 = (nmt_field_flat *) 0 ;
+  flouble *arg3 = (flouble *) 0 ;
+  flouble **arg4 = (flouble **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:compute_coupled_cell_flat",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "compute_coupled_cell_flat" "', argument " "1"" of type '" "nmt_field_flat *""'"); 
+  }
+  arg1 = (nmt_field_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_nmt_field_flat, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "compute_coupled_cell_flat" "', argument " "2"" of type '" "nmt_field_flat *""'"); 
+  }
+  arg2 = (nmt_field_flat *)(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "compute_coupled_cell_flat" "', argument " "3"" of type '" "flouble *""'"); 
+  }
+  arg3 = (flouble *)(argp3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "compute_coupled_cell_flat" "', argument " "4"" of type '" "flouble **""'"); 
+  }
+  arg4 = (flouble **)(argp4);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_compute_coupled_cell_flat(arg1,arg2,arg3,arg4);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_compute_power_spectra_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_field_flat *arg1 = (nmt_field_flat *) 0 ;
+  nmt_field_flat *arg2 = (nmt_field_flat *) 0 ;
+  nmt_binning_scheme_flat *arg3 = (nmt_binning_scheme_flat *) 0 ;
+  int arg4 ;
+  nmt_workspace_flat *arg5 = (nmt_workspace_flat *) 0 ;
+  flouble **arg6 = (flouble **) 0 ;
+  int arg7 ;
+  flouble *arg8 = (flouble *) 0 ;
+  flouble **arg9 = (flouble **) 0 ;
+  flouble **arg10 = (flouble **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  int val4 ;
+  int ecode4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  void *argp6 = 0 ;
+  int res6 = 0 ;
+  int val7 ;
+  int ecode7 = 0 ;
+  void *argp8 = 0 ;
+  int res8 = 0 ;
+  void *argp9 = 0 ;
+  int res9 = 0 ;
+  void *argp10 = 0 ;
+  int res10 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  PyObject * obj6 = 0 ;
+  PyObject * obj7 = 0 ;
+  PyObject * obj8 = 0 ;
+  PyObject * obj9 = 0 ;
+  nmt_workspace_flat *result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOOO:compute_power_spectra_flat",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8,&obj9)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "compute_power_spectra_flat" "', argument " "1"" of type '" "nmt_field_flat *""'"); 
+  }
+  arg1 = (nmt_field_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_nmt_field_flat, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "compute_power_spectra_flat" "', argument " "2"" of type '" "nmt_field_flat *""'"); 
+  }
+  arg2 = (nmt_field_flat *)(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_nmt_binning_scheme_flat, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "compute_power_spectra_flat" "', argument " "3"" of type '" "nmt_binning_scheme_flat *""'"); 
+  }
+  arg3 = (nmt_binning_scheme_flat *)(argp3);
+  ecode4 = SWIG_AsVal_int(obj3, &val4);
+  if (!SWIG_IsOK(ecode4)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "compute_power_spectra_flat" "', argument " "4"" of type '" "int""'");
+  } 
+  arg4 = (int)(val4);
+  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "compute_power_spectra_flat" "', argument " "5"" of type '" "nmt_workspace_flat *""'"); 
+  }
+  arg5 = (nmt_workspace_flat *)(argp5);
+  res6 = SWIG_ConvertPtr(obj5, &argp6,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res6)) {
+    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "compute_power_spectra_flat" "', argument " "6"" of type '" "flouble **""'"); 
+  }
+  arg6 = (flouble **)(argp6);
+  ecode7 = SWIG_AsVal_int(obj6, &val7);
+  if (!SWIG_IsOK(ecode7)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode7), "in method '" "compute_power_spectra_flat" "', argument " "7"" of type '" "int""'");
+  } 
+  arg7 = (int)(val7);
+  res8 = SWIG_ConvertPtr(obj7, &argp8,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res8)) {
+    SWIG_exception_fail(SWIG_ArgError(res8), "in method '" "compute_power_spectra_flat" "', argument " "8"" of type '" "flouble *""'"); 
+  }
+  arg8 = (flouble *)(argp8);
+  res9 = SWIG_ConvertPtr(obj8, &argp9,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res9)) {
+    SWIG_exception_fail(SWIG_ArgError(res9), "in method '" "compute_power_spectra_flat" "', argument " "9"" of type '" "flouble **""'"); 
+  }
+  arg9 = (flouble **)(argp9);
+  res10 = SWIG_ConvertPtr(obj9, &argp10,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res10)) {
+    SWIG_exception_fail(SWIG_ArgError(res10), "in method '" "compute_power_spectra_flat" "', argument " "10"" of type '" "flouble **""'"); 
+  }
+  arg10 = (flouble **)(argp10);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (nmt_workspace_flat *)nmt_compute_power_spectra_flat(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_nmt_workspace_flat, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_workspace_lmax_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   nmt_workspace *arg1 = (nmt_workspace *) 0 ;
@@ -11698,6 +13455,22 @@ fail:
 
 static PyMethodDef SwigMethods[] = {
 	 { (char *)"SWIG_PyInstanceMethod_New", (PyCFunction)SWIG_PyInstanceMethod_New, METH_O, NULL},
+	 { (char *)"binning_scheme_flat_n_bands_set", _wrap_binning_scheme_flat_n_bands_set, METH_VARARGS, NULL},
+	 { (char *)"binning_scheme_flat_n_bands_get", _wrap_binning_scheme_flat_n_bands_get, METH_VARARGS, NULL},
+	 { (char *)"binning_scheme_flat_ell_0_list_set", _wrap_binning_scheme_flat_ell_0_list_set, METH_VARARGS, NULL},
+	 { (char *)"binning_scheme_flat_ell_0_list_get", _wrap_binning_scheme_flat_ell_0_list_get, METH_VARARGS, NULL},
+	 { (char *)"binning_scheme_flat_ell_f_list_set", _wrap_binning_scheme_flat_ell_f_list_set, METH_VARARGS, NULL},
+	 { (char *)"binning_scheme_flat_ell_f_list_get", _wrap_binning_scheme_flat_ell_f_list_get, METH_VARARGS, NULL},
+	 { (char *)"new_binning_scheme_flat", _wrap_new_binning_scheme_flat, METH_VARARGS, NULL},
+	 { (char *)"delete_binning_scheme_flat", _wrap_delete_binning_scheme_flat, METH_VARARGS, NULL},
+	 { (char *)"binning_scheme_flat_swigregister", binning_scheme_flat_swigregister, METH_VARARGS, NULL},
+	 { (char *)"bins_flat_constant", _wrap_bins_flat_constant, METH_VARARGS, NULL},
+	 { (char *)"bins_flat_create", _wrap_bins_flat_create, METH_VARARGS, NULL},
+	 { (char *)"bins_flat_free", _wrap_bins_flat_free, METH_VARARGS, NULL},
+	 { (char *)"bin_cls_flat", _wrap_bin_cls_flat, METH_VARARGS, NULL},
+	 { (char *)"unbin_cls_flat", _wrap_unbin_cls_flat, METH_VARARGS, NULL},
+	 { (char *)"ell_eff_flat", _wrap_ell_eff_flat, METH_VARARGS, NULL},
+	 { (char *)"bins_flat_search_fast", _wrap_bins_flat_search_fast, METH_VARARGS, NULL},
 	 { (char *)"binning_scheme_n_bands_set", _wrap_binning_scheme_n_bands_set, METH_VARARGS, NULL},
 	 { (char *)"binning_scheme_n_bands_get", _wrap_binning_scheme_n_bands_get, METH_VARARGS, NULL},
 	 { (char *)"binning_scheme_nell_list_set", _wrap_binning_scheme_nell_list_set, METH_VARARGS, NULL},
@@ -11835,6 +13608,40 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"field_read", _wrap_field_read, METH_VARARGS, NULL},
 	 { (char *)"synfast_sph", _wrap_synfast_sph, METH_VARARGS, NULL},
 	 { (char *)"apodize_mask", _wrap_apodize_mask, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_ncls_set", _wrap_workspace_flat_ncls_set, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_ncls_get", _wrap_workspace_flat_ncls_get, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_nl_rebin_set", _wrap_workspace_flat_nl_rebin_set, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_nl_rebin_get", _wrap_workspace_flat_nl_rebin_get, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_nells_set", _wrap_workspace_flat_nells_set, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_nells_get", _wrap_workspace_flat_nells_get, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_fs_set", _wrap_workspace_flat_fs_set, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_fs_get", _wrap_workspace_flat_fs_get, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_pcl_masks_set", _wrap_workspace_flat_pcl_masks_set, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_pcl_masks_get", _wrap_workspace_flat_pcl_masks_get, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_l_arr_set", _wrap_workspace_flat_l_arr_set, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_l_arr_get", _wrap_workspace_flat_l_arr_get, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_i_band_set", _wrap_workspace_flat_i_band_set, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_i_band_get", _wrap_workspace_flat_i_band_get, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_coupling_matrix_unbinned_set", _wrap_workspace_flat_coupling_matrix_unbinned_set, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_coupling_matrix_unbinned_get", _wrap_workspace_flat_coupling_matrix_unbinned_get, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_bin_set", _wrap_workspace_flat_bin_set, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_bin_get", _wrap_workspace_flat_bin_get, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_coupling_matrix_binned_set", _wrap_workspace_flat_coupling_matrix_binned_set, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_coupling_matrix_binned_get", _wrap_workspace_flat_coupling_matrix_binned_get, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_coupling_matrix_perm_set", _wrap_workspace_flat_coupling_matrix_perm_set, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_coupling_matrix_perm_get", _wrap_workspace_flat_coupling_matrix_perm_get, METH_VARARGS, NULL},
+	 { (char *)"new_workspace_flat", _wrap_new_workspace_flat, METH_VARARGS, NULL},
+	 { (char *)"delete_workspace_flat", _wrap_delete_workspace_flat, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_swigregister", workspace_flat_swigregister, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_free", _wrap_workspace_flat_free, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_read", _wrap_workspace_flat_read, METH_VARARGS, NULL},
+	 { (char *)"workspace_flat_write", _wrap_workspace_flat_write, METH_VARARGS, NULL},
+	 { (char *)"compute_coupling_matrix_flat", _wrap_compute_coupling_matrix_flat, METH_VARARGS, NULL},
+	 { (char *)"compute_deprojection_bias_flat", _wrap_compute_deprojection_bias_flat, METH_VARARGS, NULL},
+	 { (char *)"couple_cl_l_flat", _wrap_couple_cl_l_flat, METH_VARARGS, NULL},
+	 { (char *)"decouple_cl_l_flat", _wrap_decouple_cl_l_flat, METH_VARARGS, NULL},
+	 { (char *)"compute_coupled_cell_flat", _wrap_compute_coupled_cell_flat, METH_VARARGS, NULL},
+	 { (char *)"compute_power_spectra_flat", _wrap_compute_power_spectra_flat, METH_VARARGS, NULL},
 	 { (char *)"workspace_lmax_set", _wrap_workspace_lmax_set, METH_VARARGS, NULL},
 	 { (char *)"workspace_lmax_get", _wrap_workspace_lmax_get, METH_VARARGS, NULL},
 	 { (char *)"workspace_ncls_set", _wrap_workspace_ncls_set, METH_VARARGS, NULL},
@@ -11898,11 +13705,13 @@ static swig_type_info _swigt__p_gsl_permutation = {"_p_gsl_permutation", "gsl_pe
 static swig_type_info _swigt__p_gsl_spline = {"_p_gsl_spline", "gsl_spline *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_int = {"_p_int", "int *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_nmt_binning_scheme = {"_p_nmt_binning_scheme", "nmt_binning_scheme *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_nmt_binning_scheme_flat = {"_p_nmt_binning_scheme_flat", "nmt_binning_scheme_flat *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_nmt_field = {"_p_nmt_field", "nmt_field *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_nmt_field_flat = {"_p_nmt_field_flat", "nmt_field_flat *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_nmt_flatsky_info = {"_p_nmt_flatsky_info", "nmt_flatsky_info *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_nmt_k_function = {"_p_nmt_k_function", "nmt_k_function *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_nmt_workspace = {"_p_nmt_workspace", "nmt_workspace *", 0, 0, (void*)0, 0};
+static swig_type_info _swigt__p_nmt_workspace_flat = {"_p_nmt_workspace_flat", "nmt_workspace_flat *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_double = {"_p_p_double", "double **|flouble **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_double_complex = {"_p_p_double_complex", "double complex **|fcomplex **", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_p_int = {"_p_p_int", "int **", 0, 0, (void*)0, 0};
@@ -11919,11 +13728,13 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_gsl_spline,
   &_swigt__p_int,
   &_swigt__p_nmt_binning_scheme,
+  &_swigt__p_nmt_binning_scheme_flat,
   &_swigt__p_nmt_field,
   &_swigt__p_nmt_field_flat,
   &_swigt__p_nmt_flatsky_info,
   &_swigt__p_nmt_k_function,
   &_swigt__p_nmt_workspace,
+  &_swigt__p_nmt_workspace_flat,
   &_swigt__p_p_double,
   &_swigt__p_p_double_complex,
   &_swigt__p_p_int,
@@ -11940,11 +13751,13 @@ static swig_cast_info _swigc__p_gsl_permutation[] = {  {&_swigt__p_gsl_permutati
 static swig_cast_info _swigc__p_gsl_spline[] = {  {&_swigt__p_gsl_spline, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_int[] = {  {&_swigt__p_int, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_nmt_binning_scheme[] = {  {&_swigt__p_nmt_binning_scheme, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_nmt_binning_scheme_flat[] = {  {&_swigt__p_nmt_binning_scheme_flat, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_nmt_field[] = {  {&_swigt__p_nmt_field, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_nmt_field_flat[] = {  {&_swigt__p_nmt_field_flat, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_nmt_flatsky_info[] = {  {&_swigt__p_nmt_flatsky_info, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_nmt_k_function[] = {  {&_swigt__p_nmt_k_function, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_nmt_workspace[] = {  {&_swigt__p_nmt_workspace, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_nmt_workspace_flat[] = {  {&_swigt__p_nmt_workspace_flat, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_double[] = {  {&_swigt__p_p_double, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_double_complex[] = {  {&_swigt__p_p_double_complex, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_p_int[] = {  {&_swigt__p_p_int, 0, 0, 0},{0, 0, 0, 0}};
@@ -11961,11 +13774,13 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_gsl_spline,
   _swigc__p_int,
   _swigc__p_nmt_binning_scheme,
+  _swigc__p_nmt_binning_scheme_flat,
   _swigc__p_nmt_field,
   _swigc__p_nmt_field_flat,
   _swigc__p_nmt_flatsky_info,
   _swigc__p_nmt_k_function,
   _swigc__p_nmt_workspace,
+  _swigc__p_nmt_workspace_flat,
   _swigc__p_p_double,
   _swigc__p_p_double_complex,
   _swigc__p_p_int,
