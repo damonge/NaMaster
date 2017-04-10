@@ -124,6 +124,54 @@ unbin_cls = _nmtlib.unbin_cls
 def ell_eff(*args):
   return _nmtlib.ell_eff(*args)
 ell_eff = _nmtlib.ell_eff
+class k_function(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, k_function, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, k_function, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["is_const"] = _nmtlib.k_function_is_const_set
+    __swig_getmethods__["is_const"] = _nmtlib.k_function_is_const_get
+    if _newclass:is_const = _swig_property(_nmtlib.k_function_is_const_get, _nmtlib.k_function_is_const_set)
+    __swig_setmethods__["nk"] = _nmtlib.k_function_nk_set
+    __swig_getmethods__["nk"] = _nmtlib.k_function_nk_get
+    if _newclass:nk = _swig_property(_nmtlib.k_function_nk_get, _nmtlib.k_function_nk_set)
+    __swig_setmethods__["x0"] = _nmtlib.k_function_x0_set
+    __swig_getmethods__["x0"] = _nmtlib.k_function_x0_get
+    if _newclass:x0 = _swig_property(_nmtlib.k_function_x0_get, _nmtlib.k_function_x0_set)
+    __swig_setmethods__["xf"] = _nmtlib.k_function_xf_set
+    __swig_getmethods__["xf"] = _nmtlib.k_function_xf_get
+    if _newclass:xf = _swig_property(_nmtlib.k_function_xf_get, _nmtlib.k_function_xf_set)
+    __swig_setmethods__["y0"] = _nmtlib.k_function_y0_set
+    __swig_getmethods__["y0"] = _nmtlib.k_function_y0_get
+    if _newclass:y0 = _swig_property(_nmtlib.k_function_y0_get, _nmtlib.k_function_y0_set)
+    __swig_setmethods__["yf"] = _nmtlib.k_function_yf_set
+    __swig_getmethods__["yf"] = _nmtlib.k_function_yf_get
+    if _newclass:yf = _swig_property(_nmtlib.k_function_yf_get, _nmtlib.k_function_yf_set)
+    __swig_setmethods__["spl"] = _nmtlib.k_function_spl_set
+    __swig_getmethods__["spl"] = _nmtlib.k_function_spl_get
+    if _newclass:spl = _swig_property(_nmtlib.k_function_spl_get, _nmtlib.k_function_spl_set)
+    def __init__(self): 
+        this = _nmtlib.new_k_function()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _nmtlib.delete_k_function
+    __del__ = lambda self : None;
+k_function_swigregister = _nmtlib.k_function_swigregister
+k_function_swigregister(k_function)
+
+
+def k_function_alloc(*args):
+  return _nmtlib.k_function_alloc(*args)
+k_function_alloc = _nmtlib.k_function_alloc
+
+def k_function_free(*args):
+  return _nmtlib.k_function_free(*args)
+k_function_free = _nmtlib.k_function_free
+
+def k_function_eval(*args):
+  return _nmtlib.k_function_eval(*args)
+k_function_eval = _nmtlib.k_function_eval
 class flatsky_info(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, flatsky_info, name, value)
@@ -172,6 +220,83 @@ class flatsky_info(_object):
 flatsky_info_swigregister = _nmtlib.flatsky_info_swigregister
 flatsky_info_swigregister(flatsky_info)
 
+
+def flatsky_info_alloc(*args):
+  return _nmtlib.flatsky_info_alloc(*args)
+flatsky_info_alloc = _nmtlib.flatsky_info_alloc
+
+def flatsky_info_free(*args):
+  return _nmtlib.flatsky_info_free(*args)
+flatsky_info_free = _nmtlib.flatsky_info_free
+class field_flat(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, field_flat, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, field_flat, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["fs"] = _nmtlib.field_flat_fs_set
+    __swig_getmethods__["fs"] = _nmtlib.field_flat_fs_get
+    if _newclass:fs = _swig_property(_nmtlib.field_flat_fs_get, _nmtlib.field_flat_fs_set)
+    __swig_setmethods__["npix"] = _nmtlib.field_flat_npix_set
+    __swig_getmethods__["npix"] = _nmtlib.field_flat_npix_get
+    if _newclass:npix = _swig_property(_nmtlib.field_flat_npix_get, _nmtlib.field_flat_npix_set)
+    __swig_setmethods__["pure_e"] = _nmtlib.field_flat_pure_e_set
+    __swig_getmethods__["pure_e"] = _nmtlib.field_flat_pure_e_get
+    if _newclass:pure_e = _swig_property(_nmtlib.field_flat_pure_e_get, _nmtlib.field_flat_pure_e_set)
+    __swig_setmethods__["pure_b"] = _nmtlib.field_flat_pure_b_set
+    __swig_getmethods__["pure_b"] = _nmtlib.field_flat_pure_b_get
+    if _newclass:pure_b = _swig_property(_nmtlib.field_flat_pure_b_get, _nmtlib.field_flat_pure_b_set)
+    __swig_setmethods__["mask"] = _nmtlib.field_flat_mask_set
+    __swig_getmethods__["mask"] = _nmtlib.field_flat_mask_get
+    if _newclass:mask = _swig_property(_nmtlib.field_flat_mask_get, _nmtlib.field_flat_mask_set)
+    __swig_setmethods__["pol"] = _nmtlib.field_flat_pol_set
+    __swig_getmethods__["pol"] = _nmtlib.field_flat_pol_get
+    if _newclass:pol = _swig_property(_nmtlib.field_flat_pol_get, _nmtlib.field_flat_pol_set)
+    __swig_setmethods__["nmaps"] = _nmtlib.field_flat_nmaps_set
+    __swig_getmethods__["nmaps"] = _nmtlib.field_flat_nmaps_get
+    if _newclass:nmaps = _swig_property(_nmtlib.field_flat_nmaps_get, _nmtlib.field_flat_nmaps_set)
+    __swig_setmethods__["maps"] = _nmtlib.field_flat_maps_set
+    __swig_getmethods__["maps"] = _nmtlib.field_flat_maps_get
+    if _newclass:maps = _swig_property(_nmtlib.field_flat_maps_get, _nmtlib.field_flat_maps_set)
+    __swig_setmethods__["alms"] = _nmtlib.field_flat_alms_set
+    __swig_getmethods__["alms"] = _nmtlib.field_flat_alms_get
+    if _newclass:alms = _swig_property(_nmtlib.field_flat_alms_get, _nmtlib.field_flat_alms_set)
+    __swig_setmethods__["ntemp"] = _nmtlib.field_flat_ntemp_set
+    __swig_getmethods__["ntemp"] = _nmtlib.field_flat_ntemp_get
+    if _newclass:ntemp = _swig_property(_nmtlib.field_flat_ntemp_get, _nmtlib.field_flat_ntemp_set)
+    __swig_setmethods__["temp"] = _nmtlib.field_flat_temp_set
+    __swig_getmethods__["temp"] = _nmtlib.field_flat_temp_get
+    if _newclass:temp = _swig_property(_nmtlib.field_flat_temp_get, _nmtlib.field_flat_temp_set)
+    __swig_setmethods__["a_temp"] = _nmtlib.field_flat_a_temp_set
+    __swig_getmethods__["a_temp"] = _nmtlib.field_flat_a_temp_get
+    if _newclass:a_temp = _swig_property(_nmtlib.field_flat_a_temp_get, _nmtlib.field_flat_a_temp_set)
+    __swig_setmethods__["matrix_M"] = _nmtlib.field_flat_matrix_M_set
+    __swig_getmethods__["matrix_M"] = _nmtlib.field_flat_matrix_M_get
+    if _newclass:matrix_M = _swig_property(_nmtlib.field_flat_matrix_M_get, _nmtlib.field_flat_matrix_M_set)
+    __swig_setmethods__["beam"] = _nmtlib.field_flat_beam_set
+    __swig_getmethods__["beam"] = _nmtlib.field_flat_beam_get
+    if _newclass:beam = _swig_property(_nmtlib.field_flat_beam_get, _nmtlib.field_flat_beam_set)
+    def __init__(self): 
+        this = _nmtlib.new_field_flat()
+        try: self.this.append(this)
+        except: self.this = this
+    __swig_destroy__ = _nmtlib.delete_field_flat
+    __del__ = lambda self : None;
+field_flat_swigregister = _nmtlib.field_flat_swigregister
+field_flat_swigregister(field_flat)
+
+
+def field_flat_free(*args):
+  return _nmtlib.field_flat_free(*args)
+field_flat_free = _nmtlib.field_flat_free
+
+def field_flat_alloc(*args):
+  return _nmtlib.field_flat_alloc(*args)
+field_flat_alloc = _nmtlib.field_flat_alloc
+
+def synfast_flat(*args):
+  return _nmtlib.synfast_flat(*args)
+synfast_flat = _nmtlib.synfast_flat
 class field(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, field, name, value)
@@ -223,12 +348,6 @@ class field(_object):
     __swig_setmethods__["beam"] = _nmtlib.field_beam_set
     __swig_getmethods__["beam"] = _nmtlib.field_beam_get
     if _newclass:beam = _swig_property(_nmtlib.field_beam_get, _nmtlib.field_beam_set)
-    __swig_setmethods__["is_flatsky"] = _nmtlib.field_is_flatsky_set
-    __swig_getmethods__["is_flatsky"] = _nmtlib.field_is_flatsky_get
-    if _newclass:is_flatsky = _swig_property(_nmtlib.field_is_flatsky_get, _nmtlib.field_is_flatsky_set)
-    __swig_setmethods__["fs"] = _nmtlib.field_fs_set
-    __swig_getmethods__["fs"] = _nmtlib.field_fs_get
-    if _newclass:fs = _swig_property(_nmtlib.field_fs_get, _nmtlib.field_fs_set)
     def __init__(self): 
         this = _nmtlib.new_field()
         try: self.this.append(this)
@@ -239,14 +358,6 @@ field_swigregister = _nmtlib.field_swigregister
 field_swigregister(field)
 
 
-def flatsky_info_free(*args):
-  return _nmtlib.flatsky_info_free(*args)
-flatsky_info_free = _nmtlib.flatsky_info_free
-
-def flatsky_info_alloc(*args):
-  return _nmtlib.flatsky_info_alloc(*args)
-flatsky_info_alloc = _nmtlib.flatsky_info_alloc
-
 def field_free(*args):
   return _nmtlib.field_free(*args)
 field_free = _nmtlib.field_free
@@ -255,10 +366,6 @@ def field_alloc_sph(*args):
   return _nmtlib.field_alloc_sph(*args)
 field_alloc_sph = _nmtlib.field_alloc_sph
 
-def field_alloc_flat(*args):
-  return _nmtlib.field_alloc_flat(*args)
-field_alloc_flat = _nmtlib.field_alloc_flat
-
 def field_read(*args):
   return _nmtlib.field_read(*args)
 field_read = _nmtlib.field_read
@@ -266,10 +373,6 @@ field_read = _nmtlib.field_read
 def synfast_sph(*args):
   return _nmtlib.synfast_sph(*args)
 synfast_sph = _nmtlib.synfast_sph
-
-def synfast_flat(*args):
-  return _nmtlib.synfast_flat(*args)
-synfast_flat = _nmtlib.synfast_flat
 
 def apodize_mask(*args):
   return _nmtlib.apodize_mask(*args)

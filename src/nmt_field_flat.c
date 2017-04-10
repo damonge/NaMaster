@@ -1,5 +1,37 @@
 #include "utils.h"
 
+nmt_k_function *nmt_k_function_alloc(int nk,flouble *karr,flouble *farr,flouble y0,flouble yf,int is_const)
+{
+  nmt_k_function *f=my_malloc(sizeof(nmt_k_function));
+  f->is_const=is_const;
+  f->y0=y0;
+  if(!is_const) {
+    f->x0=karr[0];
+    f->xf=karr[nk-1];
+    f->yf=yf;
+    f->spl=gsl_spline_alloc(gsl_interp_cspline,nk);
+    gsl_spline_init(f->spl,karr,farr,nk);
+  }
+  return f;
+}
+
+void nmt_k_function_free(nmt_k_function *f)
+{
+  if(!(f->is_const))
+    gsl_spline_free(f->spl);
+  free(f);
+}
+
+flouble nmt_k_function_eval(nmt_k_function *f,flouble k,gsl_interp_accel *intacc)
+{
+  if((f->is_const) || (k<=f->x0))
+      return f->y0;
+  else if(k>=f->xf)
+    return f->yf;
+  else
+    return gsl_spline_eval(f->spl,k,intacc);
+}
+
 #define N_DELL 2
 nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
 {
@@ -63,21 +95,53 @@ void nmt_flatsky_info_free(nmt_flatsky_info *fs)
   free(fs);
 }
 
-static void nmt_purify_flat(nmt_field *fl)
+void nmt_field_flat_free(nmt_field_flat *fl)
+{
+  int imap,itemp;
+  nmt_k_function_free(fl->beam);
+
+  nmt_flatsky_info_free(fl->fs);
+  for(imap=0;imap<fl->nmaps;imap++) {
+    dftw_free(fl->maps[imap]);
+    dftw_free(fl->alms[imap]);
+  }
+  dftw_free(fl->mask);
+  if(fl->ntemp>0) {
+    for(itemp=0;itemp<fl->ntemp;itemp++) {
+      for(imap=0;imap<fl->nmaps;imap++)
+	dftw_free(fl->temp[itemp][imap]);
+    }
+  }
+
+  free(fl->alms);
+  free(fl->maps);
+  if(fl->ntemp>0) {
+    for(itemp=0;itemp<fl->ntemp;itemp++) {
+      free(fl->temp[itemp]);
+      free(fl->a_temp[itemp]);
+    }
+    free(fl->temp);
+    free(fl->a_temp);
+    gsl_matrix_free(fl->matrix_M);
+  }
+  free(fl);
+}
+
+static void nmt_purify_flat(nmt_field_flat *fl)
 {
   return; //Placeholder
 }
 
-nmt_field *nmt_field_alloc_flat(int nx,int ny,flouble lx,flouble ly,flouble *mask,int pol,flouble **maps,
-				int ntemp,flouble ***temp,int lmax,flouble *beam,int pure_e,int pure_b)
+nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
+				     flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp,
+				     int nl_beam,flouble *l_beam,flouble *beam,
+				     int pure_e,int pure_b)
 {
   long ip;
   int ii,itemp,itemp2,imap;
-  nmt_field *fl=my_malloc(sizeof(nmt_field));
-  fl->is_flatsky=1;
+  nmt_field_flat *fl=my_malloc(sizeof(nmt_field_flat));
   fl->fs=nmt_flatsky_info_alloc(nx,ny,lx,ly);
   fl->npix=nx*ny;
-  fl->lmax=lmax;
   fl->pol=pol;
   if(pol) fl->nmaps=2;
   else fl->nmaps=1;
@@ -92,13 +156,10 @@ nmt_field *nmt_field_alloc_flat(int nx,int ny,flouble lx,flouble ly,flouble *mas
       fl->pure_b=1;
   }
 
-  fl->beam=my_malloc((fl->lmax+1)*sizeof(flouble));
-  if(beam==NULL) {
-    for(ii=0;ii<=fl->lmax;ii++)
-      fl->beam[ii]=1.;
-  }
+  if(beam==NULL)
+    fl->beam=nmt_k_function_alloc(-1,NULL,NULL,1.,1.,1);
   else
-    memcpy(fl->beam,beam,(fl->lmax+1)*sizeof(flouble));
+    fl->beam=nmt_k_function_alloc(nl_beam,l_beam,beam,beam[0],0.,0);
 
   fl->mask=dftw_malloc(fl->npix*sizeof(flouble));
   for(ip=0;ip<fl->npix;ip++)
@@ -183,13 +244,16 @@ nmt_field *nmt_field_alloc_flat(int nx,int ny,flouble lx,flouble ly,flouble *mas
   return fl;
 }
 
-flouble **nmt_synfast_flat(int nx,int ny,flouble lx,flouble ly,int nfields,int *spin_arr,int lmax,
-			   flouble **cells,flouble **beam_fields,int seed)
+flouble **nmt_synfast_flat(int nx,int ny,flouble lx,flouble ly,int nfields,int *spin_arr,
+			   int nl_beam,flouble *l_beam,flouble **beam_fields,
+			   int nl_cell,flouble *l_cell,flouble **cell_fields,
+			   int seed)
 {
   int ifield,imap;
-  int nmaps=0;
+  int nmaps=0,ncls=0;
   long npix=nx*ny;
-  flouble **beam,**maps;
+  nmt_k_function **beam,**cell;
+  flouble **maps;
   fcomplex **alms;
   nmt_flatsky_info *fs=nmt_flatsky_info_alloc(nx,ny,lx,ly);
   for(ifield=0;ifield<nfields;ifield++) {
@@ -199,33 +263,42 @@ flouble **nmt_synfast_flat(int nx,int ny,flouble lx,flouble ly,int nfields,int *
   }
 
   imap=0;
-  beam=my_malloc(nmaps*sizeof(flouble *));
+  beam=my_malloc(nmaps*sizeof(nmt_k_function *));
   maps=my_malloc(nmaps*sizeof(flouble *));
   for(ifield=0;ifield<nfields;ifield++) {
     int imp,nmp=1;
     if(spin_arr[ifield]) nmp=2;
     for(imp=0;imp<nmp;imp++) {
-      beam[imap+imp]=my_malloc((lmax+1)*sizeof(flouble));
+      beam[imap+imp]=nmt_k_function_alloc(nl_beam,l_beam,beam_fields[ifield],beam_fields[ifield][0],0.,0);
       maps[imap+imp]=dftw_malloc(npix*sizeof(flouble));
-      memcpy(beam[imap+imp],beam_fields[ifield],(lmax+1)*sizeof(flouble));
     }
     imap+=nmp;
   }
 
+  ncls=(nmaps*(nmaps+1))/2;
+  cell=my_malloc(ncls*sizeof(nmt_k_function *));
+  for(imap=0;imap<ncls;imap++)
+    cell[imap]=nmt_k_function_alloc(nl_cell,l_cell,cell_fields[imap],cell_fields[imap][0],0.,0);
+
+  alms=fs_synalm(nx,ny,lx,ly,nmaps,cell,beam,seed);
+
+  for(imap=0;imap<nmaps;imap++)
+    nmt_k_function_free(beam[imap]);
+  free(beam);
+  for(imap=0;imap<ncls;imap++)
+    nmt_k_function_free(cell[imap]);
+  free(cell);
+
   imap=0;
-  alms=fs_synalm(nx,ny,lx,ly,nmaps,lmax,cells,beam,seed);
   for(ifield=0;ifield<nfields;ifield++) {
     int imp,nmp=1;
     if(spin_arr[ifield]) nmp=2;
     fs_alm2map(fs,1,spin_arr[ifield],&(maps[imap]),&(alms[imap]));
-    for(imp=0;imp<nmp;imp++) {
+    for(imp=0;imp<nmp;imp++)
       dftw_free(alms[imap+imp]);
-      free(beam[imap+imp]);
-    }
     imap+=nmp;
   }
   free(alms);
-  free(beam);
   nmt_flatsky_info_free(fs);
 
   return maps;

@@ -17,9 +17,9 @@
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+#include <gsl/gsl_spline.h>
 #ifdef _WITH_NEEDLET
 #include <gsl/gsl_integration.h>
-#include <gsl/gsl_spline.h>
 #endif //_WITH_NEEDLET
 #include <fftw3.h>
 
@@ -33,6 +33,22 @@ typedef float complex fcomplex;
 typedef double flouble;
 typedef double complex fcomplex;
 #endif //_SPREC
+
+//Defined in bins_flat.c
+typedef struct {
+  int n_bands;
+  flouble *ell_0_list;
+  flouble *ell_f_list;
+} nmt_binning_scheme_flat;
+nmt_binning_scheme_flat *nmt_bins_flat_constant(int nlb,int lmax);
+nmt_binning_scheme_flat *nmt_bins_flat_create(int nell,flouble *l0,flouble *lf);
+void nmt_bins_flat_free(nmt_binning_scheme_flat *bin);
+void nmt_bin_cls_flat(nmt_binning_scheme_flat *bin,int nl,flouble *larr,flouble **cls_in,
+		      flouble **cls_out,int ncls);
+void nmt_unbin_cls_flat(nmt_binning_scheme_flat *bin,flouble **cls_in,
+			int nl,flouble *larr,flouble **cls_out,int ncls);
+void nmt_ell_eff_flat(nmt_binning_scheme_flat *bin,flouble *larr);
+int nmt_bins_flat_search_fast(nmt_binning_scheme_flat *bin,flouble l,int il);
 
 //Defined in bins.c
 typedef struct {
@@ -49,7 +65,20 @@ void nmt_bin_cls(nmt_binning_scheme *bin,flouble **cls_in,flouble **cls_out,int 
 void nmt_unbin_cls(nmt_binning_scheme *bin,flouble **cls_in,flouble **cls_out,int ncls);
 void nmt_ell_eff(nmt_binning_scheme *bin,flouble *larr);
 
-//Defined in field.c
+//Defined in field_flat.c
+typedef struct {
+  int is_const;
+  int nk;
+  flouble x0;
+  flouble xf;
+  flouble y0;
+  flouble yf;
+  gsl_spline *spl;
+} nmt_k_function;
+nmt_k_function *nmt_k_function_alloc(int nk,flouble *karr,flouble *farr,flouble y0,flouble yf,int is_const);
+void nmt_k_function_free(nmt_k_function *f);
+flouble nmt_k_function_eval(nmt_k_function *f,flouble k,gsl_interp_accel *intacc);
+
 typedef struct {
   int nx;
   int ny;
@@ -63,7 +92,36 @@ typedef struct {
   flouble *ell_min;
   int *n_cells;
 } nmt_flatsky_info;
+nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly);
+void nmt_flatsky_info_free(nmt_flatsky_info *fs);
 
+typedef struct {
+  nmt_flatsky_info *fs;
+  long npix;
+  int pure_e;
+  int pure_b;
+  flouble *mask;
+  int pol;
+  int nmaps;
+  flouble **maps;
+  fcomplex **alms;
+  int ntemp;
+  flouble ***temp;
+  fcomplex ***a_temp;
+  gsl_matrix *matrix_M;
+  nmt_k_function *beam;
+} nmt_field_flat;
+void nmt_field_flat_free(nmt_field_flat *fl);
+nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
+				     flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp,
+				     int nl_beam,flouble *l_beam,flouble *beam,
+				     int pure_e,int pure_b);
+flouble **nmt_synfast_flat(int nx,int ny,flouble lx,flouble ly,int nfields,int *spin_arr,
+			   int nl_beam,flouble *l_beam,flouble **beam_fields,
+			   int nl_cell,flouble *l_cell,flouble **cell_fields,
+			   int seed);
+
+//Defined in field.c
 typedef struct {
   long nside;
   long npix;
@@ -80,23 +138,49 @@ typedef struct {
   fcomplex ***a_temp;
   gsl_matrix *matrix_M;
   flouble *beam;
-  int is_flatsky;
-  nmt_flatsky_info *fs;
 } nmt_field;
-void nmt_flatsky_info_free(nmt_flatsky_info *fs);
-nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly);
 void nmt_field_free(nmt_field *fl);
 nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
 			       int ntemp,flouble ***temp,flouble *beam,int pure_e,int pure_b);
-nmt_field *nmt_field_alloc_flat(int nx,int ny,flouble lx,flouble ly,flouble *mask,int pol,flouble **maps,
-				int ntemp,flouble ***temp,int lmax,flouble *beam,int pure_e,int pure_b);
 nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,
 			  int pol,int pure_e,int pure_b);
 flouble **nmt_synfast_sph(int nside,int nfields,int *spin_arr,int lmax,
 			  flouble **cells,flouble **beam_fields,int seed);
-flouble **nmt_synfast_flat(int nx,int ny,flouble lx,flouble ly,int nfields,int *spin_arr,int lmax,
-			   flouble **cells,flouble **beam_fields,int seed);
+
+//Defined in mask.c
 void nmt_apodize_mask(long nside,flouble *mask_in,flouble *mask_out,flouble aposize,char *apotype);
+
+//Defined in master_flat.c
+typedef struct {
+  int ncls;
+  int nl_rebin;
+  int nells;
+  nmt_flatsky_info *fs;
+  flouble *pcl_masks;
+  flouble *l_arr;
+  int *i_band;
+  flouble **coupling_matrix_unbinned;
+  nmt_binning_scheme_flat *bin;
+  gsl_matrix *coupling_matrix_binned;
+  gsl_permutation *coupling_matrix_perm;
+} nmt_workspace_flat;
+void nmt_workspace_flat_free(nmt_workspace_flat *w);
+nmt_workspace_flat *nmt_workspace_flat_read(char *fname);
+void nmt_workspace_flat_write(nmt_workspace_flat *w,char *fname);
+nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
+						     nmt_binning_scheme_flat *bin,int nl_rebin);
+void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
+					int nl_prop,flouble *l_prop,flouble **cl_proposal,
+					flouble **cl_bias);
+void nmt_couple_cl_l_flat(nmt_workspace_flat *w,int nl,flouble *larr,flouble **cl_in,flouble **cl_out);
+void nmt_decouple_cl_l_flat(nmt_workspace_flat *w,flouble **cl_in,flouble **cl_noise_in,
+			    flouble **cl_bias,flouble **cl_out);
+void nmt_compute_coupled_cell_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,flouble *larr,flouble **cl_out);
+nmt_workspace_flat *nmt_compute_power_spectra_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
+						   nmt_binning_scheme_flat *bin,int nl_rebin,
+						   nmt_workspace_flat *w0,flouble **cl_noise,
+						   int nl_prop,flouble *l_prop,flouble **cl_prop,
+						   flouble **cl_out);
 
 //Defined in master.c
 typedef struct {

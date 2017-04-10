@@ -10,6 +10,7 @@ void nmt_bins_free(nmt_binning_scheme *bins)
   }
   free(bins->ell_list);
   free(bins->w_list);
+  free(bins);
 }
 
 nmt_binning_scheme *nmt_bins_constant(int nlb,int lmax)

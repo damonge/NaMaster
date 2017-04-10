@@ -27,8 +27,8 @@ void fs_map2alm(nmt_flatsky_info *fs,int ntrans,int spin,flouble **map,fcomplex 
 void fs_alm2map(nmt_flatsky_info *fs,int ntrans,int spin,flouble **map,fcomplex **alm);
 void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls);
 void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls);
-fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,int lmax,
-		     flouble **cells,flouble **beam,int seed);
+fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,
+		     nmt_k_function **cells,nmt_k_function **beam,int seed);
 
 //Defined in healpix_extra.c
 #define HE_NITER_DEFAULT 3

@@ -218,7 +218,7 @@ static int drc3jj(int il2,int il3,int im2, int im3,int *l1min_out,
   return 2;
 }
 
-static nmt_workspace *master_workspace_new(int lmax,int ncls,nmt_binning_scheme *bin)
+static nmt_workspace *nmt_workspace_new(int lmax,int ncls,nmt_binning_scheme *bin)
 {
   int ii;
   nmt_workspace *w=my_malloc(sizeof(nmt_workspace));
@@ -235,7 +235,6 @@ static nmt_workspace *master_workspace_new(int lmax,int ncls,nmt_binning_scheme 
   w->bin->n_bands=bin->n_bands;
   w->bin->nell_list=my_malloc(w->bin->n_bands*sizeof(int));
   memcpy(w->bin->nell_list,bin->nell_list,w->bin->n_bands*sizeof(int));
-
   w->bin->ell_list=my_malloc(w->bin->n_bands*sizeof(int *));
   w->bin->w_list=my_malloc(w->bin->n_bands*sizeof(flouble *));
   for(ii=0;ii<w->bin->n_bands;ii++) {
@@ -366,7 +365,7 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
   flouble *beam_prod=my_malloc((fl1->lmax+1)*sizeof(flouble));
   if(fl1->nside!=fl2->nside)
     report_error(1,"Can't correlate fields with different resolutions\n");
-  w=master_workspace_new(fl1->lmax,n_cl,bin);
+  w=nmt_workspace_new(fl1->lmax,n_cl,bin);
   he_anafast(&(fl1->mask),&(fl2->mask),0,0,&(w->pcl_masks),fl1->nside,fl1->lmax,HE_NITER_DEFAULT);
   for(l2=0;l2<=fl1->lmax;l2++) {
     w->pcl_masks[l2]*=(2*l2+1.);
@@ -694,8 +693,8 @@ void nmt_couple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_out)
 	int icl2=0;
 	for(icl2=0;icl2<w->ncls;icl2++)
 	  cl+=mrow[w->ncls*l2+icl2]*cl_in[icl2][l2];
-	cl_out[icl1][l1]=cl;
       }
+      cl_out[icl1][l1]=cl;
     }
   }
 }

@@ -191,23 +191,23 @@ nmt_field *field_alloc_new_notemp(int npix_1,double *mask,
   return fl;
 }
 
-nmt_field *field_alloc_new_flat(int nx,int ny,double lx,double ly,
-				int npix_1,double *mask,
-				int nmap_2,int npix_2,double *mps,
-				int ntmp_3,int nmap_3,int npix_3,double *tmp,
-				int nell3,double *weights,int pure_e,int pure_b)
+nmt_field_flat *field_alloc_new_flat(int nx,int ny,double lx,double ly,
+				     int npix_1,double *mask,
+				     int nmap_2,int npix_2,double *mps,
+				     int ntmp_3,int nmap_3,int npix_3,double *tmp,
+				     int nell3,double *weights,int pure_e,int pure_b)
 {
-  int ii,jj,lmax;
+  int ii,jj;
   int pol=0,ntemp=0;
   double **maps;
   double ***temp=NULL;
-  nmt_field *fl;
+  double *larr;
+  nmt_field_flat *fl;
   assert(npix_1==npix_2);
   assert(npix_2==npix_3);
   assert(nmap_2==nmap_3);
   assert((nmap_2==1) || (nmap_2==2));
   assert(npix_1==nx*ny);
-  lmax=nell3-1;
 
   if(nmap_2==2) pol=1;
 
@@ -225,7 +225,12 @@ nmt_field *field_alloc_new_flat(int nx,int ny,double lx,double ly,
   for(ii=0;ii<nmap_2;ii++)
     maps[ii]=mps+npix_2*ii;
 
-  fl=nmt_field_alloc_flat(nx,ny,lx,ly,mask,pol,maps,ntemp,temp,lmax,weights,pure_e,pure_b);
+  larr=malloc(nell3*sizeof(double));
+  for(ii=0;ii<nell3;ii++)
+    larr[ii]=ii;
+
+  fl=nmt_field_flat_alloc(nx,ny,lx,ly,mask,pol,maps,ntemp,temp,
+			  nell3,larr,weights,pure_e,pure_b);
 
   if(tmp!=NULL) {
     for(ii=0;ii<ntmp_3;ii++)
@@ -233,23 +238,24 @@ nmt_field *field_alloc_new_flat(int nx,int ny,double lx,double ly,
     free(temp);
   }
   free(maps);
+  free(larr);
 
   return fl;
 }
 
-nmt_field *field_alloc_new_notemp_flat(int nx,int ny,double lx,double ly,
-				       int npix_1,double *mask,
-				       int nmap_2,int npix_2,double *mps,
-				       int nell3,double *weights,int pure_e,int pure_b)
+nmt_field_flat *field_alloc_new_notemp_flat(int nx,int ny,double lx,double ly,
+					    int npix_1,double *mask,
+					    int nmap_2,int npix_2,double *mps,
+					    int nell3,double *weights,int pure_e,int pure_b)
 {
-  int ii,lmax;
+  int ii;
   int pol=0,ntemp=0;
   double **maps;
-  nmt_field *fl;
+  double *larr;
+  nmt_field_flat *fl;
   assert(npix_1==npix_2);
   assert((nmap_2==1) || (nmap_2==2));
   assert(npix_1==nx*ny);
-  lmax=nell3-1;
 
   if(nmap_2==2) pol=1;
 
@@ -257,9 +263,15 @@ nmt_field *field_alloc_new_notemp_flat(int nx,int ny,double lx,double ly,
   for(ii=0;ii<nmap_2;ii++)
     maps[ii]=mps+npix_2*ii;
 
-  fl=nmt_field_alloc_flat(nx,ny,lx,ly,mask,pol,maps,ntemp,NULL,lmax,weights,pure_e,pure_b);
+  larr=malloc(nell3*sizeof(double));
+  for(ii=0;ii<nell3;ii++)
+    larr[ii]=ii;
+
+  fl=nmt_field_flat_alloc(nx,ny,lx,ly,mask,pol,maps,ntemp,NULL,
+			  nell3,larr,weights,pure_e,pure_b);
 
   free(maps);
+  free(larr);
 
   return fl;
 }
@@ -329,8 +341,9 @@ void synfast_new_flat(int nx,int ny,double lx,double ly,int pol,int seed,
 		      int nell3,double *weights,
 		      double* dout,int ndout)
 {
-  int icl,nfields=1,nmaps=1;
+  int ii,icl,nfields=1,nmaps=1;
   long npix=nx*ny;
+  double *larr;
   double **cls,**beams,**maps;
   int spin_arr[2]={0,2};
   if(pol) {
@@ -346,7 +359,12 @@ void synfast_new_flat(int nx,int ny,double lx,double ly,int pol,int seed,
   for(icl=0;icl<nfields;icl++)
     beams[icl]=weights;
 
-  maps=nmt_synfast_flat(nx,ny,lx,ly,nfields,spin_arr,nell3-1,cls,beams,seed);
+  larr=malloc(nell3*sizeof(double));
+  for(ii=0;ii<nell3;ii++)
+    larr[ii]=ii;
+
+  maps=nmt_synfast_flat(nx,ny,lx,ly,nfields,spin_arr,
+			nell3,larr,beams,nell1,larr,cls,seed);
 
   for(icl=0;icl<nmaps;icl++) {
     memcpy(&(dout[npix*icl]),maps[icl],npix*sizeof(double));
@@ -355,6 +373,7 @@ void synfast_new_flat(int nx,int ny,double lx,double ly,int pol,int seed,
   free(maps);
   free(beams);
   free(cls);
+  free(larr);
 }
 
 void comp_deproj_bias(nmt_field *fl1,nmt_field *fl2,

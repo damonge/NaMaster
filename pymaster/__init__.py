@@ -120,7 +120,10 @@ class NmtField(object) :
                 self.fl=lib.field_alloc_new(mask,maps,templates,beam_use,pure_e,pure_b)
 
     def __del__(self) :
-        lib.field_free(self.fl)
+        if self.isflat :
+            lib.field_flat_free(self.fl)
+        else :
+            lib.field_free(self.fl)
 
     def get_maps(self) :
         """

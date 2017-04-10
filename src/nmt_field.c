@@ -5,32 +5,16 @@ void nmt_field_free(nmt_field *fl)
   int imap,itemp;
   free(fl->beam);
 
-  if(fl->is_flatsky) {
-    nmt_flatsky_info_free(fl->fs);
-    for(imap=0;imap<fl->nmaps;imap++) {
-      dftw_free(fl->maps[imap]);
-      dftw_free(fl->alms[imap]);
-    }
-    dftw_free(fl->mask);
-    if(fl->ntemp>0) {
-      for(itemp=0;itemp<fl->ntemp;itemp++) {
-	for(imap=0;imap<fl->nmaps;imap++)
-	  dftw_free(fl->temp[itemp][imap]);
-      }
-    }
+  for(imap=0;imap<fl->nmaps;imap++) {
+    free(fl->maps[imap]);
+    free(fl->alms[imap]);
   }
-  else {
-    for(imap=0;imap<fl->nmaps;imap++) {
-      free(fl->maps[imap]);
-      free(fl->alms[imap]);
-    }
-    free(fl->mask);
-    if(fl->ntemp>0) {
-      for(itemp=0;itemp<fl->ntemp;itemp++) {
-	for(imap=0;imap<fl->nmaps;imap++) {
-	  free(fl->temp[itemp][imap]);
-	  free(fl->a_temp[itemp][imap]);
-	}
+  free(fl->mask);
+  if(fl->ntemp>0) {
+    for(itemp=0;itemp<fl->ntemp;itemp++) {
+      for(imap=0;imap<fl->nmaps;imap++) {
+	free(fl->temp[itemp][imap]);
+	free(fl->a_temp[itemp][imap]);
       }
     }
   }
@@ -174,7 +158,6 @@ nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
 {
   int ii,itemp,itemp2,imap;
   nmt_field *fl=my_malloc(sizeof(nmt_field));
-  fl->is_flatsky=0;
   fl->nside=nside;
   fl->lmax=3*fl->nside-1;
   fl->npix=12*fl->nside*fl->nside;

@@ -342,8 +342,8 @@ void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,int pol_1
   }
 }
 
-fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,int lmax,
-		     flouble **cells,flouble **beam,int seed)
+fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,
+		     nmt_k_function **cells,nmt_k_function **beam,int seed)
 {
   int imap;
   fcomplex **alms;
@@ -355,7 +355,7 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,int lmax,
   gsl_error_handler_t *geh=gsl_set_error_handler_off();
 
 #pragma omp parallel default(none)			\
-  shared(nx,ny,lx,ly,nmaps,lmax,cells,beam,seed,alms)
+  shared(nx,ny,lx,ly,nmaps,cells,beam,seed,alms)
   {
     int iy;
     double dkx=2*M_PI/lx,dky=2*M_PI/ly;
@@ -371,6 +371,8 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,int lmax,
     int ithr=omp_get_thread_num();
     unsigned int seed_thr=(unsigned int)(seed+ithr);
     gsl_rng *rng=init_rng(seed_thr);
+    gsl_interp_accel *intacc_cells=gsl_interp_accel_alloc();
+    gsl_interp_accel *intacc_beam=gsl_interp_accel_alloc();
 
 #pragma omp for
     for(iy=0;iy<ny;iy++) {
@@ -385,8 +387,7 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,int lmax,
 	flouble kx=ix*dkx;
 	long index=ix+(nx/2+1)*iy;
 	flouble kmod=sqrt(kx*kx+ky*ky);
-	int iell=(int)(kmod+0.5);
-	if((kmod<=0) || (iell<0) || (iell>lmax)) {
+	if(kmod<=0) {
 	  for(imp1=0;imp1<nmaps;imp1++)
 	    alms[imp1][index]=0;
 	}
@@ -395,9 +396,10 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,int lmax,
 	  int icl=0;
 	  for(imp1=0;imp1<nmaps;imp1++) {
 	    for(imp2=imp1;imp2<nmaps;imp2++) {//Fill up only lower triangular part
-	      gsl_matrix_set(clmat,imp1,imp2,cells[icl][iell]*0.5*inv_dkvol);
+	      flouble cl=0.5*inv_dkvol*nmt_k_function_eval(cells[icl],kmod,intacc_cells);
+	      gsl_matrix_set(clmat,imp1,imp2,cl);
 	      if(imp2!=imp1)
-		gsl_matrix_set(clmat,imp2,imp1,cells[icl][iell]*0.5*inv_dkvol);
+		gsl_matrix_set(clmat,imp2,imp1,cl);
 	      icl++;
 	    }
 	  }
@@ -421,8 +423,10 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,int lmax,
 	  //Get correlate random numbers
 	  gsl_blas_dgemv(CblasNoTrans,1.,clmat,rv1,0,rv2);
 	  gsl_blas_dgemv(CblasNoTrans,1.,clmat,iv1,0,iv2);
-	  for(imp1=0;imp1<nmaps;imp1++)
-	    alms[imp1][index]=beam[imp1][iell]*(fcomplex)(gsl_vector_get(rv2,imp1)+I*gsl_vector_get(iv2,imp1));
+	  for(imp1=0;imp1<nmaps;imp1++) {
+	    flouble bm=nmt_k_function_eval(beam[imp1],kmod,intacc_beam);
+	    alms[imp1][index]=bm*(fcomplex)(gsl_vector_get(rv2,imp1)+I*gsl_vector_get(iv2,imp1));
+	  }
 	}
       }
     } //omp end for
@@ -435,6 +439,8 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,int lmax,
     gsl_matrix_free(evec);
     gsl_eigen_symmv_free(wsym);
     end_rng(rng);
+    gsl_interp_accel_free(intacc_cells);
+    gsl_interp_accel_free(intacc_beam);
   } //omp end parallel
 
   //Restore error handler
