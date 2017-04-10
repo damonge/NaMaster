@@ -377,7 +377,7 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
   shared(w,beam_prod,fl1,fl2)
   {
     int ll2,ll3;
-    double *wigner_00=NULL,*wigner_22=NULL,*wigner_12=NULL,*wigner_02;
+    double *wigner_00=NULL,*wigner_22=NULL,*wigner_12=NULL,*wigner_02=NULL;
     int lstart=0;
     int pe1=fl1->pure_e,pe2=fl2->pure_e,pb1=fl1->pure_b,pb2=fl2->pure_b;
     int pure_any=pe1 || pb1 || pe2 || pb2;
@@ -424,7 +424,7 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
 
 	for(l1=lmin_here;l1<=lmax_here;l1++) {
 	  if(l1<=w->lmax) {
-	    flouble wfac,fac_12,fac_02;
+	    flouble wfac,fac_12=0,fac_02=0;
 	    int j02,j12;
 	    int j00=l1-lmin_here_00;
 	    int j22=l1-lmin_here_22;

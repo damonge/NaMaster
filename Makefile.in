@@ -131,6 +131,7 @@ am__dirstamp = $(am__leading_dot)dirstamp
 am_libnmt_la_OBJECTS = src/libnmt_la-utils.lo \
 	src/libnmt_la-flatsky_utils.lo src/libnmt_la-healpix_extra.lo \
 	src/libnmt_la-nmt_bins.lo src/libnmt_la-nmt_field.lo \
+	src/libnmt_la-nmt_field_flat.lo src/libnmt_la-nmt_mask.lo \
 	src/libnmt_la-nmt_master.lo
 libnmt_la_OBJECTS = $(am_libnmt_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -343,7 +344,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 EXTRA_DIST = doc README.md
 lib_LTLIBRARIES = libnmt.la
-libnmt_la_SOURCES = src/utils.c src/flatsky_utils.c src/healpix_extra.c src/nmt_bins.c src/nmt_field.c src/nmt_master.c 
+libnmt_la_SOURCES = src/utils.c src/flatsky_utils.c src/healpix_extra.c src/nmt_bins.c src/nmt_field.c src/nmt_field_flat.c src/nmt_mask.c src/nmt_master.c 
 libnmt_la_CPPFLAGS = $(OPENMP_CFLAGS) -I./src/
 include_HEADERS = src/namaster.h
 namaster_SOURCES = src/nmt_main.c
@@ -454,6 +455,10 @@ src/libnmt_la-nmt_bins.lo: src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/libnmt_la-nmt_field.lo: src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/libnmt_la-nmt_field_flat.lo: src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/libnmt_la-nmt_mask.lo: src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/libnmt_la-nmt_master.lo: src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 
@@ -527,6 +532,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libnmt_la-healpix_extra.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libnmt_la-nmt_bins.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libnmt_la-nmt_field.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libnmt_la-nmt_field_flat.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libnmt_la-nmt_mask.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libnmt_la-nmt_master.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/libnmt_la-utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/namaster-nmt_main.Po@am__quote@
@@ -589,6 +596,20 @@ src/libnmt_la-nmt_field.lo: src/nmt_field.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/nmt_field.c' object='src/libnmt_la-nmt_field.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libnmt_la-nmt_field.lo `test -f 'src/nmt_field.c' || echo '$(srcdir)/'`src/nmt_field.c
+
+src/libnmt_la-nmt_field_flat.lo: src/nmt_field_flat.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libnmt_la-nmt_field_flat.lo -MD -MP -MF src/$(DEPDIR)/libnmt_la-nmt_field_flat.Tpo -c -o src/libnmt_la-nmt_field_flat.lo `test -f 'src/nmt_field_flat.c' || echo '$(srcdir)/'`src/nmt_field_flat.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libnmt_la-nmt_field_flat.Tpo src/$(DEPDIR)/libnmt_la-nmt_field_flat.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/nmt_field_flat.c' object='src/libnmt_la-nmt_field_flat.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libnmt_la-nmt_field_flat.lo `test -f 'src/nmt_field_flat.c' || echo '$(srcdir)/'`src/nmt_field_flat.c
+
+src/libnmt_la-nmt_mask.lo: src/nmt_mask.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libnmt_la-nmt_mask.lo -MD -MP -MF src/$(DEPDIR)/libnmt_la-nmt_mask.Tpo -c -o src/libnmt_la-nmt_mask.lo `test -f 'src/nmt_mask.c' || echo '$(srcdir)/'`src/nmt_mask.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/libnmt_la-nmt_mask.Tpo src/$(DEPDIR)/libnmt_la-nmt_mask.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/nmt_mask.c' object='src/libnmt_la-nmt_mask.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/libnmt_la-nmt_mask.lo `test -f 'src/nmt_mask.c' || echo '$(srcdir)/'`src/nmt_mask.c
 
 src/libnmt_la-nmt_master.lo: src/nmt_master.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libnmt_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT src/libnmt_la-nmt_master.lo -MD -MP -MF src/$(DEPDIR)/libnmt_la-nmt_master.Tpo -c -o src/libnmt_la-nmt_master.lo `test -f 'src/nmt_master.c' || echo '$(srcdir)/'`src/nmt_master.c

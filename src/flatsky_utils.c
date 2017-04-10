@@ -255,7 +255,7 @@ void fs_alm2map(nmt_flatsky_info *fs,int ntrans,int spin,flouble **map,fcomplex 
 
 void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls)
 {
-  int i1,il,nmaps_1=1,nmaps_2=1;
+  int i1,nmaps_1=1,nmaps_2=1;
   if(pol_1) nmaps_1=2;
   if(pol_2) nmaps_2=2;
 
@@ -266,6 +266,7 @@ void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_
       int il;
       fcomplex *alm2=alms_2[i2];
       int index_cl=i2+nmaps_2*i1;
+      flouble norm_factor=4*M_PI*M_PI/(fs->lx*fs->ly);
       for(il=0;il<fs->n_ell;il++)
 	cls[index_cl][il]=0;
 
@@ -285,7 +286,6 @@ void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_
 	  else
 	    ky=-(fs->ny-iy)*dky;
 	  for(ix=0;ix<=fs->nx/2;ix++) {
-	    int s=0;
 	    flouble kx=ix*dkx;
 	    long index=ix+(fs->nx/2+1)*iy;
 	    flouble kmod=sqrt(kx*kx+ky*ky);
@@ -298,11 +298,11 @@ void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_
 	} //end omp for
       } //end omp parallel
 
-      for(il<0;il<fs->n_ell;il++) {
+      for(il=0;il<fs->n_ell;il++) {
 	if(fs->n_cells[il]<=0)
 	  cls[index_cl][il]=0;
 	else
-	  cls[index_cl][il]/=fs->n_cells[il];
+	  cls[index_cl][il]*=norm_factor/fs->n_cells[il];
       }
     }
   }
@@ -359,6 +359,7 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,int lmax,
   {
     int iy;
     double dkx=2*M_PI/lx,dky=2*M_PI/ly;
+    double inv_dkvol=1./(dkx*dky);
     gsl_vector *rv1=gsl_vector_alloc(nmaps);
     gsl_vector *iv1=gsl_vector_alloc(nmaps);
     gsl_vector *rv2=gsl_vector_alloc(nmaps);
@@ -394,9 +395,9 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,int lmax,
 	  int icl=0;
 	  for(imp1=0;imp1<nmaps;imp1++) {
 	    for(imp2=imp1;imp2<nmaps;imp2++) {//Fill up only lower triangular part
-	      gsl_matrix_set(clmat,imp1,imp2,cells[icl][iell]*0.5);
+	      gsl_matrix_set(clmat,imp1,imp2,cells[icl][iell]*0.5*inv_dkvol);
 	      if(imp2!=imp1)
-		gsl_matrix_set(clmat,imp2,imp1,cells[icl][iell]*0.5);
+		gsl_matrix_set(clmat,imp2,imp1,cells[icl][iell]*0.5*inv_dkvol);
 	      icl++;
 	    }
 	  }
