@@ -3,6 +3,13 @@
 #include "namaster.h"
 
 //Defined in utils.c
+gsl_rng *init_rng(unsigned int seed);
+double rng_01(gsl_rng *rng);
+int rng_poisson(double lambda,gsl_rng *rng);
+void rng_delta_gauss(double *module,double *phase,
+		     gsl_rng *rng,double sigma2);
+void rng_gauss(gsl_rng *rng,double *r1,double *r2);
+void end_rng(gsl_rng *rng);
 int my_linecount(FILE *f);
 void report_error(int level,char *fmt,...);
 void *my_malloc(size_t size);
@@ -18,6 +25,10 @@ void fs_map_product(nmt_flatsky_info *fs,flouble *mp1,flouble *mp2,flouble *mp_o
 flouble fs_map_dot(nmt_flatsky_info *fs,flouble *mp1,flouble *mp2);
 void fs_map2alm(nmt_flatsky_info *fs,int ntrans,int spin,flouble **map,fcomplex **alm);
 void fs_alm2map(nmt_flatsky_info *fs,int ntrans,int spin,flouble **map,fcomplex **alm);
+void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls);
+void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls);
+fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,int lmax,
+		     flouble **cells,flouble **beam,int seed);
 
 //Defined in healpix_extra.c
 #define HE_NITER_DEFAULT 3
@@ -45,7 +56,7 @@ double *he_generate_beam_window(int lmax,double fwhm_amin);
 void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,double *window);
 void he_map_product(int nside,flouble *mp1,flouble *mp2,flouble *mp_out);
 flouble he_map_dot(int nside,flouble *mp1,flouble *mp2);
-//flouble *he_synfast(flouble *cl,int nside,int lmax,unsigned int seed);
+fcomplex **he_synalm(int nside,int nmaps,int lmax,flouble **cells,flouble **beam,int seed);
 #ifdef _WITH_NEEDLET
 #define HE_NBAND_NX 512
 #define HE_NORM_FT 2.2522836206907617

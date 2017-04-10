@@ -912,40 +912,116 @@ flouble he_map_dot(int nside,flouble *mp1,flouble *mp2)
   return (flouble)(sum*pixsize);
 }
 
-/*
-flouble *he_synfast(flouble *cl,int nside,int lmax,unsigned int seed)
+fcomplex **he_synalm(int nside,int nmaps,int lmax,flouble **cells,flouble **beam,int seed)
 {
-  fcomplex *alms;
-  int lmax_here=lmax;
-  long npix=12*((long)nside)*nside;
-  flouble *map=my_malloc(npix*sizeof(flouble));
-  Rng *rng=init_rng(seed);
+  int imap;
+  fcomplex **alms;
+  int lmax_here=3*nside-1;
+  alms=my_malloc(nmaps*sizeof(fcomplex *));
+  for(imap=0;imap<nmaps;imap++)
+    alms[imap]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
+  if(lmax>lmax_here) lmax=lmax_here;
 
-  if(lmax>3*nside-1)
-    lmax_here=3*nside-1;
-  alms=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
+  //Switch off error handler for Cholesky decomposition
+  gsl_error_handler_t *geh=gsl_set_error_handler_off();
 
-  int ll;
-  for(ll=0;ll<=lmax_here;ll++) {
-    int mm;
-    flouble sigma=sqrt(0.5*cl[ll]);
-    flouble r1,r2;
-    r1=rand_gauss(rng);
-    alms[he_indexlm(ll,0,lmax_here)]=(fcomplex)(M_SQRT2*sigma*r1);
+#pragma omp parallel default(none)				\
+  shared(nside,nmaps,lmax,cells,beam,seed,alms,lmax_here)
+  {
+    int ll;
+    flouble *bms=my_malloc(nmaps*sizeof(flouble));
+    gsl_vector *rv1  =gsl_vector_alloc(nmaps);
+    gsl_vector *iv1  =gsl_vector_alloc(nmaps);
+    gsl_vector *rv2  =gsl_vector_alloc(nmaps);
+    gsl_vector *iv2  =gsl_vector_alloc(nmaps);
+    gsl_matrix *clmat=gsl_matrix_alloc(nmaps,nmaps); 
+    gsl_vector *eval =gsl_vector_alloc(nmaps);
+    gsl_matrix *evec =gsl_matrix_alloc(nmaps,nmaps); 
+    gsl_eigen_symmv_workspace *wsym=gsl_eigen_symmv_alloc(nmaps);
+    int ithr=omp_get_thread_num();
+    unsigned int seed_thr=(unsigned int)(seed+ithr);
+    gsl_rng *rng=init_rng(seed_thr);
 
-    for(mm=1;mm<=ll;mm++) {
-      r1=rand_gauss(rng);
-      r2=rand_gauss(rng);
-      alms[he_indexlm(ll,mm,lmax_here)]=(fcomplex)(sigma*(r1+I*r2));
-    }
-  }
-  he_alm2map(0,nside,lmax_here,1,&map,&alms);
-  free(alms);
-  end_rng(rng);
+#pragma omp for
+    for(ll=0;ll<=lmax_here;ll++) {
+      int mm,imp1,imp2;
 
-  return map;
+      if(ll>lmax) {
+	for(imp1=0;imp1<nmaps;imp1++) {
+	  for(mm=0;mm<=ll;mm++) {
+	    long index=he_indexlm(ll,mm,lmax_here);
+	    alms[imp1][index]=0;
+	  }
+	}
+      }
+      else {
+	//Get power spectrum
+	int icl=0;
+	for(imp1=0;imp1<nmaps;imp1++) {
+	  for(imp2=imp1;imp2<nmaps;imp2++) {//Fill up only lower triangular part
+	    gsl_matrix_set(clmat,imp1,imp2,cells[icl][ll]*0.5);
+	    if(imp2!=imp1)
+	      gsl_matrix_set(clmat,imp2,imp1,cells[icl][ll]*0.5);
+	    icl++;
+	  }
+	  bms[imp1]=beam[imp1][ll];
+	}
+
+	//Take square root
+	gsl_eigen_symmv(clmat,eval,evec,wsym);
+	for(imp1=0;imp1<nmaps;imp1++) {
+	  for(imp2=0;imp2<nmaps;imp2++) {
+	    double oij=gsl_matrix_get(evec,imp1,imp2);
+	    double lambda=gsl_vector_get(eval,imp2);
+	    if(lambda<=0) lambda=0;
+	    else lambda=sqrt(lambda);
+	    gsl_matrix_set(clmat,imp1,imp2,oij*lambda);
+	  }
+	}
+
+	//Random alm for m=0
+	for(imp1=0;imp1<nmaps;imp1++) {
+	  double dr,di;
+	  rng_gauss(rng,&dr,&di);
+	  gsl_vector_set(rv1,imp1,dr);
+	}
+	gsl_blas_dgemv(CblasNoTrans,1.,clmat,rv1,0,rv2);
+	for(imp1=0;imp1<nmaps;imp1++)
+	  alms[imp1][he_indexlm(ll,0,lmax_here)]=bms[imp1]*((fcomplex)(M_SQRT2*gsl_vector_get(rv2,imp1)));
+
+	//Random alms for m>0
+	for(mm=1;mm<=ll;mm++) {
+	  long index=he_indexlm(ll,mm,lmax_here);
+	  for(imp1=0;imp1<nmaps;imp1++) {
+	    double dr,di;
+	    rng_gauss(rng,&dr,&di);
+	    gsl_vector_set(rv1,imp1,dr);
+	    gsl_vector_set(iv1,imp1,di);
+	  }
+	  gsl_blas_dgemv(CblasNoTrans,1.,clmat,rv1,0,rv2);
+	  gsl_blas_dgemv(CblasNoTrans,1.,clmat,iv1,0,iv2);
+	  for(imp1=0;imp1<nmaps;imp1++)
+	    alms[imp1][index]=bms[imp1]*((fcomplex)(gsl_vector_get(rv2,imp1)+I*gsl_vector_get(iv2,imp1)));
+	}
+      }
+    } //end omp for
+    free(bms);
+    gsl_vector_free(rv1);
+    gsl_vector_free(rv2);
+    gsl_vector_free(iv1);
+    gsl_vector_free(iv2);
+    gsl_matrix_free(clmat);
+    gsl_vector_free(eval);
+    gsl_matrix_free(evec);
+    gsl_eigen_symmv_free(wsym);
+    end_rng(rng);
+  } //end omp parallel
+
+  //Restore error handler
+  gsl_set_error_handler(geh);
+
+  return alms;
 }
-*/
 
 #ifdef _WITH_NEEDLET
 static double func_fx(double x,void *pars)

@@ -144,7 +144,7 @@ nmt_field *field_alloc_new(int npix_1,double *mask,
 	temp[ii][jj]=tmp+npix_3*(jj+ii*nmap_3);
     }
   }
-  
+
   maps=malloc(nmap_2*sizeof(double *));
   for(ii=0;ii<nmap_2;ii++)
     maps[ii]=mps+npix_2*ii;
@@ -171,8 +171,6 @@ nmt_field *field_alloc_new_notemp(int npix_1,double *mask,
   double **maps;
   nmt_field *fl;
   assert(npix_1==npix_2);
-  assert(npix_2==npix_3);
-  assert(nmap_2==nmap_3);
   assert((nmap_2==1) || (nmap_2==2));
 
   while(npix_1!=12*nside*nside)
@@ -187,6 +185,79 @@ nmt_field *field_alloc_new_notemp(int npix_1,double *mask,
     maps[ii]=mps+npix_2*ii;
 
   fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,NULL,weights,pure_e,pure_b);
+
+  free(maps);
+
+  return fl;
+}
+
+nmt_field *field_alloc_new_flat(int nx,int ny,double lx,double ly,
+				int npix_1,double *mask,
+				int nmap_2,int npix_2,double *mps,
+				int ntmp_3,int nmap_3,int npix_3,double *tmp,
+				int nell3,double *weights,int pure_e,int pure_b)
+{
+  int ii,jj,lmax;
+  int pol=0,ntemp=0;
+  double **maps;
+  double ***temp=NULL;
+  nmt_field *fl;
+  assert(npix_1==npix_2);
+  assert(npix_2==npix_3);
+  assert(nmap_2==nmap_3);
+  assert((nmap_2==1) || (nmap_2==2));
+  assert(npix_1==nx*ny);
+  lmax=nell3-1;
+
+  if(nmap_2==2) pol=1;
+
+  if(tmp!=NULL) {
+    ntemp=ntmp_3;
+    temp=malloc(ntmp_3*sizeof(double **));
+    for(ii=0;ii<ntmp_3;ii++) {
+      temp[ii]=malloc(nmap_3*sizeof(double *));
+      for(jj=0;jj<nmap_3;jj++)
+	temp[ii][jj]=tmp+npix_3*(jj+ii*nmap_3);
+    }
+  }
+  
+  maps=malloc(nmap_2*sizeof(double *));
+  for(ii=0;ii<nmap_2;ii++)
+    maps[ii]=mps+npix_2*ii;
+
+  fl=nmt_field_alloc_flat(nx,ny,lx,ly,mask,pol,maps,ntemp,temp,lmax,weights,pure_e,pure_b);
+
+  if(tmp!=NULL) {
+    for(ii=0;ii<ntmp_3;ii++)
+      free(temp[ii]);
+    free(temp);
+  }
+  free(maps);
+
+  return fl;
+}
+
+nmt_field *field_alloc_new_notemp_flat(int nx,int ny,double lx,double ly,
+				       int npix_1,double *mask,
+				       int nmap_2,int npix_2,double *mps,
+				       int nell3,double *weights,int pure_e,int pure_b)
+{
+  int ii,lmax;
+  int pol=0,ntemp=0;
+  double **maps;
+  nmt_field *fl;
+  assert(npix_1==npix_2);
+  assert((nmap_2==1) || (nmap_2==2));
+  assert(npix_1==nx*ny);
+  lmax=nell3-1;
+
+  if(nmap_2==2) pol=1;
+
+  maps=malloc(nmap_2*sizeof(double *));
+  for(ii=0;ii<nmap_2;ii++)
+    maps[ii]=mps+npix_2*ii;
+
+  fl=nmt_field_alloc_flat(nx,ny,lx,ly,mask,pol,maps,ntemp,NULL,lmax,weights,pure_e,pure_b);
 
   free(maps);
 
@@ -218,6 +289,72 @@ void apomask(int npix_1,double *mask,
     nside*=2;
 
   nmt_apodize_mask(nside,mask,dout,aposize,apotype);
+}
+
+void synfast_new(int nside,int pol,int seed,
+		 int ncl1,int nell1,double *cls1,
+		 int nell3,double *weights,
+		 double* dout,int ndout)
+{
+  int icl,nfields=1,nmaps=1;
+  long npix=12*nside*nside;
+  double **cls,**beams,**maps;
+  int spin_arr[2]={0,2};
+  if(pol) {
+    nfields=2;
+    nmaps=3;
+  }
+
+  cls=malloc(ncl1*sizeof(double *));
+  for(icl=0;icl<ncl1;icl++)
+    cls[icl]=cls1+nell1*icl;
+
+  beams=malloc(nfields*sizeof(double *));
+  for(icl=0;icl<nfields;icl++)
+    beams[icl]=weights;
+
+  maps=nmt_synfast_sph(nside,nfields,spin_arr,nell3-1,cls,beams,seed);
+
+  for(icl=0;icl<nmaps;icl++) {
+    memcpy(&(dout[npix*icl]),maps[icl],npix*sizeof(double));
+    free(maps[icl]);
+  }
+  free(maps);
+  free(beams);
+  free(cls);
+}
+
+void synfast_new_flat(int nx,int ny,double lx,double ly,int pol,int seed,
+		      int ncl1,int nell1,double *cls1,
+		      int nell3,double *weights,
+		      double* dout,int ndout)
+{
+  int icl,nfields=1,nmaps=1;
+  long npix=nx*ny;
+  double **cls,**beams,**maps;
+  int spin_arr[2]={0,2};
+  if(pol) {
+    nfields=2;
+    nmaps=3;
+  }
+
+  cls=malloc(ncl1*sizeof(double *));
+  for(icl=0;icl<ncl1;icl++)
+    cls[icl]=cls1+nell1*icl;
+
+  beams=malloc(nfields*sizeof(double *));
+  for(icl=0;icl<nfields;icl++)
+    beams[icl]=weights;
+
+  maps=nmt_synfast_flat(nx,ny,lx,ly,nfields,spin_arr,nell3-1,cls,beams,seed);
+
+  for(icl=0;icl<nmaps;icl++) {
+    memcpy(&(dout[npix*icl]),maps[icl],npix*sizeof(double));
+    free(maps[icl]);
+  }
+  free(maps);
+  free(beams);
+  free(cls);
 }
 
 void comp_deproj_bias(nmt_field *fl1,nmt_field *fl2,

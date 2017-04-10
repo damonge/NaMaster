@@ -148,6 +148,21 @@ class flatsky_info(_object):
     __swig_setmethods__["pixsize"] = _nmtlib.flatsky_info_pixsize_set
     __swig_getmethods__["pixsize"] = _nmtlib.flatsky_info_pixsize_get
     if _newclass:pixsize = _swig_property(_nmtlib.flatsky_info_pixsize_get, _nmtlib.flatsky_info_pixsize_set)
+    __swig_setmethods__["n_ell"] = _nmtlib.flatsky_info_n_ell_set
+    __swig_getmethods__["n_ell"] = _nmtlib.flatsky_info_n_ell_get
+    if _newclass:n_ell = _swig_property(_nmtlib.flatsky_info_n_ell_get, _nmtlib.flatsky_info_n_ell_set)
+    __swig_setmethods__["i_dell"] = _nmtlib.flatsky_info_i_dell_set
+    __swig_getmethods__["i_dell"] = _nmtlib.flatsky_info_i_dell_get
+    if _newclass:i_dell = _swig_property(_nmtlib.flatsky_info_i_dell_get, _nmtlib.flatsky_info_i_dell_set)
+    __swig_setmethods__["dell"] = _nmtlib.flatsky_info_dell_set
+    __swig_getmethods__["dell"] = _nmtlib.flatsky_info_dell_get
+    if _newclass:dell = _swig_property(_nmtlib.flatsky_info_dell_get, _nmtlib.flatsky_info_dell_set)
+    __swig_setmethods__["ell_min"] = _nmtlib.flatsky_info_ell_min_set
+    __swig_getmethods__["ell_min"] = _nmtlib.flatsky_info_ell_min_get
+    if _newclass:ell_min = _swig_property(_nmtlib.flatsky_info_ell_min_get, _nmtlib.flatsky_info_ell_min_set)
+    __swig_setmethods__["n_cells"] = _nmtlib.flatsky_info_n_cells_set
+    __swig_getmethods__["n_cells"] = _nmtlib.flatsky_info_n_cells_get
+    if _newclass:n_cells = _swig_property(_nmtlib.flatsky_info_n_cells_get, _nmtlib.flatsky_info_n_cells_set)
     def __init__(self): 
         this = _nmtlib.new_flatsky_info()
         try: self.this.append(this)
@@ -240,9 +255,21 @@ def field_alloc_sph(*args):
   return _nmtlib.field_alloc_sph(*args)
 field_alloc_sph = _nmtlib.field_alloc_sph
 
+def field_alloc_flat(*args):
+  return _nmtlib.field_alloc_flat(*args)
+field_alloc_flat = _nmtlib.field_alloc_flat
+
 def field_read(*args):
   return _nmtlib.field_read(*args)
 field_read = _nmtlib.field_read
+
+def synfast_sph(*args):
+  return _nmtlib.synfast_sph(*args)
+synfast_sph = _nmtlib.synfast_sph
+
+def synfast_flat(*args):
+  return _nmtlib.synfast_flat(*args)
+synfast_flat = _nmtlib.synfast_flat
 
 def apodize_mask(*args):
   return _nmtlib.apodize_mask(*args)
@@ -360,6 +387,14 @@ def field_alloc_new_notemp(*args):
   return _nmtlib.field_alloc_new_notemp(*args)
 field_alloc_new_notemp = _nmtlib.field_alloc_new_notemp
 
+def field_alloc_new_flat(*args):
+  return _nmtlib.field_alloc_new_flat(*args)
+field_alloc_new_flat = _nmtlib.field_alloc_new_flat
+
+def field_alloc_new_notemp_flat(*args):
+  return _nmtlib.field_alloc_new_notemp_flat(*args)
+field_alloc_new_notemp_flat = _nmtlib.field_alloc_new_notemp_flat
+
 def get_map(*args):
   return _nmtlib.get_map(*args)
 get_map = _nmtlib.get_map
@@ -371,6 +406,14 @@ get_temp = _nmtlib.get_temp
 def apomask(*args):
   return _nmtlib.apomask(*args)
 apomask = _nmtlib.apomask
+
+def synfast_new(*args):
+  return _nmtlib.synfast_new(*args)
+synfast_new = _nmtlib.synfast_new
+
+def synfast_new_flat(*args):
+  return _nmtlib.synfast_new_flat(*args)
+synfast_new_flat = _nmtlib.synfast_new_flat
 
 def comp_deproj_bias(*args):
   return _nmtlib.comp_deproj_bias(*args)

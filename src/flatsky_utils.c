@@ -251,8 +251,7 @@ void fs_alm2map(nmt_flatsky_info *fs,int ntrans,int spin,flouble **map,fcomplex 
   }
 }
 
-void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,
-	       int pol_1,int pol_2,flouble **cls)
+void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls)
 {
   int i1,il,nmaps_1=1,nmaps_2=1;
   if(pol_1) nmaps_1=2;
@@ -307,8 +306,7 @@ void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,
   }
 }
 
-void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,
-		int pol_1,int pol_2,flouble **cls)
+void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls)
 {
   int i1;
   fcomplex **alms_1,**alms_2;
@@ -319,7 +317,7 @@ void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,
   alms_1=my_malloc(nmaps_1*sizeof(fcomplex *));
   for(i1=0;i1<nmaps_1;i1++)
     alms_1[i1]=dftw_malloc(fs->ny*(fs->nx/2+1)*sizeof(fcomplex));
-  fs_alm2map(fs,1,2*pol_1,maps_1,alms_1);
+  fs_map2alm(fs,1,2*pol_1,maps_1,alms_1);
 
   if(maps_1==maps_2)
     alms_2=alms_1;
@@ -327,7 +325,7 @@ void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,
     alms_2=my_malloc(nmaps_2*sizeof(fcomplex *));
     for(i1=0;i1<nmaps_2;i1++)
       alms_2[i1]=dftw_malloc(fs->ny*(fs->nx/2+1)*sizeof(fcomplex));
-    fs_alm2map(fs,1,2*pol_2,maps_2,alms_2);
+    fs_map2alm(fs,1,2*pol_2,maps_2,alms_2);
   }
 
   fs_alm2cl(fs,alms_1,alms_2,pol_1,pol_2,cls);
@@ -340,4 +338,104 @@ void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,
       dftw_free(alms_2[i1]);
     free(alms_2);
   }
+}
+
+fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,int lmax,
+		     flouble **cells,flouble **beam,int seed)
+{
+  int imap;
+  fcomplex **alms;
+  alms=my_malloc(nmaps*sizeof(fcomplex *));
+  for(imap=0;imap<nmaps;imap++)
+    alms[imap]=dftw_malloc(ny*(nx/2+1)*sizeof(fcomplex));
+
+  //Switch off error handler for Cholesky decomposition
+  gsl_error_handler_t *geh=gsl_set_error_handler_off();
+
+#pragma omp parallel default(none)			\
+  shared(nx,ny,lx,ly,nmaps,lmax,cells,beam,seed,alms)
+  {
+    int iy;
+    double dkx=2*M_PI/lx,dky=2*M_PI/ly;
+    gsl_vector *rv1=gsl_vector_alloc(nmaps);
+    gsl_vector *iv1=gsl_vector_alloc(nmaps);
+    gsl_vector *rv2=gsl_vector_alloc(nmaps);
+    gsl_vector *iv2=gsl_vector_alloc(nmaps);
+    gsl_matrix *clmat=gsl_matrix_calloc(nmaps,nmaps); 
+    gsl_vector *eval =gsl_vector_alloc(nmaps);
+    gsl_matrix *evec =gsl_matrix_alloc(nmaps,nmaps); 
+    gsl_eigen_symmv_workspace *wsym=gsl_eigen_symmv_alloc(nmaps);
+    int ithr=omp_get_thread_num();
+    unsigned int seed_thr=(unsigned int)(seed+ithr);
+    gsl_rng *rng=init_rng(seed_thr);
+
+#pragma omp for
+    for(iy=0;iy<ny;iy++) {
+      int ix;
+      flouble ky;
+      if(2*iy<=ny)
+	ky=iy*dky;
+      else
+	ky=-(ny-iy)*dky;
+      for(ix=0;ix<=nx/2;ix++) {
+	int imp1,imp2;
+	flouble kx=ix*dkx;
+	long index=ix+(nx/2+1)*iy;
+	flouble kmod=sqrt(kx*kx+ky*ky);
+	int iell=(int)(kmod+0.5);
+	if((kmod<=0) || (iell<0) || (iell>lmax)) {
+	  for(imp1=0;imp1<nmaps;imp1++)
+	    alms[imp1][index]=0;
+	}
+	else {
+	  //Get power spectrum
+	  int icl=0;
+	  for(imp1=0;imp1<nmaps;imp1++) {
+	    for(imp2=imp1;imp2<nmaps;imp2++) {//Fill up only lower triangular part
+	      gsl_matrix_set(clmat,imp1,imp2,cells[icl][iell]*0.5);
+	      if(imp2!=imp1)
+		gsl_matrix_set(clmat,imp2,imp1,cells[icl][iell]*0.5);
+	      icl++;
+	    }
+	  }
+
+	  //Take square root
+	  gsl_eigen_symmv(clmat,eval,evec,wsym);
+	  for(imp1=0;imp1<nmaps;imp1++) {
+	    double dr,di; //At the same time get white random numbers
+	    rng_gauss(rng,&dr,&di);
+	    gsl_vector_set(rv1,imp1,dr);
+	    gsl_vector_set(iv1,imp1,di);
+	    for(imp2=0;imp2<nmaps;imp2++) {
+	      double oij=gsl_matrix_get(evec,imp1,imp2);
+	      double lambda=gsl_vector_get(eval,imp2);
+	      if(lambda<=0) lambda=0;
+	      else lambda=sqrt(lambda);
+	      gsl_matrix_set(clmat,imp1,imp2,oij*lambda);
+	    }
+	  }
+
+	  //Get correlate random numbers
+	  gsl_blas_dgemv(CblasNoTrans,1.,clmat,rv1,0,rv2);
+	  gsl_blas_dgemv(CblasNoTrans,1.,clmat,iv1,0,iv2);
+	  for(imp1=0;imp1<nmaps;imp1++)
+	    alms[imp1][index]=beam[imp1][iell]*(fcomplex)(gsl_vector_get(rv2,imp1)+I*gsl_vector_get(iv2,imp1));
+	}
+      }
+    } //omp end for
+    gsl_vector_free(rv1);
+    gsl_vector_free(iv1);
+    gsl_vector_free(rv2);
+    gsl_vector_free(iv2);
+    gsl_matrix_free(clmat);
+    gsl_vector_free(eval);
+    gsl_matrix_free(evec);
+    gsl_eigen_symmv_free(wsym);
+    end_rng(rng);
+  } //omp end parallel
+
+  //Restore error handler
+  gsl_set_error_handler(geh);
+
+  return alms;
 }

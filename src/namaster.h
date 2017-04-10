@@ -14,6 +14,9 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_blas.h>
+#include <gsl/gsl_eigen.h>
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 #ifdef _WITH_NEEDLET
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_spline.h>
@@ -85,8 +88,14 @@ nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly);
 void nmt_field_free(nmt_field *fl);
 nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
 			       int ntemp,flouble ***temp,flouble *beam,int pure_e,int pure_b);
+nmt_field *nmt_field_alloc_flat(int nx,int ny,flouble lx,flouble ly,flouble *mask,int pol,flouble **maps,
+				int ntemp,flouble ***temp,int lmax,flouble *beam,int pure_e,int pure_b);
 nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,
 			  int pol,int pure_e,int pure_b);
+flouble **nmt_synfast_sph(int nside,int nfields,int *spin_arr,int lmax,
+			  flouble **cells,flouble **beam_fields,int seed);
+flouble **nmt_synfast_flat(int nx,int ny,flouble lx,flouble ly,int nfields,int *spin_arr,int lmax,
+			   flouble **cells,flouble **beam_fields,int seed);
 void nmt_apodize_mask(long nside,flouble *mask_in,flouble *mask_out,flouble aposize,char *apotype);
 
 //Defined in master.c

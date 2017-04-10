@@ -37,7 +37,7 @@ class NmtField(object) :
     :param purify_b: use pure B-modes?
 
     """
-    def __init__(self,mask,maps,templates=None,beam=None,purify_e=False,purify_b=False) :
+    def __init__(self,mask,maps,templates=None,beam=None,purify_e=False,purify_b=False,lx=-1.,ly=-1.,lmax=-1) :
         pure_e=0
         if(purify_e) :
             pure_e=1
@@ -45,28 +45,79 @@ class NmtField(object) :
         if(purify_b) :
             pure_b=1
 
-        nside=2
-        while(12*nside*nside!=len(mask)) :
-            nside*=2
-            if(nside>65536) :
-                raise KeyError("Something is wrong with your input arrays")
+        self.isflat=False
+        if len(mask)==2 :
+            self.isflat=True
 
-        if((len(maps)!=1) and (len(maps)!=2)) :
-            raise KeyError("Must supply 1 or 2 maps per field")
-        if(templates!=None) :
-            if((len(templates[0])!=1) and (len(templates[0])!=2)) :
+        if self.isflat :
+            if (lx<0) or (ly<0) :
+                raise KeyError("Must supply dimensions for flat-sky field")
+            #Flatten arrays and check dimensions
+            shape_2D=np.shape(mask)
+            nmaps=len(maps[0])
+            self.ny=shape_2D[0]
+            self.nx=shape_2D[1]
+
+            #Flatten mask
+            msk=mask.flatten()
+
+            #Flatten maps
+            mps=[]
+            for m in maps :
+                if np.shape(m)!=shape_2d :
+                    KeyError("Mask and maps don't have the same shape")
+                mps.append(m.flatten())
+            mps=np.array(mps)
+
+            #Flatten templates
+            if templates!=None :
+                tmps=[]
+                for t in templates :
+                    tmp=[]
+                    if len(t)!=nmaps :
+                        KeyError("Maps and templates should have the same number of maps")
+                    for m in t :
+                        tmp.append(m.flatten())
+                    tmps.append(tmp)
+                tmps=np.array(tmps)
+
+            #Form beam
+            if(beam==None) :
+                if lmax<=0 :
+                    KeyError("Lmax must be positive")
+                beam_use=np.ones(lmax+1)
+            else :
+                beam_use=beam
+                lmax=len(beam_use)-1
+
+            #Generate field
+            if(templates==None) :
+                self.fl=lib.field_alloc_new_notemp_flat(nx,ny,lx,ly,msk,mps,beam_use,pure_e,pure_b)
+            else :
+                self.fl=lib.field_alloc_new_flat(nx,ny,lx,ly,msk,mps,tmps,beam_use,pure_e,pure_b)
+        else :
+            nside=2
+            while(12*nside*nside!=len(mask)) :
+                nside*=2
+                if(nside>65536) :
+                    raise KeyError("Something is wrong with your input arrays")
+
+            if((len(maps)!=1) and (len(maps)!=2)) :
                 raise KeyError("Must supply 1 or 2 maps per field")
-        if(beam==None) :
-            beam_use=np.ones(3*nside)
-        else :
-            if(len(beam)!=3*nside) :
-                raise KeyError("Input beam must have 3*nside elements")
-            beam_use=beam
+            if(templates!=None) :
+                if((len(templates[0])!=1) and (len(templates[0])!=2)) :
+                    raise KeyError("Must supply 1 or 2 maps per field")
+            if(beam==None) :
+                beam_use=np.ones(3*nside)
+            else :
+                if(len(beam)!=3*nside) :
+                    raise KeyError("Input beam must have 3*nside elements")
+                beam_use=beam
 
-        if(templates==None) :
-            self.fl=lib.field_alloc_new_notemp(mask,maps,beam_use,pure_e,pure_b)
-        else :
-            self.fl=lib.field_alloc_new(mask,maps,templates,beam_use,pure_e,pure_b)
+            if(templates==None) :
+                self.fl=lib.field_alloc_new_notemp(mask,maps,beam_use,pure_e,pure_b)
+            else :
+                self.fl=lib.field_alloc_new(mask,maps,templates,beam_use,pure_e,pure_b)
 
     def __del__(self) :
         lib.field_free(self.fl)
@@ -80,7 +131,11 @@ class NmtField(object) :
         maps=np.zeros([self.fl.nmaps,self.fl.npix])
         for imap in np.arange(self.fl.nmaps) :
             maps[imap,:]=lib.get_map(self.fl,imap,int(self.fl.npix))
-        return maps
+        if self.isflat :
+            mps=maps.reshape([self.fl.nmaps,self.ny,self.nx])
+        else :
+            mps=maps
+        return mps
 
     def get_templates(self) :
         """
@@ -92,7 +147,11 @@ class NmtField(object) :
         for itemp in np.arange(self.fl.ntemp) :
             for imap in np.arange(self.fl.nmaps) :
                 temp[itemp,imap,:]=lib.get_temp(self.fl,itemp,imap,int(self.fl.npix))
-        return temp
+        if self.isflat :
+            tmps=temp.reshape([self.fl.ntemp,self.fl.nmaps,self.ny,self.nx])
+        else :
+            tmps=temp
+        return tmps
 
 
 class NmtBin(object) :
@@ -219,6 +278,8 @@ class NmtWorkspace(object) :
         """
         if self.wsp!=None :
             lib.workspace_free(self.wsp)
+        if(fl1.isflat and fl2.isflat) :
+            raise KeyError("MASTER for flat-sky fields still not supported")
         self.wsp=lib.compute_coupling_matrix(fl1.fl,fl2.fl,bins.bin)
 
     def write_to(self,fname) :
@@ -281,6 +342,8 @@ def deprojection_bias(f1,f2,cls_guess) :
     :param cls_guess: set of power spectra corresponding to a best-guess of the true power spectra of f1 and f2.
     :return: deprojection bias power spectra.
     """
+    if(fl1.isflat and fl2.isflat) :
+        raise KeyError("MASTER for flat-sky fields still not supported")
     if(len(cls_guess)!=f1.fl.nmaps*f2.fl.nmaps) :
         raise KeyError("Proposal Cell doesn't match number of maps")
     if(len(cls_guess[0])!=f1.fl.lmax+1) :
@@ -298,6 +361,8 @@ def compute_coupled_cell(f1,f2,n_iter=3) :
     :param int n_iter: number of iterations for SHTs (optional)
     :return: array of coupled power spectra
     """
+    if(fl1.isflat and fl2.isflat) :
+        raise KeyError("MASTER for flat-sky fields still not supported")
     if(f1.fl.nside!=f2.fl.nside) :
         raise KeyError("Fields must have same resolution")
     
@@ -322,6 +387,8 @@ def compute_full_master(f1,f2,b,cl_noise=None,cl_guess=None,workspace=None) :
     :param NmtWorkspace workspace: object containing the mode-coupling matrix associated with an incomplete sky coverage. If provided, the function will skip the computation of the mode-coupling matrix and use the information encoded in this object.
     :return: set of decoupled bandpowers
     """
+    if(fl1.isflat and fl2.isflat) :
+        raise KeyError("MASTER for flat-sky fields still not supported")
     if(f1.fl.nside!=f2.fl.nside) :
         raise KeyError("Fields must have same resolution")
     if cl_noise!=None :
@@ -356,3 +423,81 @@ def mask_apodization(mask_in,aposize,apotype="C1") :
     :return: apodized mask as a HEALPix map
     """
     return lib.apomask(mask_in,len(mask_in),aposize,apotype)
+
+def synfast_spherical(nside,cls,pol=False,beam=None) :
+    seed=np.random.randint(50000000)
+    if pol :
+        use_pol=1
+        nmaps=3
+        if(len(np.shape(cls))!=2) :
+            raise KeyError("You should supply more than one power spectrum if you want polarization")
+        ncl=len(cls)
+        if ((ncl!=4) and (ncl!=6)) :
+            raise KeyError("You should provide 4 or 6 power spectra if you want polarization")
+        lmax=len(cls[0])-1
+        cls_use=np.zeros([6,lmax+1])
+        cls_use[0,:]=cls[0] #TT
+        cls_use[1,:]=cls[3] #TE
+        cls_use[3,:]=cls[1] #EE
+        cls_use[5,:]=cls[2] #BB
+        if ncl==6 :
+            cls_use[2,:]=cls[4] #TB
+            cls_use[4,:]=cls[5] #EB
+    else :
+        use_pol=0
+        nmaps=1
+        if(len(np.shape(cls))!=1) :
+            raise KeyError("You should supply only one power spectrum if you don't want polarization")
+        lmax=len(cls)-1
+        cls_use=np.array([cls])
+
+    if beam==None :
+        beam_use=np.ones(lmax+1)
+    else :
+        if len(beam)!=lmax+1 :
+            raise KeyError("The beam should have as many multipoles as the power spectrum")
+        beam_use=beam
+    data=lib.synfast_new(nside,use_pol,seed,cls_use,beam_use,nmaps*12*nside*nside)
+
+    maps=data.reshape([nmaps,12*nside*nside])
+
+    return maps
+
+def synfast_flat(nx,ny,lx,ly,cls,pol=False,beam=None) :
+    seed=np.random.randint(50000000)
+    if pol :
+        use_pol=1
+        nmaps=3
+        if(len(np.shape(cls))!=2) :
+            raise KeyError("You should supply more than one power spectrum if you want polarization")
+        ncl=len(cls)
+        if ((ncl!=4) and (ncl!=6)) :
+            raise KeyError("You should provide 4 or 6 power spectra if you want polarization")
+        lmax=len(cls[0])-1
+        cls_use=np.zeros([6,lmax+1])
+        cls_use[0,:]=cls[0] #TT
+        cls_use[1,:]=cls[3] #TE
+        cls_use[3,:]=cls[1] #EE
+        cls_use[5,:]=cls[2] #BB
+        if ncl==6 :
+            cls_use[2,:]=cls[4] #TB
+            cls_use[4,:]=cls[5] #EB
+    else :
+        use_pol=0
+        nmaps=1
+        if(len(np.shape(cls))!=1) :
+            raise KeyError("You should supply only one power spectrum if you don't want polarization")
+        lmax=len(cls)-1
+        cls_use=np.array([cls])
+
+    if beam==None :
+        beam_use=np.ones(lmax+1)
+    else :
+        if len(beam)!=lmax+1 :
+            raise KeyError("The beam should have as many multipoles as the power spectrum")
+        beam_use=beam
+    data=lib.synfast_new_flat(nx,ny,lx,ly,use_pol,seed,cls_use,beam_use,nmaps*ny*nx)
+
+    maps=data.reshape([nmaps,ny,nx])
+
+    return maps
