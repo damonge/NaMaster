@@ -5,6 +5,12 @@
 - :class:`pymaster.bins.NmtBin`
 - :class:`pymaster.workspaces.NmtWorkspace`
 
+and their flat-sky equivalents:
+
+- :class:`pymaster.field.NmtFieldFlat`
+- :class:`pymaster.bins.NmtBin`
+- :class:`pymaster.workspaces.NmtWorkspace`
+
 And a number of functions
 
 - :func:`pymaster.workspaces.deprojection_bias`
@@ -26,6 +32,6 @@ All sky maps accepted and returned by these functions are in the form of HEALPix
 import nmtlib as lib
 import numpy as np
 from utils import mask_apodization, synfast_spherical, synfast_flat
-from field import NmtField
+from field import NmtField, NmtFieldFlat
 from bins import NmtBin
 from workspaces import NmtWorkspace, deprojection_bias, compute_coupled_cell, compute_full_master

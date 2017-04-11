@@ -195,19 +195,20 @@ nmt_field_flat *field_alloc_new_flat(int nx,int ny,double lx,double ly,
 				     int npix_1,double *mask,
 				     int nmap_2,int npix_2,double *mps,
 				     int ntmp_3,int nmap_3,int npix_3,double *tmp,
-				     int nell3,double *weights,int pure_e,int pure_b)
+				     int ncl1,int nell1,double *cls1,
+				     int pure_e,int pure_b)
 {
   int ii,jj;
   int pol=0,ntemp=0;
   double **maps;
   double ***temp=NULL;
-  double *larr;
   nmt_field_flat *fl;
   assert(npix_1==npix_2);
   assert(npix_2==npix_3);
   assert(nmap_2==nmap_3);
   assert((nmap_2==1) || (nmap_2==2));
   assert(npix_1==nx*ny);
+  assert(ncl1==2);
 
   if(nmap_2==2) pol=1;
 
@@ -225,12 +226,11 @@ nmt_field_flat *field_alloc_new_flat(int nx,int ny,double lx,double ly,
   for(ii=0;ii<nmap_2;ii++)
     maps[ii]=mps+npix_2*ii;
 
-  larr=malloc(nell3*sizeof(double));
-  for(ii=0;ii<nell3;ii++)
-    larr[ii]=ii;
+  double *larr=&(cls1[0]);
+  double *beam=&(cls1[nell1]);
 
   fl=nmt_field_flat_alloc(nx,ny,lx,ly,mask,pol,maps,ntemp,temp,
-			  nell3,larr,weights,pure_e,pure_b);
+			  nell1,larr,beam,pure_e,pure_b);
 
   if(tmp!=NULL) {
     for(ii=0;ii<ntmp_3;ii++)
@@ -238,7 +238,6 @@ nmt_field_flat *field_alloc_new_flat(int nx,int ny,double lx,double ly,
     free(temp);
   }
   free(maps);
-  free(larr);
 
   return fl;
 }
@@ -246,34 +245,11 @@ nmt_field_flat *field_alloc_new_flat(int nx,int ny,double lx,double ly,
 nmt_field_flat *field_alloc_new_notemp_flat(int nx,int ny,double lx,double ly,
 					    int npix_1,double *mask,
 					    int nmap_2,int npix_2,double *mps,
-					    int nell3,double *weights,int pure_e,int pure_b)
+					    int ncl1,int nell1,double *cls1,
+					    int pure_e,int pure_b)
 {
-  int ii;
-  int pol=0,ntemp=0;
-  double **maps;
-  double *larr;
-  nmt_field_flat *fl;
-  assert(npix_1==npix_2);
-  assert((nmap_2==1) || (nmap_2==2));
-  assert(npix_1==nx*ny);
-
-  if(nmap_2==2) pol=1;
-
-  maps=malloc(nmap_2*sizeof(double *));
-  for(ii=0;ii<nmap_2;ii++)
-    maps[ii]=mps+npix_2*ii;
-
-  larr=malloc(nell3*sizeof(double));
-  for(ii=0;ii<nell3;ii++)
-    larr[ii]=ii;
-
-  fl=nmt_field_flat_alloc(nx,ny,lx,ly,mask,pol,maps,ntemp,NULL,
-			  nell3,larr,weights,pure_e,pure_b);
-
-  free(maps);
-  free(larr);
-
-  return fl;
+  return field_alloc_new_flat(nx,ny,lx,ly,npix_1,mask,nmap_2,npix_2,mps,
+			      -1,-1,-1,NULL,ncl1,nell1,cls1,pure_e,pure_b);
 }
 
 void get_map(nmt_field *fl,int imap,double *dout,int ndout)
@@ -283,7 +259,22 @@ void get_map(nmt_field *fl,int imap,double *dout,int ndout)
   memcpy(dout,fl->maps[imap],fl->npix*sizeof(double));
 }
 
+void get_map_flat(nmt_field_flat *fl,int imap,double *dout,int ndout)
+{
+  assert(imap<fl->nmaps);
+  assert(ndout==fl->npix);
+  memcpy(dout,fl->maps[imap],fl->npix*sizeof(double));
+}
+
 void get_temp(nmt_field *fl,int itemp,int imap,double *dout,int ndout)
+{
+  assert(itemp<fl->ntemp);
+  assert(imap<fl->nmaps);
+  assert(ndout==fl->npix);
+  memcpy(dout,fl->temp[itemp][imap],fl->npix*sizeof(double));
+}
+
+void get_temp_flat(nmt_field_flat *fl,int itemp,int imap,double *dout,int ndout)
 {
   assert(itemp<fl->ntemp);
   assert(imap<fl->nmaps);

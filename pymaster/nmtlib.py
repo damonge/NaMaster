@@ -638,9 +638,17 @@ def get_map(*args):
   return _nmtlib.get_map(*args)
 get_map = _nmtlib.get_map
 
+def get_map_flat(*args):
+  return _nmtlib.get_map_flat(*args)
+get_map_flat = _nmtlib.get_map_flat
+
 def get_temp(*args):
   return _nmtlib.get_temp(*args)
 get_temp = _nmtlib.get_temp
+
+def get_temp_flat(*args):
+  return _nmtlib.get_temp_flat(*args)
+get_temp_flat = _nmtlib.get_temp_flat
 
 def apomask(*args):
   return _nmtlib.apomask(*args)
