@@ -34,10 +34,10 @@ void nmt_bins_flat_free(nmt_binning_scheme_flat *bin)
   free(bin);
 }
 
-nmt_binning_scheme_flat *nmt_bins_flat_constant(int nlb,int lmax)
+nmt_binning_scheme_flat *nmt_bins_flat_constant(int nlb,flouble lmax)
 {
   int ii;
-  int nband_max=(lmax-1)/nlb;
+  int nband_max=(int)((lmax-1)/nlb);
 
   nmt_binning_scheme_flat *bin=my_malloc(sizeof(nmt_binning_scheme_flat));
   bin->n_bands=nband_max;

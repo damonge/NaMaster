@@ -606,17 +606,33 @@ def get_ell_eff(*args):
   return _nmtlib.get_ell_eff(*args)
 get_ell_eff = _nmtlib.get_ell_eff
 
+def get_ell_eff_flat(*args):
+  return _nmtlib.get_ell_eff_flat(*args)
+get_ell_eff_flat = _nmtlib.get_ell_eff_flat
+
 def bins_create_py(*args):
   return _nmtlib.bins_create_py(*args)
 bins_create_py = _nmtlib.bins_create_py
+
+def bins_flat_create_py(*args):
+  return _nmtlib.bins_flat_create_py(*args)
+bins_flat_create_py = _nmtlib.bins_flat_create_py
 
 def bin_cl(*args):
   return _nmtlib.bin_cl(*args)
 bin_cl = _nmtlib.bin_cl
 
+def bin_cl_flat(*args):
+  return _nmtlib.bin_cl_flat(*args)
+bin_cl_flat = _nmtlib.bin_cl_flat
+
 def unbin_cl(*args):
   return _nmtlib.unbin_cl(*args)
 unbin_cl = _nmtlib.unbin_cl
+
+def unbin_cl_flat(*args):
+  return _nmtlib.unbin_cl_flat(*args)
+unbin_cl_flat = _nmtlib.unbin_cl_flat
 
 def field_alloc_new(*args):
   return _nmtlib.field_alloc_new(*args)
@@ -666,21 +682,45 @@ def comp_deproj_bias(*args):
   return _nmtlib.comp_deproj_bias(*args)
 comp_deproj_bias = _nmtlib.comp_deproj_bias
 
+def comp_deproj_bias_flat(*args):
+  return _nmtlib.comp_deproj_bias_flat(*args)
+comp_deproj_bias_flat = _nmtlib.comp_deproj_bias_flat
+
 def comp_pspec_coupled(*args):
   return _nmtlib.comp_pspec_coupled(*args)
 comp_pspec_coupled = _nmtlib.comp_pspec_coupled
+
+def comp_pspec_coupled_flat(*args):
+  return _nmtlib.comp_pspec_coupled_flat(*args)
+comp_pspec_coupled_flat = _nmtlib.comp_pspec_coupled_flat
 
 def decouple_cell_py(*args):
   return _nmtlib.decouple_cell_py(*args)
 decouple_cell_py = _nmtlib.decouple_cell_py
 
+def decouple_cell_py_flat(*args):
+  return _nmtlib.decouple_cell_py_flat(*args)
+decouple_cell_py_flat = _nmtlib.decouple_cell_py_flat
+
 def couple_cell_py(*args):
   return _nmtlib.couple_cell_py(*args)
 couple_cell_py = _nmtlib.couple_cell_py
 
+def couple_cell_py_flat(*args):
+  return _nmtlib.couple_cell_py_flat(*args)
+couple_cell_py_flat = _nmtlib.couple_cell_py_flat
+
+def get_ell_sampling_flat(*args):
+  return _nmtlib.get_ell_sampling_flat(*args)
+get_ell_sampling_flat = _nmtlib.get_ell_sampling_flat
+
 def comp_pspec(*args):
   return _nmtlib.comp_pspec(*args)
 comp_pspec = _nmtlib.comp_pspec
+
+def comp_pspec_flat(*args):
+  return _nmtlib.comp_pspec_flat(*args)
+comp_pspec_flat = _nmtlib.comp_pspec_flat
 # This file is compatible with both classic and new-style classes.
 
 

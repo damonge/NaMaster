@@ -40,7 +40,7 @@ typedef struct {
   flouble *ell_0_list;
   flouble *ell_f_list;
 } nmt_binning_scheme_flat;
-nmt_binning_scheme_flat *nmt_bins_flat_constant(int nlb,int lmax);
+nmt_binning_scheme_flat *nmt_bins_flat_constant(int nlb,flouble lmax);
 nmt_binning_scheme_flat *nmt_bins_flat_create(int nell,flouble *l0,flouble *lf);
 void nmt_bins_flat_free(nmt_binning_scheme_flat *bin);
 void nmt_bin_cls_flat(nmt_binning_scheme_flat *bin,int nl,flouble *larr,flouble **cls_in,

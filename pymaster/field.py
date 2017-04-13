@@ -136,7 +136,6 @@ class NmtFieldFlat(object) :
 
         #Generate field
         if(templates==None) :
-            print np.shape(beam_use)
             self.fl=lib.field_alloc_new_notemp_flat(self.nx,self.ny,lx,ly,msk,mps,beam_use,pure_e,pure_b)
         else :
             self.fl=lib.field_alloc_new_flat(self.nx,self.ny,lx,ly,msk,mps,tmps,beam_use,pure_e,pure_b)
@@ -146,9 +145,9 @@ class NmtFieldFlat(object) :
 
     def get_maps(self) :
         """
-        Returns a 2D array ([nmap][npix]) corresponding to the observed maps for this field. If the field was initialized with contaminant templates, the maps returned by this function have their best-fit contribution from these contaminants removed.
+        Returns a 3D array ([nmap][ny][nx]) corresponding to the observed maps for this field. If the field was initialized with contaminant templates, the maps returned by this function have their best-fit contribution from these contaminants removed.
         
-        :return: 2D array of HEALPix maps
+        :return: 3D array of flat-sky maps
         """
         maps=np.zeros([self.fl.nmaps,self.fl.npix])
         for imap in np.arange(self.fl.nmaps) :
@@ -159,9 +158,9 @@ class NmtFieldFlat(object) :
 
     def get_templates(self) :
         """
-        Returns a 3D array ([ntemp][nmap][npix]) corresponding to the contaminant templates passed when initializing this field.
+        Returns a 4D array ([ntemp][nmap][ny][nx]) corresponding to the contaminant templates passed when initializing this field.
 
-        :return: 3D array of HEALPix maps
+        :return: 4D array of flat-sky maps
         """
         temp=np.zeros([self.fl.ntemp,self.fl.nmaps,self.fl.npix])
         for itemp in np.arange(self.fl.ntemp) :

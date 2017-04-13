@@ -94,3 +94,60 @@ class NmtBin(object) :
         clout=np.reshape(cl1d,[len(cls_in),self.lmax+1])
         return clout
 
+
+class NmtBinFlat(object) :
+    """
+    An NmtBinFlat object defines the set of bandpowers used in the computation of the pseudo-Cl estimator. The definition of bandpowers is described in Section 3.6 of the scientific documentation. Note that currently pymaster only supports top-hat bandpowers for flat-sky power spectra.
+
+    :param array-like l0: array of floats corresponding to the lower bound of each bandpower.
+    :param array-like lf: array of floats corresponding to the upper bound of each bandpower. lf should have the same shape as l0
+    """
+    def __init__(self,l0,lf) :
+        self.bin=lib.bins_flat_create_py(l0,lf)
+
+    def __del__(self) :
+        lib.bins_flat_free(self.bin)
+
+    def get_n_bands(self) :
+        """
+        Returns the number of bandpowers stored in this object
+
+        :return: number of bandpowers
+        """
+        return self.bin.n_bands
+
+    def get_effective_ells(self) :
+        """
+        Returns an array with the effective multipole associated to each bandpower. These are computed as a weighted average of the multipoles within each bandpower.
+
+        :return: effective multipoles for each bandpower
+        """
+        return lib.get_ell_eff_flat(self.bin,self.bin.n_bands)
+
+    def bin_cell(self,ells,cls_in) :
+        """
+        Bins a power spectrum into bandpowers. This is carried out as a weighted average over the multipoles in each bandpower.
+
+        :param array-like ells: multipole values at which the input power spectra are defined
+        :param array-like cls_in: 2D array of input power spectra
+        :return: array of bandpowers
+        """
+        if(len(cls_in[0])!=len(ells)) :
+            raise KeyError("Input Cl has wrong size")
+        cl1d=lib.bin_cl_flat(self.bin,ells,cls_in,len(cls_in)*self.bin.n_bands)
+        clout=np.reshape(cl1d,[len(cls_in),self.bin.n_bands])
+        return clout
+
+    def unbin_cell(self,cls_in,ells) :
+        """
+        Un-bins a set of bandpowers into a power spectrum. This is simply done by assigning a constant value for every multipole in each bandpower (corresponding to the value of that bandpower).
+
+        :param array-like cls_in: array of bandpowers
+        :param array-like ells: array of multipoles at which the power spectra should be intepolated
+        :return: array of power spectra
+        """
+        if(len(cls_in[0])!=self.bin.n_bands) :
+            raise KeyError("Input Cl has wrong size")
+        cl1d=lib.unbin_cl_flat(self.bin,cls_in,ells,len(cls_in)*len(ells))
+        clout=np.reshape(cl1d,[len(cls_in),len(ells)])
+        return clout
