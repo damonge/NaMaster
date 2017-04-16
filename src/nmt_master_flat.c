@@ -168,8 +168,128 @@ static void bin_coupling_matrix(nmt_workspace_flat *w)
   free(coupling_b);
 }
 
+typedef struct {
+  flouble l,k;
+  nmt_k_function *cvw;
+  int flag;
+} intg_par;
+
+#define INTG_FLAG_00 0
+#define INTG_FLAG_02 1
+#define INTG_FLAG_22 2
+double integ_coupling(double th,void *params)
+{
+  intg_par *p=(intg_par *)params;
+  flouble cth=cos(th);
+  flouble q=sqrt(k*k+l*l-2*k*l*cth);
+
+  if(p->flag
+
+
 nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 						     nmt_binning_scheme_flat *bin,int nl_rebin)
+{
+  int l2;
+  int n_cl=fl1->nmaps*fl2->nmaps;
+  flouble *beam_prod;
+  flouble *pcl_masks_raw=my_malloc(fl1->fs->n_ell*sizeof(flouble));
+  nmt_workspace_flat *w=nmt_workspace_flat_new(nl_rebin,n_cl,fl1->fs,bin);
+  flouble dell_here=w->fs->dell/w->nl_rebin;
+
+  //TODO: check that fields are compatible
+
+  fs_anafast(fl1->fs,&(fl1->mask),&(fl2->mask),0,0,&(pcl_masks_raw));
+
+  gsl_interp_accel *intacc=gsl_interp_accel_alloc();
+  beam_prod=my_malloc(w->nells*sizeof(flouble));
+  for(l2=0;l2<w->fs->n_ell;l2++) {
+    int ir;
+    for(ir=0;ir<w->nl_rebin;ir++) {
+      int ibin=l2*w->nl_rebin+ir;
+      int l_here=w->l_arr[ibin];
+      flouble b1=nmt_k_function_eval(fl1->beam,l_here,intacc);
+      flouble b2=nmt_k_function_eval(fl2->beam,l_here,intacc);
+      beam_prod[ibin]=b1*b2;
+      w->pcl_masks[ibin]=dell_here*pcl_masks_raw[l2]*l_here/(4*M_PI*M_PI);
+    }
+  }
+  gsl_interp_accel_free(intacc);
+
+#pragma omp parallel default(none)		\
+  shared(w,beam_prod,dell_here)
+  {
+    int jj,ll1,ll2,ll3;
+
+#pragma omp for
+    for(ll1=0;ll1<w->nells;ll1++) {
+      flouble l1=w->l_arr[ll1];
+      for(ll2=0;ll2<w->nells;ll2++) {
+	flouble l2=w->l_arr[ll2];
+	for(ll3=0;ll3<w->nells;ll3++) {
+	  flouble wfac;
+	  flouble l3=w->l_arr[ll3];
+	  if(l3<=fabs(l1-l2))
+	    continue;
+	  else if(l3>=(l1+l2))
+	    break;
+	  flouble j123,fac_spin=1.,prod=(l1+l2+l3)*(l1+l2-l3)*(l1-l2+l3)*(-l1+l2+l3);
+	  if(prod<=0)
+	    report_error(1,"This shouldn't have happened\n");
+	  
+	  j123=4./sqrt(prod);
+	  if((w->ncls==2)||(w->ncls==4)) {
+	    if((l1==0) || (l2==0))
+	      fac_spin=0.;
+	    else {
+	      flouble l12=l1*l1,l22=l2*l2,l32=l3*l3;
+	      flouble l14=l12*l12,l24=l22*l22,l34=l32*l32;
+	      fac_spin=(l14+l24+l34-2*l12*l32-2*l22*l32)/(2*l12*l22);
+	      if(w->ncls==4)
+		fac_spin=fac_spin*fac_spin;
+	    }
+	  }
+
+	  if(w->ncls==1) {
+	    wfac=w->pcl_masks[ll3]*j123;
+	    w->coupling_matrix_unbinned[1*ll1+0][1*ll2+0]+=wfac; //TT,TT
+	  }
+	  if(w->ncls==2) {
+	    wfac=w->pcl_masks[ll3]*j123*fac_spin;
+	    w->coupling_matrix_unbinned[2*ll1+0][2*ll2+0]+=wfac; //TE,TE
+	    w->coupling_matrix_unbinned[2*ll1+1][2*ll2+1]+=wfac; //TB,TB
+	  }
+	  if(w->ncls==4) {
+	    wfac=w->pcl_masks[ll3]*j123*fac_spin;
+	    w->coupling_matrix_unbinned[4*ll1+0][4*ll2+0]+=wfac; //EE,EE
+	    w->coupling_matrix_unbinned[4*ll1+1][4*ll2+1]+=wfac; //EE,EE
+	    w->coupling_matrix_unbinned[4*ll1+2][4*ll2+2]+=wfac; //EE,EE
+	    w->coupling_matrix_unbinned[4*ll1+3][4*ll2+3]+=wfac; //EE,EE
+	    wfac=w->pcl_masks[ll3]*j123*(1-fac_spin);
+	    w->coupling_matrix_unbinned[4*ll1+0][4*ll2+3]+=wfac; //EE,BB
+	    w->coupling_matrix_unbinned[4*ll1+1][4*ll2+2]-=wfac; //EE,EE
+	    w->coupling_matrix_unbinned[4*ll1+2][4*ll2+1]-=wfac; //EE,EE
+	    w->coupling_matrix_unbinned[4*ll1+3][4*ll2+0]+=wfac; //EE,EE
+	  }
+	}
+	for(jj=0;jj<w->ncls;jj++) {
+	  int kk;
+	  for(kk=0;kk<w->ncls;kk++)
+	    w->coupling_matrix_unbinned[w->ncls*ll1+jj][w->ncls*ll2+kk]*=l2*beam_prod[ll2];
+	}
+      }
+    } //end omp for
+  } //end omp parallel
+
+  bin_coupling_matrix(w);
+
+  free(beam_prod);
+  free(pcl_masks_raw);
+
+  return w;
+}
+
+nmt_workspace_flat *nmt_compute_coupling_matrix_flat_b(nmt_field_flat *fl1,nmt_field_flat *fl2,
+						       nmt_binning_scheme_flat *bin,int nl_rebin)
 {
   int l2;
   int n_cl=fl1->nmaps*fl2->nmaps;
