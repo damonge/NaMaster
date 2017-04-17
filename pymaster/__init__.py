@@ -37,7 +37,7 @@ All sky maps accepted and returned by these functions are in the form of HEALPix
 """
 import nmtlib as lib
 import numpy as np
-from utils import mask_apodization, synfast_spherical, synfast_flat
+from utils import mask_apodization, mask_apodization_flat, synfast_spherical, synfast_flat
 from field import NmtField, NmtFieldFlat
 from bins import NmtBin, NmtBinFlat
 from workspaces import NmtWorkspace, NmtWorkspaceFlat, deprojection_bias, compute_coupled_cell, compute_full_master, deprojection_bias_flat, compute_coupled_cell_flat, compute_full_master_flat

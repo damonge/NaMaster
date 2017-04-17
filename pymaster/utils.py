@@ -5,12 +5,28 @@ def mask_apodization(mask_in,aposize,apotype="C1") :
     """
     Apodizes a mask with an given apodization scale using different methods.
 
-    :param mask_in: input mask, provided as an array of plots corresponding to a HEALPix map in RING order.
+    :param mask_in: input mask, provided as an array of floats corresponding to a HEALPix map in RING order.
     :param aposize: apodization scale in degrees.
     :param apotype: apodization type. Three methods implemented: "C1", "C2" and "Smooth". See the description of the C-function nmt_apodize_mask in the C API documentation for a full description of these methods.
     :return: apodized mask as a HEALPix map
     """
     return lib.apomask(mask_in,len(mask_in),aposize,apotype)
+
+def mask_apodization_flat(mask_in,lx,ly,aposize,apotype="C1") :
+    """
+    Apodizes a flat-sky mask with an given apodization scale using different methods.
+
+    :param mask_in: input mask, provided as a 2D array (ny,nx) of floats.
+    :param float lx: patch size in the x-axis (in radians)
+    :param float ly: patch size in the y-axis (in radians)
+    :param aposize: apodization scale in degrees.
+    :param apotype: apodization type. Three methods implemented: "C1", "C2" and "Smooth". See the description of the C-function nmt_apodize_mask in the C API documentation for a full description of these methods.
+    :return: apodized mask as a 2D array (ny,nx)
+    """
+    nx=len(mask_in[0])
+    ny=len(mask_in)
+    mask_apo_flat=lib.apomask_flat(nx,ny,lx,ly,mask_in.flatten(),nx*ny,aposize,apotype)
+    return mask_apo_flat.reshape([ny,nx])
 
 def synfast_spherical(nside,cls,pol=False,beam=None) :
     """

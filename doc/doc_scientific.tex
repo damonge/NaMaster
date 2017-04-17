@@ -511,8 +511,58 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
       &=\int\frac{kdk\,qdq}{(2\pi)^2}\left[\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{{\bf q}}w^*_{{\bf q}}
       \int d\varphi_\ell d\varphi_k{\sf R}^\dag(s_a\Delta\varphi){\sf C}^{ab}_k{\sf R}(s_b\Delta\varphi)\delta({\bf l}-{\bf k}-{\bf q})\right]
     \end{align}
+    
+    Simplifying this expression amounts to computing the following integrals:
+    \begin{itemize}
+     \item $s_a=s_b=0$:
+       \begin{align}\nonumber
+         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}=\\\nonumber
+         &\frac{k}{2\pi}\int q\,dq\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int J_0(qr)J_0(kr)J_0(\ell r)\,r\,dr=\\
+         &\frac{k}{2\pi}\int \frac{q\,dq}{\pi k\ell\sin\theta}\,\tilde{C}^{vw}_q=\frac{k}{2\pi}\int_0^\pi \frac{d\theta}{\pi}\,\tilde{C}^{vw}_{q=\sqrt{\ell^2+k^2-2k\ell\cos\theta}}
+       \end{align}
+       where we have used the following identities:
+       \begin{align}
+         \int_0^{2\pi} d\varphi\,e^{i\,x\,\cos\varphi}e^{i\,n\varphi}=2\pi\,i^n\,J_n(x),
+         \hspace{12pt}
+         \int_0^\infty dr\,r\,J_0(qr)\,J_n(kr)\,J_n(\ell r)=\frac{\cos n\theta}{\pi k\ell\sin\theta}.
+       \end{align}
+       Here $\theta$ is the angle between sides $\ell$ and $k$ of the triangle formed by three sides of length $q$, $\ell$ and $k$. In the last line of the equations above we have also performed a change of variables $q^2=\ell^2+k^2-2k\ell\cos\theta$.
+     \item $s_a=2,\,s_b=0$:
+       \begin{align}\nonumber
+         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}\cos2\Delta\varphi=\\\nonumber
+         &\frac{k}{2\pi}\int q\,dq\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int J_0(qr)J_2(kr)J_2(\ell r)\,r\,dr=\\
+         &\frac{k}{2\pi}\int \frac{q\,dq}{\pi k\ell\sin\theta}\,\tilde{C}^{vw}_q=\frac{k}{2\pi}\int_0^\pi\frac{d\theta}{\pi}\,\tilde{C}^{vw}_{q(\ell,k,\theta)}\cos2\theta
+       \end{align}
+       \begin{align}
+         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}\sin2\Delta\varphi=0
+       \end{align}
+     \item $s_a=s_b=2$:
+       \begin{align}\nonumber
+         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}\cos^22\Delta\varphi=\\\nonumber
+         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}\frac{1+\cos4\Delta\varphi}{2}=\\\nonumber
+         &\frac{k}{2\pi}\int q\,dq\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int J_0(qr)\left[J_0(kr)J_0(\ell r)+J_4(kr)J_4(\ell r)\right]\,r\,dr=\\
+         &\frac{k}{2\pi}\int \frac{q\,dq}{\pi k\ell\sin\theta}\,\tilde{C}^{vw}_q=\frac{k}{2\pi}\int_0^\pi\frac{d\theta}{\pi}\,\tilde{C}^{vw}_{q(\ell,k,\theta)}\frac{1+\cos4\theta}{2} 
+       \end{align}
+       \begin{align}\nonumber
+         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}\sin^22\Delta\varphi=\\
+         &\frac{k}{2\pi}\int \frac{q\,dq}{\pi k\ell\sin\theta}\,\tilde{C}^{vw}_q=\frac{k}{2\pi}\int_0^\pi\frac{d\theta}{\pi}\,\tilde{C}^{vw}_{q(\ell,k,\theta)}\frac{1-\cos4\theta}{2} 
+       \end{align}
+       \begin{align}\nonumber
+         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}\cos2\Delta\varphi\sin2\Delta\varphi=0
+       \end{align}
+
+
+    \end{itemize}
+
 
     Let's start by defining the function:
+    \begin{align}
+      A\left[f(\varphi_\ell,\varphi_k);\ell,k,q\right]
+      &\equiv\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int d\varphi_\ell d\varphi_kf(\varphi_\ell,\varphi_k)\,\delta({\bf l}-{\bf k}-{\bf q})\\
+      &= \left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q} \int d\varphi_kf(\varphi_{{\bf k}+{\bf q}},\varphi_k)\,\frac{\delta\left(\ell-\sqrt{k^2+q^2+2kq\cos\varphi_k}\right)}{\ell}\\
+      &= \left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q} \int d\varphi_k\frac{f(\varphi_{{\bf k}+{\bf q}},\varphi_k)}{kq|\sin\varphi_k|}\,\left[\delta(\varphi_k-\varphi_*)+\delta(\varphi_k+\varphi_*)\right]\\
+      &= \tilde{C}^{vw}_q\left(\left.\frac{f(\varphi_{{\bf k}+{\bf q}},\varphi_k)}{kq|\sin\varphi_k|}\right|_{\varphi_k=\varphi_*}+\left.\frac{f(\varphi_{{\bf k}+{\bf q}},\varphi_k)}{kq|\sin\varphi_k|}\right|_{\varphi_k=-\varphi_*}\right)
+    \end{align}
     \begin{align}
       A\left[f(\varphi_\ell,\varphi_k);\ell,k,q\right]
       &\equiv\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int d\varphi_\ell d\varphi_kf(\varphi_\ell,\varphi_k)\,\delta({\bf l}-{\bf k}-{\bf q})\\

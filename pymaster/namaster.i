@@ -349,6 +349,15 @@ void apomask(int npix_1,double *mask,
   nmt_apodize_mask(nside,mask,dout,aposize,apotype);
 }
 
+void apomask_flat(int nx,int ny,double lx,double ly,
+		  int npix_1,double *mask,
+		  double *dout,int ndout,double aposize,char *apotype)
+{
+  assert(ndout==npix_1);
+
+  nmt_apodize_mask_flat(nx,ny,lx,ly,mask,dout,aposize,apotype);
+}
+
 void synfast_new(int nside,int pol,int seed,
 		 int ncl1,int nell1,double *cls1,
 		 int nell3,double *weights,
@@ -618,13 +627,20 @@ void couple_cell_py_flat(nmt_workspace_flat *w,
   free(cl_out);
 }
 
-void get_ell_sampling_flat(nmt_workspace_flat *w,
-			   double *dout,int ndout)
+void get_ell_sampling_flat_wsp(nmt_workspace_flat *w,
+			       double *dout,int ndout)
+{
+  assert(ndout==w->nells);
+  memcpy(dout,w->l_arr,w->nells*sizeof(double));
+}
+
+void get_ell_sampling_flat_field(nmt_field_flat *fl,
+				 double *dout,int ndout)
 {
   int ii;
-  assert(ndout==w->fs->n_ell);
-  for(ii=0;ii<w->fs->n_ell;ii++)
-    dout[ii]=w->fs->ell_min[ii]+0.5*w->fs->dell;
+  assert(ndout==fl->fs->n_ell);
+  for(ii=0;ii<fl->fs->n_ell;ii++)
+    dout[ii]=fl->fs->ell_min[ii]+0.5*fl->fs->dell;
 }
 
 void comp_pspec(nmt_field *fl1,nmt_field *fl2,

@@ -18,9 +18,7 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_spline.h>
-#ifdef _WITH_NEEDLET
 #include <gsl/gsl_integration.h>
-#endif //_WITH_NEEDLET
 #include <fftw3.h>
 
 #define NMT_MAX(a,b)  (((a)>(b)) ? (a) : (b)) // maximum
@@ -149,6 +147,10 @@ flouble **nmt_synfast_sph(int nside,int nfields,int *spin_arr,int lmax,
 
 //Defined in mask.c
 void nmt_apodize_mask(long nside,flouble *mask_in,flouble *mask_out,flouble aposize,char *apotype);
+
+//Defined in mask.c
+void nmt_apodize_mask_flat(int nx,int ny,flouble lx,flouble ly,
+			   flouble *mask_in,flouble *mask_out,flouble aposize,char *apotype);
 
 //Defined in master_flat.c
 typedef struct {

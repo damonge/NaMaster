@@ -9,7 +9,8 @@ nmt_k_function *nmt_k_function_alloc(int nk,flouble *karr,flouble *farr,flouble 
     f->x0=karr[0];
     f->xf=karr[nk-1];
     f->yf=yf;
-    f->spl=gsl_spline_alloc(gsl_interp_cspline,nk);
+    //    f->spl=gsl_spline_alloc(gsl_interp_cspline,nk);
+    f->spl=gsl_spline_alloc(gsl_interp_linear,nk);
     gsl_spline_init(f->spl,karr,farr,nk);
   }
   return f;
@@ -32,7 +33,7 @@ flouble nmt_k_function_eval(nmt_k_function *f,flouble k,gsl_interp_accel *intacc
     return gsl_spline_eval(f->spl,k,intacc);
 }
 
-#define N_DELL 2
+#define N_DELL 1
 nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
 {
   nmt_flatsky_info *fs=my_malloc(sizeof(nmt_flatsky_info));

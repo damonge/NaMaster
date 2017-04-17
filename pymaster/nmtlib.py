@@ -429,6 +429,10 @@ synfast_sph = _nmtlib.synfast_sph
 def apodize_mask(*args):
   return _nmtlib.apodize_mask(*args)
 apodize_mask = _nmtlib.apodize_mask
+
+def apodize_mask_flat(*args):
+  return _nmtlib.apodize_mask_flat(*args)
+apodize_mask_flat = _nmtlib.apodize_mask_flat
 class workspace_flat(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, workspace_flat, name, value)
@@ -670,6 +674,10 @@ def apomask(*args):
   return _nmtlib.apomask(*args)
 apomask = _nmtlib.apomask
 
+def apomask_flat(*args):
+  return _nmtlib.apomask_flat(*args)
+apomask_flat = _nmtlib.apomask_flat
+
 def synfast_new(*args):
   return _nmtlib.synfast_new(*args)
 synfast_new = _nmtlib.synfast_new
@@ -710,9 +718,13 @@ def couple_cell_py_flat(*args):
   return _nmtlib.couple_cell_py_flat(*args)
 couple_cell_py_flat = _nmtlib.couple_cell_py_flat
 
-def get_ell_sampling_flat(*args):
-  return _nmtlib.get_ell_sampling_flat(*args)
-get_ell_sampling_flat = _nmtlib.get_ell_sampling_flat
+def get_ell_sampling_flat_wsp(*args):
+  return _nmtlib.get_ell_sampling_flat_wsp(*args)
+get_ell_sampling_flat_wsp = _nmtlib.get_ell_sampling_flat_wsp
+
+def get_ell_sampling_flat_field(*args):
+  return _nmtlib.get_ell_sampling_flat_field(*args)
+get_ell_sampling_flat_field = _nmtlib.get_ell_sampling_flat_field
 
 def comp_pspec(*args):
   return _nmtlib.comp_pspec(*args)

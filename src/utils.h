@@ -25,6 +25,9 @@ void fs_map_product(nmt_flatsky_info *fs,flouble *mp1,flouble *mp2,flouble *mp_o
 flouble fs_map_dot(nmt_flatsky_info *fs,flouble *mp1,flouble *mp2);
 void fs_map2alm(nmt_flatsky_info *fs,int ntrans,int spin,flouble **map,fcomplex **alm);
 void fs_alm2map(nmt_flatsky_info *fs,int ntrans,int spin,flouble **map,fcomplex **alm);
+nmt_k_function *fs_generate_beam_window(double fwhm_amin);
+void fs_alter_alm(nmt_flatsky_info *fs,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,
+		  nmt_k_function *window);
 void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls);
 void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls);
 fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,
