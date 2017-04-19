@@ -473,12 +473,12 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
   fcomplex *cmask1,*cmask2;
   flouble *maskprod,*cosarr,*sinarr;
   int *i_band;
-  cmask1=dftw_malloc(fl1->fs->ny*(fs->nx/2+1)*sizeof(fcomplex));
+  cmask1=dftw_malloc(fs->ny*(fs->nx/2+1)*sizeof(fcomplex));
   fs_map2alm(fl1->fs,1,0,&(fl1->mask),&cmask1);
   if(fl1==fl2)
     cmask2=cmask1;
   else {
-    cmask2=dftw_malloc(fl2->fs->ny*(fs->nx/2+1)*sizeof(fcomplex));
+    cmask2=dftw_malloc(fs->ny*(fs->nx/2+1)*sizeof(fcomplex));
     fs_map2alm(fl2->fs,1,0,&(fl2->mask),&cmask2);
   }
   maskprod=dftw_malloc(fl1->npix*sizeof(flouble));
@@ -685,6 +685,170 @@ void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 					flouble **cl_bias)
 {
   //Placeholder
+  int ii;
+  long ip;
+  int nspec=fl1->nmaps*fl2->nmaps;
+  flouble **cl_dum=my_malloc(nspec*sizeof(flouble *));
+  nmt_k_function **cl_proposal_f=my_malloc(nspec*sizeof(nmt_k_function *));
+  for(ii=0;ii<nspec;ii++) {
+    cl_dum[ii]=my_calloc(fl1->fs->n_ell,sizeof(flouble));
+    cl_proposal_f[ii]=nmt_k_function_alloc(nl_prop,l_prop,cl_proposal[ii],cl_proposal[ii][0],0,0);
+    for(ip=0;ip<fl1->fs->n_ell;ip++)
+      cl_bias[ii][ip]=0;
+  }
+
+  //TODO: some terms (e.g. C^ab*SHT[w*g^j]) could be precomputed
+  //TODO: if fl1=fl2 F2=F3
+  //Allocate dummy maps and alms
+  flouble **map_1_dum=my_malloc(fl1->nmaps*sizeof(flouble *));
+  fcomplex **alm_1_dum=my_malloc(fl1->nmaps*sizeof(fcomplex *));
+  for(ii=0;ii<fl1->nmaps;ii++) {
+    map_1_dum[ii]=dftw_malloc(fl1->npix*sizeof(flouble));
+    alm_1_dum[ii]=dftw_malloc(fl1->fs->ny*(fl1->fs->nx/2+1)*sizeof(fcomplex));
+  }
+  flouble **map_2_dum=my_malloc(fl2->nmaps*sizeof(flouble *));
+  fcomplex **alm_2_dum=my_malloc(fl2->nmaps*sizeof(fcomplex *));
+  for(ii=0;ii<fl2->nmaps;ii++) {
+    map_2_dum[ii]=dftw_malloc(fl2->npix*sizeof(flouble));
+    alm_2_dum[ii]=dftw_malloc(fl2->fs->ny*(fl2->fs->nx/2+1)*sizeof(fcomplex));
+  }
+
+  if(fl2->ntemp>0) {
+    int iti;
+    for(iti=0;iti<fl2->ntemp;iti++) {
+      int itj;
+      for(itj=0;itj<fl2->ntemp;itj++) {
+	int im1,im2;
+	double nij=gsl_matrix_get(fl2->matrix_M,iti,itj);
+	//w*g^j
+	for(im2=0;im2<fl2->nmaps;im2++)
+	  fs_map_product(fl2->fs,fl2->temp[itj][im2],fl2->mask,map_2_dum[im2]);
+	//DFT[w*g^j]
+	fs_map2alm(fl2->fs,1,2*fl2->pol,map_2_dum,alm_2_dum);
+	//C^ab*DFT[w*g^j]
+	for(im1=0;im1<fl1->nmaps;im1++) {
+	  fs_zero_alm(fl1->fs,alm_1_dum[im1]);
+	  for(im2=0;im2<fl2->nmaps;im2++)
+	    fs_alter_alm(fl2->fs,-1.,alm_2_dum[im2],alm_1_dum[im1],cl_proposal_f[im1*fl2->nmaps+im2],1);
+	}
+	//DFT^-1[C^ab*DFT[w*g^j]]
+	fs_alm2map(fl1->fs,1,2*fl1->pol,map_1_dum,alm_1_dum);
+	//v*DFT^-1[C^ab*DFT[w*g^j]]
+	for(im1=0;im1<fl1->nmaps;im1++)
+	  fs_map_product(fl1->fs,map_1_dum[im1],fl1->mask,map_1_dum[im1]);
+	//DFT[v*DFT^-1[C^ab*DFT[w*g^j]]]
+	fs_map2alm(fl1->fs,1,2*fl1->pol,map_1_dum,alm_1_dum);
+	//Sum_m(DFT[v*DFT^-1[C^ab*DFT[w*g^j]]]*g^i*)/(2l+1)
+	fs_alm2cl(fl1->fs,alm_1_dum,fl2->a_temp[iti],fl1->pol,fl2->pol,cl_dum);
+	for(im1=0;im1<nspec;im1++) {
+	  for(ip=0;ip<fl1->fs->n_ell;ip++)
+	    cl_bias[im1][ip]-=cl_dum[im1][ip]*nij;
+	}
+      }
+    }
+  }
+
+  if(fl1->ntemp>0) {
+    int iti;
+    for(iti=0;iti<fl1->ntemp;iti++) {
+      int itj;
+      for(itj=0;itj<fl1->ntemp;itj++) {
+	int im1,im2;
+	double mij=gsl_matrix_get(fl1->matrix_M,iti,itj);
+	//v*f^j
+	for(im1=0;im1<fl1->nmaps;im1++)
+	  fs_map_product(fl1->fs,fl1->temp[itj][im1],fl1->mask,map_1_dum[im1]);
+	//DFT[v*f^j]
+	fs_map2alm(fl1->fs,1,2*fl1->pol,map_1_dum,alm_1_dum);
+	//C^abT*DFT[v*f^j]
+	for(im2=0;im2<fl2->nmaps;im2++) {
+	  fs_zero_alm(fl2->fs,alm_2_dum[im2]);
+	  for(im1=0;im1<fl1->nmaps;im1++)
+	    fs_alter_alm(fl1->fs,-1.,alm_1_dum[im1],alm_2_dum[im2],cl_proposal_f[im1*fl2->nmaps+im2],1);
+	}
+	//DFT^-1[C^abT*DFT[v*f^j]]
+	fs_alm2map(fl2->fs,1,2*fl2->pol,map_2_dum,alm_2_dum);
+	//w*DFT^-1[C^abT*DFT[v*f^j]]
+	for(im2=0;im2<fl2->nmaps;im2++)
+	  fs_map_product(fl2->fs,map_2_dum[im2],fl2->mask,map_2_dum[im2]);
+	//DFT[w*DFT^-1[C^abT*DFT[v*f^j]]]
+	fs_map2alm(fl2->fs,1,2*fl2->pol,map_2_dum,alm_2_dum);
+	//Sum_m(f^i*DFT[w*DFT^-1[C^abT*DFT[v*f^j]]]^*)/(2l+1)
+	fs_alm2cl(fl1->fs,fl1->a_temp[iti],alm_2_dum,fl1->pol,fl2->pol,cl_dum);
+	for(im1=0;im1<nspec;im1++) {
+	  for(ip=0;ip<fl1->fs->n_ell;ip++)
+	    cl_bias[im1][ip]-=cl_dum[im1][ip]*mij;
+	}
+      }
+    }
+  }
+
+  if((fl1->ntemp>0) && (fl2->ntemp>0)) {
+    int iti,itj,itp,itq,im1,im2;
+    flouble *mat_prod=my_calloc(fl1->ntemp*fl2->ntemp,sizeof(flouble));
+    for(itj=0;itj<fl1->ntemp;itj++) {
+      for(itq=0;itq<fl2->ntemp;itq++) {
+	//w*g^q
+	for(im2=0;im2<fl2->nmaps;im2++)
+	  fs_map_product(fl2->fs,fl2->temp[itq][im2],fl2->mask,map_2_dum[im2]);
+	//DFT[w*g^q]
+	fs_map2alm(fl2->fs,1,2*fl2->pol,map_2_dum,alm_2_dum);
+	//C^ab*DFT[w*g^q]
+	for(im1=0;im1<fl1->nmaps;im1++) {
+	  fs_zero_alm(fl1->fs,alm_1_dum[im1]);
+	  for(im2=0;im2<fl2->nmaps;im2++)
+	    fs_alter_alm(fl2->fs,-1.,alm_2_dum[im2],alm_1_dum[im1],cl_proposal_f[im1*fl2->nmaps+im2],1);
+	}
+	//DFT^-1[C^ab*DFT[w*g^q]]
+	fs_alm2map(fl1->fs,1,2*fl1->pol,map_1_dum,alm_1_dum);
+	for(im1=0;im1<fl1->nmaps;im1++) {
+	  //v*DFT^-1[C^ab*DFT[w*g^q]]
+	  fs_map_product(fl1->fs,map_1_dum[im1],fl1->mask,map_1_dum[im1]);
+	  //Int[f^jT*v*DFT^-1[C^ab*DFT[w*g^q]]]
+	  mat_prod[itj*fl2->ntemp+itq]+=fs_map_dot(fl1->fs,map_1_dum[im1],fl1->temp[itj][im1]);
+	}
+      }
+    }
+
+    for(iti=0;iti<fl1->ntemp;iti++) {
+      for(itp=0;itp<fl2->ntemp;itp++) {
+	//Sum_m(f^i*g^p*)/(2l+1)
+	fs_alm2cl(fl1->fs,fl1->a_temp[iti],fl2->a_temp[itp],fl1->pol,fl2->pol,cl_dum);
+	for(itj=0;itj<fl1->ntemp;itj++) {
+	  double mij=gsl_matrix_get(fl1->matrix_M,iti,itj);
+	  for(itq=0;itq<fl2->ntemp;itq++) {
+	    double npq=gsl_matrix_get(fl2->matrix_M,itp,itq);
+	    for(im1=0;im1<nspec;im1++) {
+	      for(ip=0;ip<fl1->fs->n_ell;ip++)
+		cl_bias[im1][ip]+=cl_dum[im1][ip]*mat_prod[itj*fl2->ntemp+itq]*mij*npq;
+	    }
+	  }
+	}
+      }
+    }
+
+    free(mat_prod);
+  }
+
+  for(ii=0;ii<fl1->nmaps;ii++) {
+    dftw_free(map_1_dum[ii]);
+    dftw_free(alm_1_dum[ii]);
+  }
+  free(map_1_dum);
+  free(alm_1_dum);
+  for(ii=0;ii<fl2->nmaps;ii++) {
+    dftw_free(map_2_dum[ii]);
+    dftw_free(alm_2_dum[ii]);
+  }
+  free(map_2_dum);
+  free(alm_2_dum);
+  for(ii=0;ii<nspec;ii++) {
+    free(cl_dum[ii]);
+    nmt_k_function_free(cl_proposal_f[ii]);
+  }
+  free(cl_proposal_f);
+  free(cl_dum);
+
   return;
 }
 

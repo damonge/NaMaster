@@ -275,15 +275,29 @@ nmt_k_function *fs_generate_beam_window(double fwhm_amin)
   return beam;
 }
 
+void fs_zero_alm(nmt_flatsky_info *fs,fcomplex *alm)
+{
+
+#pragma omp parallel default(none)		\
+  shared(fs,alm)
+  {
+    int ii;
+#pragma omp for
+    for(ii=0;ii<fs->ny*(fs->nx/2+1);ii++) {
+      alm[ii]=0;
+    } //end omp for
+  } //end omp parallel
+}
+
 void fs_alter_alm(nmt_flatsky_info *fs,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,
-		  nmt_k_function *window)
+		  nmt_k_function *window,int add_to_out)
 {
   nmt_k_function *beam;
   if(window==NULL) beam=fs_generate_beam_window(fwhm_amin);
   else beam=window;
 
 #pragma omp parallel default(none)		\
-  shared(fs,alm_in,alm_out,beam)
+  shared(fs,alm_in,alm_out,beam,add_to_out)
   {
     int iy;
     flouble dkx=2*M_PI/fs->lx;
@@ -302,7 +316,10 @@ void fs_alter_alm(nmt_flatsky_info *fs,double fwhm_amin,fcomplex *alm_in,fcomple
 	flouble kx=ix*dkx;
 	long index=ix+(fs->nx/2+1)*iy;
 	flouble kmod=sqrt(kx*kx+ky*ky);
-	alm_out[index]=alm_in[index]*nmt_k_function_eval(beam,kmod,intacc_thr);
+	if(add_to_out)
+	  alm_out[index]+=alm_in[index]*nmt_k_function_eval(beam,kmod,intacc_thr);
+	else
+	  alm_out[index]=alm_in[index]*nmt_k_function_eval(beam,kmod,intacc_thr);
       }
     } //end omp for
     gsl_interp_accel_free(intacc_thr);
@@ -310,8 +327,6 @@ void fs_alter_alm(nmt_flatsky_info *fs,double fwhm_amin,fcomplex *alm_in,fcomple
 
   if(window==NULL) nmt_k_function_free(beam);
 }
-
-
 
 void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls)
 {

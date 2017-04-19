@@ -137,7 +137,7 @@ static void apodize_mask_smooth(nmt_flatsky_info *fs,flouble *mask_in,flouble *m
   } //end omp parallel
 
   fs_map2alm(fs,1,0,&mask_dum,&alms_dum);
-  fs_alter_alm(fs,aporad*180*60*2.355/M_PI,alms_dum,alms_dum,NULL);
+  fs_alter_alm(fs,aporad*180*60*2.355/M_PI,alms_dum,alms_dum,NULL,0);
   fs_alm2map(fs,1,0,&mask_dum,&alms_dum);
   fs_map_product(fs,mask_in,mask_dum,mask_out);
 

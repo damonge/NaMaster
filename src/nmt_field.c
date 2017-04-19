@@ -74,7 +74,7 @@ static void nmt_purify(nmt_field *fl)
   //Compute spin-1 mask
   for(ll=0;ll<=fl->lmax;ll++) //The minus sign is because of the definition of E-modes
     f_l[ll]=-sqrt((ll+1.)*ll);
-  he_alter_alm(fl->lmax,-1.,walm[0],walm[0],f_l); //TODO: There may be a -1 sign here
+  he_alter_alm(fl->lmax,-1.,walm[0],walm[0],f_l,0); //TODO: There may be a -1 sign here
   he_alm2map(fl->nside,fl->lmax,1,1,wmap,walm);
   //Product with spin-1 mask
   for(ip=0;ip<fl->npix;ip++) {
@@ -107,7 +107,7 @@ static void nmt_purify(nmt_field *fl)
     else
       f_l[ll]=0;
   }
-  he_alter_alm(fl->lmax,-1.,walm[0],walm[0],f_l); //TODO: There may be a -1 sign here
+  he_alter_alm(fl->lmax,-1.,walm[0],walm[0],f_l,0); //TODO: There may be a -1 sign here
   he_alm2map(fl->nside,fl->lmax,1,2,wmap,walm);
   //Product with spin-2 mask
   for(ip=0;ip<fl->npix;ip++) {

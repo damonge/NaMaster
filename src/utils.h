@@ -26,8 +26,9 @@ flouble fs_map_dot(nmt_flatsky_info *fs,flouble *mp1,flouble *mp2);
 void fs_map2alm(nmt_flatsky_info *fs,int ntrans,int spin,flouble **map,fcomplex **alm);
 void fs_alm2map(nmt_flatsky_info *fs,int ntrans,int spin,flouble **map,fcomplex **alm);
 nmt_k_function *fs_generate_beam_window(double fwhm_amin);
+void fs_zero_alm(nmt_flatsky_info *fs,fcomplex *alm);
 void fs_alter_alm(nmt_flatsky_info *fs,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,
-		  nmt_k_function *window);
+		  nmt_k_function *window,int add_to_out);
 void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls);
 void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls);
 fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,
@@ -56,7 +57,8 @@ void he_in_ring(int nside,int iz,flouble phi0,flouble dphi,int *listir,int *nir)
 void he_query_disc(int nside,double cth0,double phi,flouble radius,int *listtot,int *nlist,int inclusive);
 void he_udgrade(flouble *map_in,long nside_in,flouble *map_out,long nside_out,int nest);
 double *he_generate_beam_window(int lmax,double fwhm_amin);
-void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,double *window);
+void he_zero_alm(int lmax,fcomplex *alm);
+void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,double *window,int add_to_out);
 void he_map_product(int nside,flouble *mp1,flouble *mp2,flouble *mp_out);
 flouble he_map_dot(int nside,flouble *mp1,flouble *mp2);
 fcomplex **he_synalm(int nside,int nmaps,int lmax,flouble **cells,flouble **beam,int seed);

@@ -563,8 +563,9 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
 	he_map2alm(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
 	//C^ab*SHT[w*g^j]
 	for(im1=0;im1<fl1->nmaps;im1++) {
+	  he_zero_alm(fl1->lmax,alm_1_dum[im1]);
 	  for(im2=0;im2<fl2->nmaps;im2++)
-	    he_alter_alm(lmax,-1.,alm_2_dum[im2],alm_1_dum[im1],cl_proposal[im1*fl2->nmaps+im2]);
+	    he_alter_alm(lmax,-1.,alm_2_dum[im2],alm_1_dum[im1],cl_proposal[im1*fl2->nmaps+im2],1);
 	}
 	//SHT^-1[C^ab*SHT[w*g^j]]
 	he_alm2map(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum);
@@ -574,7 +575,7 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
 	//SHT[v*SHT^-1[C^ab*SHT[w*g^j]]]
 	he_map2alm(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
 	//Sum_m(SHT[v*SHT^-1[C^ab*SHT[w*g^j]]]*g^i*)/(2l+1)
-	he_alm2cl(alm_1_dum,fl2->a_temp[iti],fl1->pol,fl1->pol,cl_dum,lmax);
+	he_alm2cl(alm_1_dum,fl2->a_temp[iti],fl1->pol,fl2->pol,cl_dum,lmax);
 	for(im1=0;im1<nspec;im1++) {
 	  for(ip=0;ip<=lmax;ip++)
 	    cl_bias[im1][ip]-=cl_dum[im1][ip]*nij;
@@ -597,8 +598,9 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
 	he_map2alm(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
 	//C^abT*SHT[v*f^j]
 	for(im2=0;im2<fl2->nmaps;im2++) {
+	  he_zero_alm(fl2->lmax,alm_2_dum[im2]);
 	  for(im1=0;im1<fl1->nmaps;im1++)
-	    he_alter_alm(lmax,-1.,alm_1_dum[im1],alm_2_dum[im2],cl_proposal[im1*fl2->nmaps+im2]);
+	    he_alter_alm(lmax,-1.,alm_1_dum[im1],alm_2_dum[im2],cl_proposal[im1*fl2->nmaps+im2],1);
 	}
 	//SHT^-1[C^abT*SHT[v*f^j]]
 	he_alm2map(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum);
@@ -629,8 +631,9 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_pr
 	he_map2alm(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
 	//C^ab*SHT[w*g^q]
 	for(im1=0;im1<fl1->nmaps;im1++) {
+	  he_zero_alm(fl1->lmax,alm_1_dum[im1]);
 	  for(im2=0;im2<fl2->nmaps;im2++)
-	    he_alter_alm(lmax,-1.,alm_2_dum[im2],alm_1_dum[im1],cl_proposal[im1*fl2->nmaps+im2]);
+	    he_alter_alm(lmax,-1.,alm_2_dum[im2],alm_1_dum[im1],cl_proposal[im1*fl2->nmaps+im2],1);
 	}
 	//SHT^-1[C^ab*SHT[w*g^q]]
 	he_alm2map(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum);

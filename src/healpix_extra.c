@@ -850,7 +850,20 @@ flouble *he_generate_beam_window(int lmax,double fwhm_amin)
   return beam;
 }
 
-void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,flouble *window)
+void he_zero_alm(int lmax,fcomplex *alm)
+{
+#pragma omp parallel default(none) \
+  shared(lmax,alm)
+  {
+    long lm,nalm=he_nalms(lmax);
+#pragma omp for
+    for(lm=0;lm<nalm;lm++) {
+      alm[lm]=0;
+    } //end omp for
+  } //end omp parallel
+}
+
+void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,flouble *window,int add_to_out)
 {
   flouble *beam;
   int mm;
@@ -862,8 +875,10 @@ void he_alter_alm(int lmax,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,f
     int ll;
     for(ll=mm;ll<=lmax;ll++) {
       long index=he_indexlm(ll,mm,lmax);
-
-      alm_out[index]=alm_in[index]*beam[ll];
+      if(add_to_out)
+	alm_out[index]+=alm_in[index]*beam[ll];
+      else
+	alm_out[index]=alm_in[index]*beam[ll];
     }
   }
 
@@ -1182,7 +1197,8 @@ void he_nt_get_window(he_needlet_params *par,int j,flouble *b)
   if(j==0) {
     int jj;
 
-    memset(b,0,lmx+1);
+    for(jj=0;jj<=lmx;jj++)
+      b[jj]=0;
     for(jj=0;jj<=par->jmax_min;jj++) {
       bfac=1./pow(par->b,jj);
       for(l=0;l<=lmx;l++) {
@@ -1318,7 +1334,7 @@ fcomplex **he_map2needlet(he_needlet_params *par,flouble **map,flouble ***nt,
     //Loop over spin components
     for(imap=0;imap<nmaps;imap++) {
       //Set alms and window to zero
-      memset(alm_dum[imap],0,n_alms*sizeof(fcomplex));
+      he_zero_alm(l_max,alm_dum);
 
       //Multiply alms by window function
       for(mm=0;mm<=lmx;mm++) {

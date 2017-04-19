@@ -184,8 +184,8 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
     (\hat{\sf M}^{-1})_{ij}\equiv\int d\nv\,{\bf f}^{i\dag}(\nv)\,{\bf f}^j(\nv).
   \end{equation}
   Thus we can find a cleaned version of ${\bf a}$ as:
-  \begin{align}
-    \tilde{\bf a}(\nv)&\equiv{\bf d}_a(\nv)-{\bf f}^i(\nv)\,M_{ij}\int d\nv'{\bf f}^{j\dag}(\nv'){\bf d}_a(\nv')\\
+  \begin{align}\nonumber
+    \tilde{\bf a}(\nv)&\equiv{\bf d}_a(\nv)-{\bf f}^i(\nv)\,M_{ij}\int d\nv'{\bf f}^{j\dag}(\nv'){\bf d}_a(\nv')\\\label{eq:deproject_real}
                       &={\bf a}^v(\nv)-{\bf f}^i(\nv)\,M_{ij}\int d\nv'{\bf f}^{j\dag}(\nv'){\bf a}^v(\nv'),
   \end{align}
   where there is an implicit summation sign over $i$ and $j$ (we will omit these from now on).
@@ -195,7 +195,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
    \tilde{\bf a}_{\ell m}={\bf a}^v_{\ell m}-{\bf f}^i_{\ell m}M_{ij}\sum_{\ell' m'}{\bf f}^{j\dag}_{\ell' m'}{\bf a}^{v}_{\ell' m'}.
   \end{equation}
   From now on we will simplify the notation by abbreviating the pair $\ell m$ as ${\bf l}$, so that the previous equation reads:
-  \begin{equation}
+  \begin{equation}\label{eq:deproject_harmonic}
    \tilde{\bf a}_{\bf l}={\bf a}^v_{\bf l}-{\bf f}^i_{\bf l}M_{ij}\sum_{{\bf l}'}{\bf f}^{j\dag}_{{\bf l}'}{\bf a}^{v}_{{\bf l}'}.
   \end{equation}
 
@@ -316,7 +316,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
     Putting together the results from Equations \ref{eq:master_transformation}, \ref{eq:bias_2}, \ref{eq:bias_3} and \ref{eq:bias_4}, we can write down an unbiased estimator for the pseudo-$C_\ell$ of the cut-sky maps free from contamination from ${\bf f}$ and ${\bf g}$:
     \begin{align}\nonumber
       \tilde{\sf C}^{ab}_\ell=&\tilde{\sf C}^{\tilde{a}\tilde{b}}_\ell+N^*_{ij}\,\frac{\sum_m}{2\ell+1}{\rm SHT}\left\{v(\nv){\rm SHT}^{-1}\left[\hat{\sf C}^{ab}_{\ell_1}{\rm SHT}\left(w\,{\bf g}^j\right)^{s_b}_{{\bf l}_1}\right]^{s_a}_{\nv}\right\}^{s_a}_{\bf l}{\bf g}^{i\dag}_{\bf l}+\\\nonumber
-      &+M_{ij}\frac{\sum_{m}}{2\ell+1}{\bf f}^i_{\bf l}\,{\rm SHT}\left\{w(\nv)\,{\rm SHT}^{-1}\left[\hat{\sf C}^{ab\dag}_{\ell_1}{\rm SHT}\left(v\,{\bf f}^j\right)^{s_a}_{{\bf l}_1}\right]^{s_b}_{\nv}\right\}^{s_b\dag}_{\bf l}-\\
+      &+M_{ij}\frac{\sum_{m}}{2\ell+1}{\bf f}^i_{\bf l}\,{\rm SHT}\left\{w(\nv)\,{\rm SHT}^{-1}\left[\hat{\sf C}^{ab\dag}_{\ell_1}{\rm SHT}\left(v\,{\bf f}^j\right)^{s_a}_{{\bf l}_1}\right]^{s_b}_{\nv}\right\}^{s_b\dag}_{\bf l}-\\\label{eq:unbiased_pcl}
       &-M_{ij}N^*_{pq}\left\{\int d\nv\,v(\nv)\,{\bf f}^{j\dag}(\nv)\,{\rm SHT}^{-1}\left[\hat{\sf C}^{ab}_{\ell_1}{\rm SHT}\left(w\,{\bf g}^q\right)^{s_b}_{{\bf l}_1}\right]^{s_a}_{\nv}\right\}\tilde{\sf C}^{f^ig^p}_\ell
     \end{align}
 
@@ -483,13 +483,6 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
     \end{equation}
 
 
-  \subsection{Contaminant cleaning}
-    Using the same notation as in Section \ref{sec:contaminant}, the contaminant-cleaned version of ${\bf a}$ is:
-    \begin{equation}
-      \tilde{\bf a}({\bf x})={\bf a}^v({\bf x})-{\bf f}^i({\bf x})M_{ij}\int d{\bf x}^2\,{\bf f}^{j\dag}({\bf x}'){\bf a}^v({\bf x}'),\hspace{12pt}
-      \tilde{\bf a}_{\bf l}={\bf a}^v_{\bf l}-{\bf f}^i_{\bf l}M_{ij}\int d{\bf k}^2\,{\bf f}^{j\dag}_{\bf k}{\bf a}^v_{\bf k}
-    \end{equation}
-
   \subsection{Pseudo-$C_\ell$ estimator - continuum limit}
     The Fourier coefficients of the masked field are:
     \begin{align}
@@ -593,7 +586,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
     
     In this scenario, the spin Fourier transform of the pixelized field can be computed as its discrete Fourier transform:
     \begin{equation}
-      {\bf a}_{\bf k}\equiv\sum_{\bf x}\frac{\Delta{\bf x}^2}{2\pi}\,_{s_a}{\sf E}_{\bf k}({\bf x}){\bf a}_{\bf x},
+      {\bf a}_{\bf k}\equiv {\rm DFT}\left({\bf a}\right)^{s_a}_{\bf k}\equiv\sum_{\bf x}\frac{\Delta{\bf x}^2}{2\pi}\,_{s_a}{\sf E}_{\bf k}({\bf x}){\bf a}_{\bf x},
     \end{equation}
     where the wavenumber ${\bf k}$ is now discretized as ${\bf k}=(j_x\Delta k_x,j_y\Delta k_y)$, the integers
     $j_{(x,y)}$ run from $-N_{(x,y)}/2$ tof $N_{(x,y)}/2-1$\footnote{This is the valid domain when $N_{(x,y)}$ is even.
@@ -623,7 +616,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
       \left\langle{\bf a}^v_{\bf l}{\bf b}^{w\dag}_{\bf l}\right\rangle=\sum_{\bf k}\frac{\Delta{\bf k}^2}{(2\pi)^2}{\sf R}^\dag(s_a\Delta\varphi){\sf C}^{ab}_{\bf k}{\sf R}^\dag(s_b\Delta\varphi)v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
     \end{equation}
     
-    At this stage it is natural to connect directly with the final bandpowers. In this case we will define a bandpower ${\sf B}_b$, indexed by an integer $b$ as the average of the covariance above over a set of ${\bf l}$ values $S_b$:
+    At this stage it is natural to connect directly with the final bandpowers (since there is no natural minimal binning as in the case of the full-sky multipoles). In this case we will define a bandpower ${\sf B}_b$, indexed by an integer $b$ as the average of the covariance above over a set of ${\bf l}$ values $S_b$:
     \begin{equation}
       \,_v{\sf B}^{ab}_b\equiv\frac{\Delta{\bf k}^2}{N_b}\sum_{{\bf l}\in S_b}{\bf a}^v_{\bf l}{\bf b}^{w\dag}_{\bf l},
     \end{equation}
@@ -652,11 +645,18 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
       \right)
     \end{align}
 
-
-
-
-
-  
+  \subsection{Contaminant cleaning}
+    Using the same notation as in Section \ref{sec:contaminant}, the contaminant-cleaned version of ${\bf a}$ is (c.f. Eqs. \ref{eq:deproject_real} \ref{eq:deproject_harmonic}):
+    \begin{equation}
+      \tilde{\bf a}({\bf x})={\bf a}^v({\bf x})-{\bf f}^i({\bf x})M_{ij}\sum_{\bf x}\Delta{\bf x}^2\,{\bf f}^{j\dag}({\bf x}'){\bf a}^v({\bf x}'),\hspace{12pt}
+      \tilde{\bf a}_{\bf l}={\bf a}^v_{\bf l}-{\bf f}^i_{\bf l}M_{ij}\sum_{\bf k}\Delta{\bf k}^2\,{\bf f}^{j\dag}_{\bf k}{\bf a}^v_{\bf k},
+    \end{equation}
+    and the unbiased pseudo-$C_\ell$ estimator takes the form (c.f. Eq. \ref{eq:unbiased_pcl}):
+    \begin{align}\nonumber
+      \left\langle\tilde{\bf a}_{\bf l}\tilde{\bf b}_{\bf l}^\dag\right\rangle=&\left\langle{\bf a}^v_{\bf l}{\bf b}^{w\dag}_{\bf l}\right\rangle+N^*_{ij}\,{\rm DFT}\left\{v({\bf x}){\rm DFT}^{-1}\left[\hat{\sf C}^{ab}_{\ell_1}{\rm DFT}\left(w\,{\bf g}^j\right)^{s_b}_{{\bf l}_1}\right]^{s_a}_{\bf x}\right\}^{s_a}_{\bf l}{\bf g}^{i\dag}_{\bf l}+\\\nonumber
+      &+M_{ij}{\bf f}^i_{\bf l}\,{\rm DFT}\left\{w({\bf x})\,{\rm DFT}^{-1}\left[\hat{\sf C}^{ab\dag}_{\ell_1}{\rm DFT}\left(v\,{\bf f}^j\right)^{s_a}_{{\bf l}_1}\right]^{s_b}_{\bf x}\right\}^{s_b\dag}_{\bf l}-\\
+      &-M_{ij}N^*_{pq}\left\{\sum_{\bf x} \Delta{\bf x}^D\,v({\bf x})\,{\bf f}^{j\dag}({\bf x})\,{\rm DFT}^{-1}\left[\hat{\sf C}^{ab}_{\ell_1}{\rm DFT}\left(w\,{\bf g}^q\right)^{s_b}_{{\bf l}_1}\right]^{s_a}_{\bf x}\right\}\,{\bf f}^i_{\bf l}{\bf g}^{p\dag}_{\bf l}
+    \end{align}
   
 \begin{thebibliography}{}
  \bibitem{2002ApJ...567....2H} Hivon, E., G{\'o}rski, K.~M., Netterfield, C.~B., et al.\ 2002, \apj, 567, 2 
