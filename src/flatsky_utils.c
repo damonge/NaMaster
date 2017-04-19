@@ -447,7 +447,7 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,
 	flouble kx=ix*dkx;
 	long index=ix+(nx/2+1)*iy;
 	flouble kmod=sqrt(kx*kx+ky*ky);
-	if(kmod<=0) {
+	if(kmod<0) {
 	  for(imp1=0;imp1<nmaps;imp1++)
 	    alms[imp1][index]=0;
 	}
@@ -485,7 +485,23 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,
 	  gsl_blas_dgemv(CblasNoTrans,1.,clmat,iv1,0,iv2);
 	  for(imp1=0;imp1<nmaps;imp1++) {
 	    flouble bm=nmt_k_function_eval(beam[imp1],kmod,intacc_beam);
-	    alms[imp1][index]=bm*(fcomplex)(gsl_vector_get(rv2,imp1)+I*gsl_vector_get(iv2,imp1));
+	    flouble a_re=bm*gsl_vector_get(rv2,imp1);
+	    flouble a_im=bm*gsl_vector_get(iv2,imp1);
+	    if(ix==0) {
+	      if(iy>ny/2)
+		continue;
+	      else {
+		if(iy==0)
+		  alms[imp1][index]=(fcomplex)(M_SQRT2*a_re+I*0*a_im);
+		else {
+		  int iyy=ny-iy;	
+		  alms[imp1][index]=(fcomplex)(a_re+I*a_im);
+		  alms[imp1][ix+(nx/2+1)*iyy]=(fcomplex)(a_re-I*a_im);
+		}
+	      }
+	    }
+	    else
+	      alms[imp1][index]=(fcomplex)(a_re+I*a_im);
 	  }
 	}
       }

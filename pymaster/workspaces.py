@@ -106,7 +106,7 @@ class NmtWorkspaceFlat(object) :
             lib.workspace_flat_free(self.wsp)
         self.wsp=lib.workspace_flat_read(fname);
         
-    def compute_coupling_matrix(self,fl1,fl2,bins,nell_rebin=2) :
+    def compute_coupling_matrix(self,fl1,fl2,bins,nell_rebin=2,method=203) :
         """
         Computes coupling matrix associated with the cross-power spectrum of two NmtFieldFlats and an NmtBinFlat binning scheme.
 
@@ -117,7 +117,7 @@ class NmtWorkspaceFlat(object) :
         if self.wsp!=None :
             lib.workspace_flat_free(self.wsp)
 
-        self.wsp=lib.compute_coupling_matrix_flat(fl1.fl,fl2.fl,bins.bin,nell_rebin)
+        self.wsp=lib.compute_coupling_matrix_flat(fl1.fl,fl2.fl,bins.bin,nell_rebin,method)
 
     def write_to(self,fname) :
         """
@@ -295,7 +295,7 @@ def compute_full_master_flat(f1,f2,b,cl_noise=None,cl_guess=None,ells_guess=None
     - :func:`pymaster.NmtWorkspaceFlat.compute_coupling_matrix`
     - :func:`pymaster.deprojection_bias_flat`
     - :func:`pymaster.compute_coupled_cell_flat`
-    - :func:`pymaster.NmtWorkspaceFlat.decouple_cell_flat`
+    - :func:`pymaster.NmtWorkspaceFlat.decouple_cell`
 
     :param NmtFieldFlat f1,f2: fields to correlate
     :param NmtBinFlat b: binning scheme defining output bandpower

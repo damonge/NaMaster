@@ -372,23 +372,23 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
   where $b^{ab}_\ell$ is the product of the harmonic transform of the beams for maps $a$ and $b$.
     
 \subsection{Binning into bandpowers}
-  Given the loss of information implicit in masking the originally full-sky field, it is in general not possible to invert Eq. \ref{eq:cell_coupled} directly. De usual approach to doing so is by binning the pseudo-$C_\ell$ into bandpowers. A bandpower $k$ is defined by a set of $N_k$ multipoles $\vec{\ell}_k\equiv(\ell_k^1,...,\ell_k^{N_k})$ and a set of weights $\vec{w}_k\equiv(w_k^1,...,w_k^{N_k})$ normalized such that $\sum_{i=1}^{N_k}w_k^i=1$. The $k-$th bandpower for the coupled pseudo-$C_\ell$ is then defined as:
+  Given the loss of information implicit in masking the originally full-sky field, it is in general not possible to invert Eq. \ref{eq:cell_coupled} directly. De usual approach to doing so is by binning the pseudo-$C_\ell$ into bandpowers. A bandpower $b$ is defined by a set of $N_b$ multipoles $\vec{\ell}_b\equiv(\ell_b^1,...,\ell_b^{N_k})$ and a set of weights $\vec{w}_b\equiv(w_b^1,...,w_b^{N_b})$ normalized such that $\sum_{i=1}^{N_b}w_b^i=1$. The $b-$th bandpower for the coupled pseudo-$C_\ell$ is then defined as:
   \begin{equation}
-    _v\tilde{\sf B}^{ab}_k\equiv\sum_{i=1}^{N_k}w_k^i\,_v\tilde{\sf C}^{ab}_{\ell_k^i}
-    =\sum_{i=1}^{N_k}w_k^i\sum_{\ell'}{\sf M}^{s_as_b}_{\ell_k^i\ell'}\,_v\hat{\sf C}^{ab}_\ell.
+    _v\tilde{\sf B}_b \equiv\sum_{i=1}^{N_b}w_b^i\,_v\tilde{\sf C}_{\ell_b^i}
+    =\sum_{i=1}^{N_b}w_b^i\sum_{\ell'}{\sf M}^{s_as_b}_{\ell_b^i\ell'}\,_v\hat{\sf C}_\ell.
   \end{equation}
-  One then proceeds by assuming that the true power spectrum is a step-wise function, taking constant values over the multipoles corresponding to each bandpower: $_v\hat{\sf C}^{ab}_\ell=\sum_k\,_v\hat{\sf B}^{ab}_k\Theta(\ell\in\vec{\ell}_k)$ (where $\Theta$ is a binary step function). The previous equation then reads:
+  One then proceeds by assuming that the true power spectrum is a step-wise function, taking constant values over the multipoles corresponding to each bandpower: $_v\hat{\sf C}_\ell=\sum_b\,_v\hat{\sf B}_b\Theta(\ell\in\vec{\ell}_b)$ (where $\Theta$ is a binary step function). The previous equation then reads:
   \begin{equation}
-   _v\tilde{\sf B}^{ab}_k=\sum_{k'}\mathcal{M}^{s_as_b}_{kk'}\,_v\hat{\sf B}^{ab}_{kk'}\equiv\sum_{k'}\left(\sum_{\ell\in\vec{\ell}_k}\sum_{\ell'\in\vec{\ell}_{k'}}w_k^\ell{\sf M}^{s_as_b}_{\ell\ell'}\right)\,_v\hat{\sf B}^{ab}_{k'},
+   _v\tilde{\sf B}_b=\sum_{b'}\mathcal{M}_{bb'}\,_v\hat{\sf B}_{bb'}\equiv\sum_{b'}\left(\sum_{\ell\in\vec{\ell}_b}\sum_{\ell'\in\vec{\ell}_{b'}}w_b^\ell{\sf M}_{\ell\ell'}\right)\,_v\hat{\sf B}_{b'},
   \end{equation}
-  which defines the binned coupling matrix $\mathcal{M}^{ab}_{kk'}$. The decoupled bandpowers are then estimated by inverting $\mathcal{M}^{ab}$:
+  which defines the binned coupling matrix $\mathcal{M}_{bb'}$. The decoupled bandpowers are then estimated by inverting $\mathcal{M}$:
   \begin{equation}
-    _v\hat{\sf B}^{ab}_k=\sum_{k'}\left(\mathcal{M}^{ab}\right)^{-1}_{kk'}\,_v\tilde{\sf B}^{ab}_{k'}.
+    _v\hat{\sf B}_b=\sum_{b'}\left(\mathcal{M}\right)^{-1}_{bb'}\,_v\tilde{\sf B}_{b'}.
   \end{equation}
 
-  Note that, even though this procedure is based on the assumption that the true power spectrum is step-wise constant, the bandpowers computed this way should be compared with the theoretical prediction subjected to the same type of transformation. I.e. the theoretical prediction for the bandpowers is:
+  Note that, since this procedure is based on the assumption that the true power spectrum is step-wise constant, the bandpowers computed this way should be compared with the theoretical prediction subjected to the same type of transformation. I.e. the theoretical prediction for the bandpowers is:
   \begin{equation}
-    _v\bar{\sf B}^{ab}_k=\sum_{k'}\left(\mathcal{M}^{ab}\right)^{-1}_{kk'}\sum_{\ell'\in\vec{\ell}_{k'}}w_{k'}^{\ell'}\sum_{\ell''}{\sf M}^{s_as_b}_{\ell'\ell''}\,_v\bar{\sf C}^{ab}_{\ell''},
+    _v\bar{\sf B}_b=\sum_{b'}\left(\mathcal{M}\right)^{-1}_{bb'}\sum_{\ell'\in\vec{\ell}_{b'}}w_{b'}^{\ell'}\sum_{\ell''}{\sf M}_{\ell'\ell''}\,_v\bar{\sf C}_{\ell''},
   \end{equation}
   where we the overline $\bar{\,}$ denotes theoretical predictions.
 
@@ -444,7 +444,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
                  \cos(s\varphi_l) & \sin(s\varphi_l) \\
                 -\sin(s\varphi_l) & \cos(s\varphi_l)
             \end{array}\right)e^{i{\bf l}{\bf x}}\\
-      &=-(-i)^s{\sf R}(\varphi_l)e^{i{\bf l}{\bf x}},
+      &=-(-i)^s{\sf R}(s\varphi_l)e^{i{\bf l}{\bf x}},
     \end{align}
     where ${\sf R}(\varphi)$ is a rotation matrix.
     
@@ -490,7 +490,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
       \tilde{\bf a}_{\bf l}={\bf a}^v_{\bf l}-{\bf f}^i_{\bf l}M_{ij}\int d{\bf k}^2\,{\bf f}^{j\dag}_{\bf k}{\bf a}^v_{\bf k}
     \end{equation}
 
-  \subsection{Pseudo-$C_\ell$ estimator}
+  \subsection{Pseudo-$C_\ell$ estimator - continuum limit}
     The Fourier coefficients of the masked field are:
     \begin{align}
       {\bf a}^v_{\bf l}&=\int\int\frac{d{\bf k}^2d{\bf q}^2}{2\pi}\left[\int\frac{d{\bf x}^2}{(2\pi)^2}\,_{s_a}{\sf E}^\dag_{\bf l}({\bf x})\,_{s_a}{\sf E}_{\bf k}({\bf x})\,_0E_{\bf q}({\bf x})\right]{\bf a}_{\bf k}\,v_{\bf q}\\
@@ -506,219 +506,163 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
     
     The pseudo-$C_\ell$ is defined as the nomalized angular average of ${\bf a}_{\bf l}{\bf b}^\dag_{\bf l}$:
     \begin{align}
-      \tilde{\sf C}^{\tilde{a}\tilde{b}}_\ell
-      &\equiv\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_\ell}{2\pi}\left\langle\tilde{\bf a}_{\bf l}\,\tilde{\bf b}^\dag_{\bf l}\right\rangle\\
-      &=\int\frac{kdk\,qdq}{(2\pi)^2}\left[\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{{\bf q}}w^*_{{\bf q}}
-      \int d\varphi_\ell d\varphi_k{\sf R}^\dag(s_a\Delta\varphi){\sf C}^{ab}_k{\sf R}(s_b\Delta\varphi)\delta({\bf l}-{\bf k}-{\bf q})\right]
+      \tilde{\sf C}^{ab}_\ell
+      &\equiv\frac{(2\pi)^2}{S}\int\frac{d\varphi_\ell}{2\pi}\left\langle\tilde{\bf a}_{\bf l}\,\tilde{\bf b}^\dag_{\bf l}\right\rangle\\
+      &=\int\frac{kdk\,qdq}{(2\pi)^2}\left[\frac{(2\pi)^2}{S}\int\frac{d\varphi_q}{2\pi}v_{{\bf q}}w^*_{{\bf q}}
+      \int d\varphi_\ell d\varphi_k{\sf R}^\dag(s_a\Delta\varphi){\sf C}^{ab}_k{\sf R}(s_b\Delta\varphi)\delta({\bf q}-{\bf l}+{\bf k})\right],
     \end{align}
+    where $S$ is the observed sky area (in sterad), and where we have eliminated the dependence on ${\bf l}-{\bf k}$ by introducing an additional integral over $d{\bf q}^2\delta({\bf q}-{\bf l}+{\bf k})$.
     
-    Simplifying this expression amounts to computing the following integrals:
-    \begin{itemize}
-     \item $s_a=s_b=0$:
-       \begin{align}\nonumber
-         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}=\\\nonumber
-         &\frac{k}{2\pi}\int q\,dq\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int J_0(qr)J_0(kr)J_0(\ell r)\,r\,dr=\\
-         &\frac{k}{2\pi}\int \frac{q\,dq}{\pi k\ell\sin\theta}\,\tilde{C}^{vw}_q=\frac{k}{2\pi}\int_0^\pi \frac{d\theta}{\pi}\,\tilde{C}^{vw}_{q=\sqrt{\ell^2+k^2-2k\ell\cos\theta}}
-       \end{align}
-       where we have used the following identities:
-       \begin{align}
-         \int_0^{2\pi} d\varphi\,e^{i\,x\,\cos\varphi}e^{i\,n\varphi}=2\pi\,i^n\,J_n(x),
-         \hspace{12pt}
-         \int_0^\infty dr\,r\,J_0(qr)\,J_n(kr)\,J_n(\ell r)=\frac{\cos n\theta}{\pi k\ell\sin\theta}.
-       \end{align}
-       Here $\theta$ is the angle between sides $\ell$ and $k$ of the triangle formed by three sides of length $q$, $\ell$ and $k$. In the last line of the equations above we have also performed a change of variables $q^2=\ell^2+k^2-2k\ell\cos\theta$.
-     \item $s_a=2,\,s_b=0$:
-       \begin{align}\nonumber
-         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}\cos2\Delta\varphi=\\\nonumber
-         &\frac{k}{2\pi}\int q\,dq\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int J_0(qr)J_2(kr)J_2(\ell r)\,r\,dr=\\
-         &\frac{k}{2\pi}\int \frac{q\,dq}{\pi k\ell\sin\theta}\,\tilde{C}^{vw}_q=\frac{k}{2\pi}\int_0^\pi\frac{d\theta}{\pi}\,\tilde{C}^{vw}_{q(\ell,k,\theta)}\cos2\theta
-       \end{align}
-       \begin{align}
-         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}\sin2\Delta\varphi=0
-       \end{align}
-     \item $s_a=s_b=2$:
-       \begin{align}\nonumber
-         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}\cos^22\Delta\varphi=\\\nonumber
-         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}\frac{1+\cos4\Delta\varphi}{2}=\\\nonumber
-         &\frac{k}{2\pi}\int q\,dq\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int J_0(qr)\left[J_0(kr)J_0(\ell r)+J_4(kr)J_4(\ell r)\right]\,r\,dr=\\
-         &\frac{k}{2\pi}\int \frac{q\,dq}{\pi k\ell\sin\theta}\,\tilde{C}^{vw}_q=\frac{k}{2\pi}\int_0^\pi\frac{d\theta}{\pi}\,\tilde{C}^{vw}_{q(\ell,k,\theta)}\frac{1+\cos4\theta}{2} 
-       \end{align}
-       \begin{align}\nonumber
-         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}\sin^22\Delta\varphi=\\
-         &\frac{k}{2\pi}\int \frac{q\,dq}{\pi k\ell\sin\theta}\,\tilde{C}^{vw}_q=\frac{k}{2\pi}\int_0^\pi\frac{d\theta}{\pi}\,\tilde{C}^{vw}_{q(\ell,k,\theta)}\frac{1-\cos4\theta}{2} 
-       \end{align}
-       \begin{align}\nonumber
-         &\frac{k}{2\pi}\int \frac{q\,dq}{2\pi}\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int\frac{r\,dr}{(2\pi)^2}\int d\varphi_re^{i\,rq\cos\varphi_r}\int d\varphi_\ell\,d\varphi_ke^{ikr\varphi_k}e^{-i\ell r\varphi_\ell}\cos2\Delta\varphi\sin2\Delta\varphi=0
-       \end{align}
-
-
-    \end{itemize}
-
-
-    Let's start by defining the function:
-    \begin{align}
-      A\left[f(\varphi_\ell,\varphi_k);\ell,k,q\right]
-      &\equiv\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int d\varphi_\ell d\varphi_kf(\varphi_\ell,\varphi_k)\,\delta({\bf l}-{\bf k}-{\bf q})\\
-      &= \left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q} \int d\varphi_kf(\varphi_{{\bf k}+{\bf q}},\varphi_k)\,\frac{\delta\left(\ell-\sqrt{k^2+q^2+2kq\cos\varphi_k}\right)}{\ell}\\
-      &= \left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q} \int d\varphi_k\frac{f(\varphi_{{\bf k}+{\bf q}},\varphi_k)}{kq|\sin\varphi_k|}\,\left[\delta(\varphi_k-\varphi_*)+\delta(\varphi_k+\varphi_*)\right]\\
-      &= \tilde{C}^{vw}_q\left(\left.\frac{f(\varphi_{{\bf k}+{\bf q}},\varphi_k)}{kq|\sin\varphi_k|}\right|_{\varphi_k=\varphi_*}+\left.\frac{f(\varphi_{{\bf k}+{\bf q}},\varphi_k)}{kq|\sin\varphi_k|}\right|_{\varphi_k=-\varphi_*}\right)
-    \end{align}
-    \begin{align}
-      A\left[f(\varphi_\ell,\varphi_k);\ell,k,q\right]
-      &\equiv\left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q}\int d\varphi_\ell d\varphi_kf(\varphi_\ell,\varphi_k)\,\delta({\bf l}-{\bf k}-{\bf q})\\
-      &= \left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q} \int d\varphi_kf(\varphi_{{\bf k}+{\bf q}},\varphi_k)\,\frac{\delta\left(\ell-\sqrt{k^2+q^2+2kq\cos\varphi_k}\right)}{\ell}\\
-      &= \left(\frac{2\pi}{L}\right)^2\int\frac{d\varphi_q}{2\pi}v_{\bf q}w^*_{\bf q} \int d\varphi_k\frac{f(\varphi_{{\bf k}+{\bf q}},\varphi_k)}{kq|\sin\varphi_k|}\,\left[\delta(\varphi_k-\varphi_*)+\delta(\varphi_k+\varphi_*)\right]\\
-      &= \tilde{C}^{vw}_q\left(\left.\frac{f(\varphi_{{\bf k}+{\bf q}},\varphi_k)}{kq|\sin\varphi_k|}\right|_{\varphi_k=\varphi_*}+\left.\frac{f(\varphi_{{\bf k}+{\bf q}},\varphi_k)}{kq|\sin\varphi_k|}\right|_{\varphi_k=-\varphi_*}\right)
-    \end{align}
-    where $\varphi_*$ is defined as the positive root of:
+    As shown in \cite{2016arXiv161204664A}, these expressions can be simplified through the following steps:
+    \begin{enumerate}
+     \item Substitute
+       \begin{equation}
+         \delta({\bf q}-{\bf l}+{\bf k})\rightarrow\int\frac{d{\bf r}^2}{(2\pi)^2}e^{i({\bf q}-{\bf l}+{\bf k}){\bf r}}
+       \end{equation}
+     \item Integrate over the angular parts of ${\bf r}$, ${\bf l}$ and ${\bf k}$ using the following relation:
+       \begin{equation}
+        \int_0^{2\pi} d\varphi\,e^{i\,x\,\cos\varphi}e^{i\,n\varphi}=2\pi\,i^n\,J_n(x),
+       \end{equation}
+       where $J_n$ is the cylindrical Bessel function of order $n$.
+     \item Integrate over the angular part of ${\bf q}$, defining the pseudo-power spectrum of the masks:
+       \begin{equation}
+         \tilde{C}^{vw}_q\equiv\frac{(2\pi)^2}{S}\int d\varphi_qv_{\bf q}w^*_{\bf q}
+       \end{equation}
+     \item Solve the last isolated integral over the radial part of ${\bf r}$ by using the following relation:
+       \begin{equation}
+         \int_0^\infty dr\,r\,J_0(qr)\,J_n(kr)\,J_n(\ell r)=\frac{\cos n\theta}{\pi k\ell\sin\theta},
+       \end{equation}
+       where $\theta$ is the angle between sides $\ell$ and $k$ of the triangle formed by three sides of length $q$, $\ell$ and $k$.
+     \item Make the change of variables $q^2(\ell,k,\theta)\equiv\ell^2+k^2-2k\ell\cos\theta$ to simplify the integral over the radial part of ${\bf q}$.
+    \end{enumerate}
+    
+    This yields the following relation analogous to Eq. \ref{eq:cell_coupled}:
     \begin{equation}
-     \ell^2-k^2-q^2-2kq\cos\varphi_*=0.
+      \,_v\tilde{\sf C}^{ab}_\ell=\int_0^{\infty} dk {\sf M}^{s_as_b}_{\ell k}\cdot\,_v\hat{\sf C}^{ab}_k,
     \end{equation}
-
-    Then we can write:
-    \begin{itemize}
-      \item {\bf Case $s_a=s_b=0$:}
-        \begin{equation}
-          \tilde{C}^{\tilde{a}\tilde{b}}_\ell=\int\frac{kdk\,qdq}{(2\pi)^2}C^{ab}_kA\left[1\right]
-        \end{equation}
-        \begin{align}
-          &A[1]=\frac{2\tilde{C}^{vw}_q}{kq\sin\varphi_*}=\tilde{C}^{vw}_qJ(\ell,k,q)\\
-          &J(\ell,k,q)\equiv\left\{
+    where:
+    \begin{align}
+      &{\sf M}^{00}_{\ell k}=\frac{k}{2\pi}\int_0^\pi \frac{d\theta}{\pi}\,\tilde{C}^{vw}_{q(\ell,k,\theta)}\\
+      &{\sf M}^{02}_{\ell\ell'}=M^{0+}_{\ell\ell'}\,\hat{\sf 1},
+      \hspace{12pt}
+      M^{0+}_{\ell k}=\frac{k}{2\pi}\int_0^\pi \frac{d\theta}{\pi}\,\tilde{C}^{vw}_{q(\ell,k,\theta)}\cos2\theta\\
+      &{\sf M}^{22}_{\ell\ell'}=\left(
+      \begin{array}{cccc}
+        M^{++}_{\ell\ell'} &0 &0&M^{--}_{\ell\ell'}\\
+        0&M^{++}_{\ell\ell'} &-M^{--}_{\ell\ell'}&0\\
+        0&-M^{--}_{\ell\ell'} &M^{++}_{\ell\ell'}&0\\
+        M^{--}_{\ell\ell'} &0 &0&M^{++}_{\ell\ell'}
+      \end{array}\right),
+      \hspace{12pt}M^{\pm\pm}_{\ell\ell'}=\frac{k}{2\pi}\int_0^\pi \frac{d\theta}{\pi}\,\tilde{C}^{vw}_{q(\ell,k,\theta)}\frac{1\pm\cos4\theta}{2}.
+    \end{align}
+    These can also be expressed as integrals over $q$:
+    \begin{align}
+      &M^{00}_{\ell k}=\frac{k}{2\pi}\int\frac{q\,dq}{2\pi}\tilde{C}^{vw}_qF(\ell,k,q)\\
+      &M^{0+}_{\ell k}=\frac{k}{2\pi}\int\frac{q\,dq}{2\pi}\tilde{C}^{vw}_qF(\ell,k,q)\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\\
+      &M^{++}_{\ell k}=\frac{k}{2\pi}\int\frac{q\,dq}{2\pi}\tilde{C}^{vw}_qF(\ell,k,q)\left[\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\right]^2\\
+      &M^{--}_{\ell k}=\frac{k}{2\pi}\int\frac{q\,dq}{2\pi}\tilde{C}^{vw}_qF(\ell,k,q)\left(1-\left[\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\right]^2\right),
+    \end{align}
+    where
+    \begin{equation}
+     F(\ell,k,q)\equiv\left\{
           \begin{array}{cl}
             4\,(2\ell^2k^2+2k^2q^2+2q^2\ell^2-\ell^4-k^4-q^4)^{-1/2} & {\rm if} |k-q|<\ell<k+q\\
             0 & {\rm otherwise}
           \end{array}\right.
-        \end{align}
-        Thus:
-        \begin{equation}
-          \tilde{C}^{\tilde{a}\tilde{b}}_\ell=\int dkM^{00}_{\ell k}C^{ab}_k,\hspace{12pt}
-          M^{00}_{\ell k}\equiv\frac{k}{2\pi}\int\frac{q\,dq}{2\pi}\tilde{C}^{vw}_qJ(\ell,k,q),
-        \end{equation}
+    \end{equation}
+    
+    Since in the flat-sky limit $\ell$ is a continuous variable, we define bandpowers $_v{\sf B}_b$ as averages over a given interval in $\ell$, $[\ell_b^i,\ell_b^0]$:
+    \begin{equation}
+      \,_v\tilde{\sf B}_b\equiv N_b\int_{\ell_b^i}^{\ell_b^f} \frac{d\ell}{\ell_b^f-\ell_b^i}\,_v\tilde{\sf C}_\ell.
+    \end{equation}
+    The binned coupling matrix is therefore given by:
+    \begin{equation}
+      \mathcal{M}_{bb'}\equiv\int^{\ell_b^f}_{\ell_b^i} \frac{d\ell}{\ell_b^f-\ell_b^i}\int^{\ell_b'^f}_{\ell_b'^i} d\ell'\,{\sf M}_{\ell\ell'}
+    \end{equation}
 
-      \item {\bf Case $s_a=0,\,\,s_b=2$:}
-        \begin{equation}
-          \left(
-          \begin{array}{c}
-	    \tilde{C}^{\tilde{a}\tilde{E}_b}_\ell\\
-	    \tilde{C}^{\tilde{a}\tilde{B}_b}_\ell
-	  \end{array}\right)=\int\frac{kdk\,qdq}{(2\pi)^2}
-          A\left[\left(
-          \begin{array}{cc}
-            \cos & -\sin\\
-            \sin &  \cos
-          \end{array}\right)2\Delta\varphi\right]
-          \left(
-          \begin{array}{c}
-           C^{aE_b}_k \\
-           C^{aB_b}_k \\
-          \end{array}\right)
-        \end{equation}
-        To begin with, let us choose $\varphi_k$ such that ${\bf k}\cdot{\bf q}=kq\cos\varphi_k$. Then:
-        \begin{align}
-          &\cos\varphi_{{\bf k}+{\bf q}}=\frac{k\cos\varphi_k+q}{|{\bf k}+{\bf q}|}=\frac{k}{\ell}\cos\varphi_k+\frac{q}{\ell},\hspace{12pt}
-          \sin\varphi_{{\bf k}+{\bf q}}=\frac{k}{\ell}\sin\varphi_k\\
-          &\cos(\varphi_{{\bf k}+{\bf q}}-\varphi_{\bf k})=\cos\varphi_{{\bf k}+{\bf q}}\cos\varphi_k+\sin\varphi_{{\bf k}+{\bf q}}\sin\varphi_k=\frac{k}{\ell}+\frac{q}{\ell}\cos\varphi_k\\
-          &\sin(\varphi_{{\bf k}+{\bf q}}-\varphi_{\bf k})=\sin\varphi_{{\bf k}+{\bf q}}\cos\varphi_k-\cos\varphi_{{\bf k}+{\bf q}}\sin\varphi_k=-\frac{q}{\ell}\sin\varphi_k\\
-          &\cos2(\varphi_{{\bf k}+{\bf q}}-\varphi_{\bf k})=\cos^2(\varphi_{{\bf k}+{\bf q}}-\varphi_k)-\sin^2(\varphi_{{\bf k}+{\bf q}}-\varphi_k)=\frac{k^2}{\ell^2}+2\frac{kq}{\ell^2}\cos\varphi_k+\frac{q^2}{\ell^2}\left[2\cos^2\varphi_k-1\right]\\
-          &\sin2(\varphi_{{\bf k}+{\bf q}}-\varphi_{\bf k})=2\sin(\varphi_{{\bf k}+{\bf q}}-\varphi_k)\cos(\varphi_{{\bf k}+{\bf q}}-\varphi_k)=-2\frac{q}{\ell}\sin\varphi_k\left[\frac{k}{\ell}+\frac{q}{\ell}\cos\varphi_k\right]
-        \end{align}
-        Then
-        \begin{align}
-          A\left[\cos2(\varphi_{{\bf k}+{\bf q}}-\varphi_k)\right]
-          &=\tilde{C}^{vw}_q\,J(\ell,k,q)\,\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\\
-          A\left[\sin2(\varphi_{{\bf k}+{\bf q}}-\varphi_k)\right]&=0
-        \end{align}
-        Thus
-        \begin{equation}
-          \left(
-          \begin{array}{c}
-	    \tilde{C}^{\tilde{a}\tilde{E}_b}_\ell\\
-	    \tilde{C}^{\tilde{a}\tilde{B}_b}_\ell
-	  \end{array}\right)=\int dk\,
-	  \left(
-	  \begin{array}{cc}
-	   M^{0+}_{\ell k} & 0 \\
-	   0 & M^{0+}_{\ell k}
-	  \end{array}\right)
-          \left(
-          \begin{array}{c}
-           C^{aE_b}_k \\
-           C^{aB_b}_k \\
-          \end{array}\right)
-        \end{equation}
-        where
-        \begin{align}
-          M^{0+}_{\ell k}\equiv\frac{k}{2\pi}\int\frac{q\,dq}{2\pi}\tilde{C}^{vw}_qJ(\ell,k,q)\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}
-        \end{align}
-
-      \item {\bf Case $s_a=s_b=2$:}
-        \begin{equation}
-          \left(
-            \begin{array}{c}
-	      \tilde{C}^{\tilde{E}_a\tilde{E}_b}_\ell\\
-	      \tilde{C}^{\tilde{E}_a\tilde{B}_b}_\ell\\
-	      \tilde{C}^{\tilde{B}_a\tilde{E}_b}_\ell\\
-	      \tilde{C}^{\tilde{B}_a\tilde{B}_b}_\ell\\
-	    \end{array}\right)=\int\frac{kdk\,qdq}{(2\pi)^D}
-	    A\left[
-            \left(
-            \begin{array}{cccc}
-              \cos^2   & -\sin\cos & -\sin\cos &  \sin^2  \\
-              \cos\sin & \cos^2    & -\sin^2   & -\sin\cos\\
-              \cos\sin & -\sin^2   &  \cos^2   & -\sin\cos\\
-              \sin^2   & \sin\cos  &  \sin\cos &  \cos^2
-            \end{array}\right)2\Delta\varphi\right]
-            \left(
-            \begin{array}{c}
-              C^{E_aE_b}_k \\
-              C^{E_aB_b}_k \\
-              C^{B_aE_b}_k \\
-              C^{B_aB_b}_k \\
-            \end{array}\right)
-       \end{equation}
-       Now
-       \begin{align}
-         &A\left[\cos^22\Delta\varphi\right]
-         =\tilde{C}^{vw}_qJ(\ell,k,q)\left[\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\right]^2\\
-         &A\left[\sin^22\Delta\varphi\right]
-         =\tilde{C}^{vw}_qJ(\ell,k,q)\left(1-\left[\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\right]^2\right)\\
-         &A\left[\cos2\Delta\varphi\sin2\Delta\varphi\right]=0
-       \end{align}
-       Thus
-       \begin{equation}
-         \left(
-         \begin{array}{c}
-	   \tilde{C}^{\tilde{E}_a\tilde{E}_b}_\ell\\
-	   \tilde{C}^{\tilde{E}_a\tilde{B}_b}_\ell\\
-	   \tilde{C}^{\tilde{B}_a\tilde{E}_b}_\ell\\
-	   \tilde{C}^{\tilde{B}_a\tilde{B}_b}_\ell
-	 \end{array}\right)=\int dk\,
-	 \left(
-	 \begin{array}{cccc}
-	   M^{++}_{\ell k} & 0 & 0 & M^{--}_{\ell k}\\
-	   0 & M^{++}_{\ell k} & -M^{--}_{\ell k} & 0\\
-	   0 & -M^{--}_{\ell k} & M^{++}_{\ell k} & 0\\
-	   M^{--}_{\ell k} & 0 & 0 & M^{++}_{\ell k}
-	 \end{array}\right)
-         \left(
-         \begin{array}{c}
-           C^{E_aE_b}_k \\
-           C^{E_aB_b}_k \\
-           C^{B_aE_b}_k \\
-           C^{B_aB_b}_k
-          \end{array}\right)
-        \end{equation}
-        where
-        \begin{align}
-          M^{++}_{\ell k}&\equiv\frac{k}{2\pi}\int\frac{q\,dq}{2\pi}\tilde{C}^{vw}_qJ(\ell,k,q)\left[\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\right]^2\\
-          M^{--}_{\ell k}&\equiv\frac{k}{2\pi}\int\frac{q\,dq}{2\pi}\tilde{C}^{vw}_qJ(\ell,k,q)\left(1-\left[\frac{\ell^4+k^4+q^4-2k^2q^2-2\ell^2q^2}{2k^2\ell^2}\right]^2\right)
-        \end{align}
+  \subsection{Pseudo-$C_\ell$ estimator - discrete formalism}
+    The main complication in using the pseudo-$C_\ell$ formalism in the continuum limit is the need to compute the angle-averaged mask pseudo power spectrum $C^{vw}_\ell$. Flat fields are most easily analyzed when pixelized in a Cartesian grid, and under this setup the mask power spectrum is not a well defined quantity for infinitesitally small intervals of $\ell$. This leads to non-negligible biases and poor performance \cite{2016arXiv161204664A} due to the need to use highly resolved finite intervals to compute the integrals presented in the previous section. This motivates the discrete formalism described here, which connects directy with the data storage format of flat-sky maps.
+  
+    We will discuss the flat-sky pseudo-$C_\ell$ algorithm starting from a pixelized representation of the sky map.
+    Let the patch of sky under inspection be contained by a rectangle of sides $L_x$ and $L_y$ (in units of radians),
+    and let us discretize this rectangle by dividing it into an $N_x\times N_y$ grid with pixels of area
+    $\Delta{\bf x}^2\equiv\Delta x\Delta y\equiv (L_x/N_x)(L_y/N_y)$. Each pixel in this grid is then labelled by a
+    pair of integers ${\bf n}\equiv(n_x,n_y)$, and is assigned coordinates ${\bf x}_{\bf n}\equiv(n_x\Delta x,n_y\Delta y)$.
+    The each component of the pixelized map ${\bf a}({\bf x})$ is therefore defined for
+    $n_x\in[0,N_x-1],\,\,n_y\in[0,N_y-1]$.
+    
+    In this scenario, the spin Fourier transform of the pixelized field can be computed as its discrete Fourier transform:
+    \begin{equation}
+      {\bf a}_{\bf k}\equiv\sum_{\bf x}\frac{\Delta{\bf x}^2}{2\pi}\,_{s_a}{\sf E}_{\bf k}({\bf x}){\bf a}_{\bf x},
+    \end{equation}
+    where the wavenumber ${\bf k}$ is now discretized as ${\bf k}=(j_x\Delta k_x,j_y\Delta k_y)$, the integers
+    $j_{(x,y)}$ run from $-N_{(x,y)}/2$ tof $N_{(x,y)}/2-1$\footnote{This is the valid domain when $N_{(x,y)}$ is even.
+    For odd $N_{(x,y)}$ the interval becomes $[-(N_{(x,y)}-1)/2,(N_{(x,y)}-1)/2]$} and the pixel size is
+    $\Delta k_{(x,y)}\equiv2\pi/L_{(x,y)}$.
+    
+    The following properties of the DFT are worth remembering:
+    \begin{itemize}
+     \item Periodicity: ${\bf a}_{(k_x,k_y)}={\bf a}_{(k_x+N_x\Delta k_x,k_y)}={\bf a}_{(k_x,k_y+N_y\Delta k_y)}={\bf a}_{(k_x+N_x\Delta k_x,k_y+N_y\Delta k_y)}$
+     \item The power spectrum of the DFT is defined as:
+           \begin{equation}
+             \langle{\bf a}_{\bf l}{\bf b}^\dag_{\bf k}\rangle\equiv\frac{\delta_{{\bf l},{\bf k}}}{\Delta{\bf k}^2}{\sf C}^{ab}_{\bf l}
+           \end{equation}
+     \item For a real-valued scalar $a$, its DFT satisfies $a^*_{{\bf k}_{\bf j}}=a^{}_{{\bf k}_{{\bf N}-{\bf j}}}$ (where ${\bf N}\equiv(N_x,N_y)$).
+     \item The orthogonality relation of the basis functions now takes the form:
+           \begin{equation}
+             \sum_{\bf x}\,_sE^\dag_{\bf l}({\bf x})\,_sE_{\bf k}({\bf x})=N_xN_y\delta_{{\bf l},{\bf k}}\hat{\sf 1}
+           \end{equation}
     \end{itemize}
+
+    Using the properties above one can prove that the Fourier coefficients of a masked field are:
+    \begin{equation}
+      {\bf a}^v_{\bf l}\equiv\left(v({\bf x}){\bf a}({\bf x})\right)_{\bf l}=\sum_{\bf k}\frac{\Delta{\bf k}^2}{2\pi}{\sf R}^\dag(s_a(\varphi_{\bf l}-\varphi_{\bf k})){\bf a}_{\bf k}v_{{\bf l}-{\bf k}},
+    \end{equation}
+    and we can easily find the following relation for the covariance of two masked fields at the same wavenumber:
+    \begin{equation}
+      \left\langle{\bf a}^v_{\bf l}{\bf b}^{w\dag}_{\bf l}\right\rangle=\sum_{\bf k}\frac{\Delta{\bf k}^2}{(2\pi)^2}{\sf R}^\dag(s_a\Delta\varphi){\sf C}^{ab}_{\bf k}{\sf R}^\dag(s_b\Delta\varphi)v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
+    \end{equation}
+    
+    At this stage it is natural to connect directly with the final bandpowers. In this case we will define a bandpower ${\sf B}_b$, indexed by an integer $b$ as the average of the covariance above over a set of ${\bf l}$ values $S_b$:
+    \begin{equation}
+      \,_v{\sf B}^{ab}_b\equiv\frac{\Delta{\bf k}^2}{N_b}\sum_{{\bf l}\in S_b}{\bf a}^v_{\bf l}{\bf b}^{w\dag}_{\bf l},
+    \end{equation}
+    where $N_b$ is the number of Fourier-space pixels covered by $S_b$. The mode-coupling matrix for the bandpowers is therefore given by:
+    \begin{equation}
+      \mathcal{M}^{s_as_b}_{bb'}=\sum_{{\bf l}\in S_b}N_b^{-1}\sum_{{\bf k}\in S_{b'}}{\sf M}^{s_as_b}_{{\bf l}\,{\bf k}},
+    \end{equation}
+    where:
+    \begin{align}
+      & M^{00}_{{\bf l}\,{\bf k}}\equiv\frac{2\pi^2}{L_x^2L_y^2}v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}},\\
+      & {\sf M}^{02}_{{\bf l}\,{\bf k}}\equiv\frac{2\pi^2}{L_x^2L_y^2}v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
+      \left(
+      \begin{array}{cc}
+        \cos2\Delta\varphi & -\sin2\Delta\varphi \\
+        \sin2\Delta\varphi & \cos2\Delta\varphi
+      \end{array}
+      \right)\\
+      & {\sf M}^{02}_{{\bf l}\,{\bf k}}\equiv\frac{2\pi^2}{L_x^2L_y^2}v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
+      \left(
+      \begin{array}{cccc}
+        \cos^22\Delta\varphi & -\cos2\Delta\varphi\sin2\Delta\varphi & -\cos2\Delta\varphi\sin2\Delta\varphi & \sin^22\Delta\varphi\\
+        \cos2\Delta\varphi\sin2\Delta\varphi & \cos^22\Delta\varphi & -\sin^22\Delta\varphi & -\cos2\Delta\varphi\sin2\Delta\varphi\\
+        \cos2\Delta\varphi\sin2\Delta\varphi & -\sin^22\Delta\varphi & \cos^22\Delta\varphi & -\cos2\Delta\varphi\sin2\Delta\varphi\\
+        \sin^22\Delta\varphi &  \cos2\Delta\varphi\sin2\Delta\varphi & \cos2\Delta\varphi\sin2\Delta\varphi & \cos^22\Delta\varphi\\
+      \end{array}
+      \right)
+    \end{align}
+
+
+
+
+
+  
   
 \begin{thebibliography}{}
  \bibitem{2002ApJ...567....2H} Hivon, E., G{\'o}rski, K.~M., Netterfield, C.~B., et al.\ 2002, \apj, 567, 2 
  \bibitem{2017MNRAS.465.1847E} Elsner, F., Leistedt, B., \& Peiris, H.~V.\ 2017, \mnras, 465, 1847 
  \bibitem{2003ApJS..148..161K} Kogut, A., Spergel, D.~N., Barnes, C., et al.\ 2003, \apjs, 148, 161 
+ \bibitem{2016arXiv161204664A} Asgari, M., Taylor, A., Joachimi, B., \& Kitching, T.~D.\ 2016, arXiv:1612.04664 
 \end{thebibliography}
 
 \end{document}

@@ -161,8 +161,10 @@ typedef struct {
   flouble *pcl_masks;
   flouble *l_arr;
   int *i_band;
+  int *n_cells;
   flouble **coupling_matrix_unbinned;
   nmt_binning_scheme_flat *bin;
+  flouble lmax;
   gsl_matrix *coupling_matrix_binned;
   gsl_permutation *coupling_matrix_perm;
 } nmt_workspace_flat;
@@ -170,7 +172,7 @@ void nmt_workspace_flat_free(nmt_workspace_flat *w);
 nmt_workspace_flat *nmt_workspace_flat_read(char *fname);
 void nmt_workspace_flat_write(nmt_workspace_flat *w,char *fname);
 nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
-						     nmt_binning_scheme_flat *bin,int nl_rebin);
+						     nmt_binning_scheme_flat *bin,int nl_rebin,int method_flag);
 void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 					int nl_prop,flouble *l_prop,flouble **cl_proposal,
 					flouble **cl_bias);
@@ -179,7 +181,7 @@ void nmt_decouple_cl_l_flat(nmt_workspace_flat *w,flouble **cl_in,flouble **cl_n
 			    flouble **cl_bias,flouble **cl_out);
 void nmt_compute_coupled_cell_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,flouble *larr,flouble **cl_out);
 nmt_workspace_flat *nmt_compute_power_spectra_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
-						   nmt_binning_scheme_flat *bin,int nl_rebin,
+						   nmt_binning_scheme_flat *bin,int nl_rebin,int method_flag,
 						   nmt_workspace_flat *w0,flouble **cl_noise,
 						   int nl_prop,flouble *l_prop,flouble **cl_prop,
 						   flouble **cl_out);
