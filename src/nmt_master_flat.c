@@ -288,9 +288,11 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_a(nmt_field_flat *fl
   free(pcl_masks_raw);
 
 #pragma omp parallel default(none)		\
-  shared(w,beam_prod,dell_here)
+  shared(w,beam_prod,dell_here,fl1,fl2)
   {
     int jj,ll1,ll2,ll3;
+    int pe1=fl1->pure_e,pe2=fl2->pure_e,pb1=fl1->pure_b,pb2=fl2->pure_b;
+    int pure_any=pe1 || pb1 || pe2 || pb2;
 
 #pragma omp for
     for(ll1=0;ll1<w->nells;ll1++) {
@@ -304,7 +306,7 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_a(nmt_field_flat *fl
 	    continue;
 	  else if(l3>=(l1+l2))
 	    break;
-	  flouble j123,fac_spin=1.,prod=(l1+l2+l3)*(l1+l2-l3)*(l1-l2+l3)*(-l1+l2+l3);
+	  flouble j123,fac_spin=1.,fac_spin2=1.,prod=(l1+l2+l3)*(l1+l2-l3)*(l1-l2+l3)*(-l1+l2+l3);
 	  if(prod<=0)
 	    report_error(1,"This shouldn't have happened\n");
 	  
@@ -317,7 +319,7 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_a(nmt_field_flat *fl
 	      flouble l14=l12*l12,l24=l22*l22,l34=l32*l32;
 	      fac_spin=(l14+l24+l34-2*l12*l32-2*l22*l32)/(2*l12*l22);
 	      if(w->ncls==4)
-		fac_spin=fac_spin*fac_spin;
+		fac_spin2=fac_spin*fac_spin;
 	    }
 	  }
 
@@ -326,21 +328,47 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_a(nmt_field_flat *fl
 	    w->coupling_matrix_unbinned[1*ll1+0][1*ll2+0]+=wfac; //TT,TT
 	  }
 	  if(w->ncls==2) {
-	    wfac=w->pcl_masks[ll3]*j123*fac_spin;
-	    w->coupling_matrix_unbinned[2*ll1+0][2*ll2+0]+=wfac; //TE,TE
-	    w->coupling_matrix_unbinned[2*ll1+1][2*ll2+1]+=wfac; //TB,TB
+	    double fac_pure[2];
+	    fac_pure[0]=w->pcl_masks[ll3]*j123*fac_spin;
+	    if(pure_any) {
+	      if(l1==0) fac_pure[1]=0;
+	      else fac_pure[1]=w->pcl_masks[ll3]*j123*(l2*l2)/(l1*l1);
+	    }
+	    else
+	      fac_pure[1]=fac_pure[0];
+	    w->coupling_matrix_unbinned[2*ll1+0][2*ll2+0]+=fac_pure[pe1+pe2]; //TE,TE
+	    w->coupling_matrix_unbinned[2*ll1+1][2*ll2+1]+=fac_pure[pb1+pb2]; //TB,TB
 	  }
 	  if(w->ncls==4) {
-	    wfac=w->pcl_masks[ll3]*j123*fac_spin;
-	    w->coupling_matrix_unbinned[4*ll1+0][4*ll2+0]+=wfac; //EE,EE
-	    w->coupling_matrix_unbinned[4*ll1+1][4*ll2+1]+=wfac; //EE,EE
-	    w->coupling_matrix_unbinned[4*ll1+2][4*ll2+2]+=wfac; //EE,EE
-	    w->coupling_matrix_unbinned[4*ll1+3][4*ll2+3]+=wfac; //EE,EE
-	    wfac=w->pcl_masks[ll3]*j123*(1-fac_spin);
-	    w->coupling_matrix_unbinned[4*ll1+0][4*ll2+3]+=wfac; //EE,BB
-	    w->coupling_matrix_unbinned[4*ll1+1][4*ll2+2]-=wfac; //EE,EE
-	    w->coupling_matrix_unbinned[4*ll1+2][4*ll2+1]-=wfac; //EE,EE
-	    w->coupling_matrix_unbinned[4*ll1+3][4*ll2+0]+=wfac; //EE,EE
+	    double fac_pure_p[3],fac_pure_m[3];
+	    fac_pure_p[0]=w->pcl_masks[ll3]*j123*fac_spin2;
+	    fac_pure_m[0]=w->pcl_masks[ll3]*j123*(1-fac_spin2);
+	    if(pure_any) {
+	      if(l1==0) {
+		fac_pure_p[1]=0;
+		fac_pure_p[2]=0;
+	      }
+	      else {
+		fac_pure_p[1]=w->pcl_masks[ll3]*j123*fac_spin*(l2*l2)/(l1*l1);
+		fac_pure_p[2]=w->pcl_masks[ll3]*j123*(l2*l2*l2*l2)/(l1*l1*l1*l1);
+	      }
+	      fac_pure_m[1]=0;
+	      fac_pure_m[2]=0;
+	    }
+	    else {
+	      fac_pure_p[1]=fac_pure_p[0];
+	      fac_pure_p[2]=fac_pure_p[0];
+	      fac_pure_m[1]=fac_pure_m[0];
+	      fac_pure_m[2]=fac_pure_m[0];
+	    }
+	    w->coupling_matrix_unbinned[4*ll1+0][4*ll2+0]+=fac_pure_p[pe1+pe2]; //EE,EE
+	    w->coupling_matrix_unbinned[4*ll1+1][4*ll2+1]+=fac_pure_p[pe1+pb2]; //EB,EB
+	    w->coupling_matrix_unbinned[4*ll1+2][4*ll2+2]+=fac_pure_p[pb1+pe2]; //BE,BE
+	    w->coupling_matrix_unbinned[4*ll1+3][4*ll2+3]+=fac_pure_p[pb1+pb2]; //BB,BB
+	    w->coupling_matrix_unbinned[4*ll1+0][4*ll2+3]+=fac_pure_m[pe1+pe2]; //EE,BB
+	    w->coupling_matrix_unbinned[4*ll1+1][4*ll2+2]-=fac_pure_m[pe1+pe2]; //EB,BE
+	    w->coupling_matrix_unbinned[4*ll1+2][4*ll2+1]-=fac_pure_m[pe1+pe2]; //BE,EB
+	    w->coupling_matrix_unbinned[4*ll1+3][4*ll2+0]+=fac_pure_m[pe1+pe2]; //BB,EE
 	  }
 	}
 	for(jj=0;jj<w->ncls;jj++) {
@@ -382,13 +410,16 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_b(nmt_field_flat *fl
   gsl_set_error_handler_off();
 
 #pragma omp parallel default(none)		\
-  shared(w,beam_prod,pcl_masks_raw)
+  shared(w,beam_prod,pcl_masks_raw,fl1,fl2)
   {
     int ll1;
     gsl_function F;
     intg_par p;
     flouble dell_here=w->fs->dell/w->nl_rebin;
     gsl_integration_workspace *wi=gsl_integration_workspace_alloc(1000);
+    int pe1=fl1->pure_e,pe2=fl2->pure_e,pb1=fl1->pure_b,pb2=fl2->pure_b;
+    int pure_any=pe1 || pb1 || pe2 || pb2;
+
     p.qmax=w->fs->dell*w->fs->n_ell;
     p.carr=pcl_masks_raw;
     p.inv_dell=w->fs->i_dell;
@@ -410,28 +441,60 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_b(nmt_field_flat *fl
 	  w->coupling_matrix_unbinned[1*ll1+0][1*ll2+0]=integ; //TT,TT
 	}
 	if(w->ncls==2) {
-	  double integ,einteg;
+	  double integ,einteg,fac_pure[2];
 	  p.flag=INTG_FLAG_02;
 	  gsl_integration_qag(&F,0,M_PI,0,1E-4,1000,GSL_INTEG_GAUSS61,wi,&integ,&einteg);
-	  w->coupling_matrix_unbinned[2*ll1+0][2*ll2+0]=integ; //TE,TE
-	  w->coupling_matrix_unbinned[2*ll1+1][2*ll2+1]=integ; //TB,TB
+	  fac_pure[0]=integ;
+	  if(pure_any) {
+	    if(l1==0)
+	      fac_pure[1]=0;
+	    else {
+	      p.flag=INTG_FLAG_00;
+	      gsl_integration_qag(&F,0,M_PI,0,1E-4,1000,GSL_INTEG_GAUSS61,wi,&integ,&einteg);
+	      fac_pure[1]=integ*(l2*l2)/(l1*l1);
+	    }
+	  }
+	  else
+	    fac_pure[1]=fac_pure[0];
+	  w->coupling_matrix_unbinned[2*ll1+0][2*ll2+0]=fac_pure[pe1+pe2]; //TE,TE
+	  w->coupling_matrix_unbinned[2*ll1+1][2*ll2+1]=fac_pure[pb1+pb2]; //TB,TB
 	}
 	if(w->ncls==4) {
-	  double integ_0,integ_4,einteg,integ_p,integ_m;
+	  double integ_0,integ_4,integ_2,einteg,fac_pure_p[3],fac_pure_m[3];
 	  p.flag=INTG_FLAG_00;
 	  gsl_integration_qag(&F,0,M_PI,0,1E-4,1000,GSL_INTEG_GAUSS61,wi,&integ_0,&einteg);
 	  p.flag=INTG_FLAG_22;
 	  gsl_integration_qag(&F,0,M_PI,0,1E-4,1000,GSL_INTEG_GAUSS61,wi,&integ_4,&einteg);
-	  integ_p=0.5*(integ_0+integ_4);
-	  integ_m=0.5*(integ_0-integ_4);
-	  w->coupling_matrix_unbinned[4*ll1+0][4*ll2+0]= integ_p; //EE,EE
-	  w->coupling_matrix_unbinned[4*ll1+1][4*ll2+1]= integ_p; //EB,EB
-	  w->coupling_matrix_unbinned[4*ll1+2][4*ll2+2]= integ_p; //BE,BE
-	  w->coupling_matrix_unbinned[4*ll1+3][4*ll2+3]= integ_p; //BB,BB
-	  w->coupling_matrix_unbinned[4*ll1+0][4*ll2+3]= integ_m; //EE,BB
-	  w->coupling_matrix_unbinned[4*ll1+1][4*ll2+2]=-integ_m; //EB,BE
-	  w->coupling_matrix_unbinned[4*ll1+2][4*ll2+1]=-integ_m; //BE,EB
-	  w->coupling_matrix_unbinned[4*ll1+3][4*ll2+0]= integ_m; //BB,EE
+	  fac_pure_p[0]=0.5*(integ_0+integ_4);
+	  fac_pure_m[0]=0.5*(integ_0-integ_4);
+	  if(pure_any) {
+	    if(l1==0) {
+	      fac_pure_p[1]=0;
+	      fac_pure_p[2]=0;
+	    }
+	    else {
+	      p.flag=INTG_FLAG_02;
+	      gsl_integration_qag(&F,0,M_PI,0,1E-4,1000,GSL_INTEG_GAUSS61,wi,&integ_2,&einteg);
+	      fac_pure_p[1]=integ_2*(l2*l2)/(l1*l1);
+	      fac_pure_p[2]=integ_0*(l2*l2*l2*l2)/(l1*l1*l1*l1);
+	    }
+	    fac_pure_m[1]=0;
+	    fac_pure_m[2]=0;
+	  }
+	  else {
+	    fac_pure_p[1]=fac_pure_p[0];
+	    fac_pure_p[2]=fac_pure_p[0];
+	    fac_pure_m[1]=fac_pure_m[0];
+	    fac_pure_m[2]=fac_pure_m[0];
+	  }
+	  w->coupling_matrix_unbinned[4*ll1+0][4*ll2+0]= fac_pure_p[pe1+pe2]; //EE,EE
+	  w->coupling_matrix_unbinned[4*ll1+1][4*ll2+1]= fac_pure_p[pe1+pb2]; //EB,EB
+	  w->coupling_matrix_unbinned[4*ll1+2][4*ll2+2]= fac_pure_p[pb1+pe2]; //BE,BE
+	  w->coupling_matrix_unbinned[4*ll1+3][4*ll2+3]= fac_pure_p[pb1+pb2]; //BB,BB
+	  w->coupling_matrix_unbinned[4*ll1+0][4*ll2+3]= fac_pure_m[pe1+pe2]; //EE,BB
+	  w->coupling_matrix_unbinned[4*ll1+1][4*ll2+2]=-fac_pure_m[pe1+pb2]; //EB,BE
+	  w->coupling_matrix_unbinned[4*ll1+2][4*ll2+1]=-fac_pure_m[pb1+pe2]; //BE,EB
+	  w->coupling_matrix_unbinned[4*ll1+3][4*ll2+0]= fac_pure_m[pb1+pb2]; //BB,EE
 	}
 
 	int jj,kk;
@@ -471,7 +534,7 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
   gsl_interp_accel_free(intacc);
 
   fcomplex *cmask1,*cmask2;
-  flouble *maskprod,*cosarr,*sinarr;
+  flouble *maskprod,*cosarr,*sinarr,*kmodarr;
   int *i_band;
   cmask1=dftw_malloc(fs->ny*(fs->nx/2+1)*sizeof(fcomplex));
   fs_map2alm(fl1->fs,1,0,&(fl1->mask),&cmask1);
@@ -484,12 +547,13 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
   maskprod=dftw_malloc(fl1->npix*sizeof(flouble));
   i_band=my_malloc(fl1->npix*sizeof(int));		    
   if(w->ncls>1) {
+    kmodarr=dftw_malloc(fl1->npix*sizeof(flouble));
     cosarr=dftw_malloc(fl1->npix*sizeof(flouble));
     sinarr=dftw_malloc(fl1->npix*sizeof(flouble));
   }
 
-#pragma omp parallel default(none)				\
-  shared(fs,maskprod,cmask1,cmask2,w,i_band,cosarr,sinarr)
+#pragma omp parallel default(none)					\
+  shared(fs,maskprod,cmask1,cmask2,w,i_band,cosarr,sinarr,kmodarr)
   {
     flouble dkx=2*M_PI/fs->lx;
     flouble dky=2*M_PI/fs->ly;
@@ -541,6 +605,7 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
 	  }
 	  cosarr[index]=c*c-s*s;
 	  sinarr[index]=2*s*c;
+	  kmodarr[index]=kmod;
 	}	
       }
     } //end omp for
@@ -553,10 +618,12 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
     free(n_cells_thr);
   } //end omp parallel
 
-#pragma omp parallel default(none)		\
-  shared(fs,i_band,w,cosarr,sinarr,maskprod)
+#pragma omp parallel default(none)				\
+  shared(fs,i_band,w,cosarr,sinarr,kmodarr,maskprod,fl1,fl2)
   {
     int iy1,ix1,ix2,iy2;
+    int pe1=fl1->pure_e,pe2=fl2->pure_e,pb1=fl1->pure_b,pb2=fl2->pure_b;
+    int pure_any=pe1 || pb1 || pe2 || pb2;
     flouble **coupling_matrix_thr=my_malloc(w->nells*w->ncls*sizeof(flouble *));
     for(iy1=0;iy1<w->nells*w->ncls;iy1++)
       coupling_matrix_thr[iy1]=my_calloc(w->nells*w->ncls,sizeof(flouble));
@@ -567,13 +634,16 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
 	int index1=ix1+fs->nx*iy1;
 	int ik1=i_band[index1];
 	if(ik1>=0) {
+	  flouble inv_k1=0;
 	  ik1*=w->ncls;
+	  if((index1>0) && (w->ncls>1))
+	    inv_k1=1./kmodarr[index1];
 	  for(iy2=0;iy2<fs->ny;iy2++) {
 	    for(ix2=0;ix2<fs->nx;ix2++) {
 	      int index2=ix2+fs->nx*iy2;
 	      int ik2=i_band[index2];
 	      if(ik2>=0) {
-		flouble cdiff=1,sdiff=1;
+		flouble cdiff=1,sdiff=1,kr=1,mp=1;
 		int index;
 		int iy=iy1-iy2;
 		int ix=ix1-ix2;
@@ -585,39 +655,49 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
 		if(w->ncls>1) {
 		  cdiff=cosarr[index1]*cosarr[index2]+sinarr[index1]*sinarr[index2];
 		  sdiff=sinarr[index1]*cosarr[index2]-cosarr[index1]*sinarr[index2];
+		  kr=kmodarr[index2]*inv_k1;
+		  kr*=kr;
 		}
+		mp=maskprod[index];
 
 		if(w->ncls==1) {
-		  coupling_matrix_thr[ik1+0][ik2+0]+=maskprod[index];
+		  coupling_matrix_thr[ik1+0][ik2+0]+=mp;
 		}
 		if(w->ncls==2) {
-		  flouble fc=cdiff*maskprod[index];
-		  flouble fs=sdiff*maskprod[index];
-		  coupling_matrix_thr[ik1+0][ik2+0]+=fc; //CHECK SIGNS;
-		  coupling_matrix_thr[ik1+0][ik2+1]-=fs;
-		  coupling_matrix_thr[ik1+1][ik2+0]+=fs;
-		  coupling_matrix_thr[ik1+1][ik2+1]+=fc;
+		  flouble fc[2],fs[2];
+		  fc[0]=cdiff*mp;
+		  fs[0]=sdiff*mp;
+		  if(pure_any) {
+		    fc[1]=kr*mp;
+		    fs[1]=0;
+		  }
+		  coupling_matrix_thr[ik1+0][ik2+0]+=fc[pe1+pe2]; //TE,TE
+		  coupling_matrix_thr[ik1+0][ik2+1]-=fs[pe1+pe2]; //TE,TB
+		  coupling_matrix_thr[ik1+1][ik2+0]+=fs[pb1+pb2]; //TB,TE
+		  coupling_matrix_thr[ik1+1][ik2+1]+=fc[pb1+pb2]; //TB,TB
 		}
 		if(w->ncls==4) {
-		  flouble fcc=cdiff*cdiff*maskprod[index];
-		  flouble fsc=sdiff*cdiff*maskprod[index];
-		  flouble fss=sdiff*sdiff*maskprod[index];
-		  coupling_matrix_thr[ik1+0][ik2+0]+=fcc; //CHECK SIGNS;
-		  coupling_matrix_thr[ik1+0][ik2+1]-=fsc;
-		  coupling_matrix_thr[ik1+0][ik2+2]-=fsc;
-		  coupling_matrix_thr[ik1+0][ik2+3]+=fss;
-		  coupling_matrix_thr[ik1+1][ik2+0]+=fsc;
-		  coupling_matrix_thr[ik1+1][ik2+1]+=fcc;
-		  coupling_matrix_thr[ik1+1][ik2+2]-=fss;
-		  coupling_matrix_thr[ik1+1][ik2+3]-=fsc;
-		  coupling_matrix_thr[ik1+2][ik2+0]+=fsc;
-		  coupling_matrix_thr[ik1+2][ik2+1]-=fss;
-		  coupling_matrix_thr[ik1+2][ik2+2]+=fcc;
-		  coupling_matrix_thr[ik1+2][ik2+3]-=fsc;
-		  coupling_matrix_thr[ik1+3][ik2+0]+=fss;
-		  coupling_matrix_thr[ik1+3][ik2+1]+=fsc;
-		  coupling_matrix_thr[ik1+3][ik2+2]+=fsc;
-		  coupling_matrix_thr[ik1+3][ik2+3]+=fcc;
+		  flouble fc[2],fs[2];
+		  fc[0]=cdiff; fs[0]=sdiff;
+		  if(pure_any) {
+		    fc[1]=kr; fs[1]=0;
+		  }
+		  coupling_matrix_thr[ik1+0][ik2+0]+=fc[pe1]*fc[pe2]*mp; //EE,EE
+		  coupling_matrix_thr[ik1+0][ik2+1]-=fc[pe1]*fs[pe2]*mp; //EE,EB
+		  coupling_matrix_thr[ik1+0][ik2+2]-=fs[pe1]*fc[pe2]*mp; //EE,BE
+		  coupling_matrix_thr[ik1+0][ik2+3]+=fs[pe1]*fs[pe2]*mp; //EE,BB
+		  coupling_matrix_thr[ik1+1][ik2+0]+=fc[pe1]*fs[pb2]*mp; //EB,EE
+		  coupling_matrix_thr[ik1+1][ik2+1]+=fc[pe1]*fc[pb2]*mp; //EB,EB
+		  coupling_matrix_thr[ik1+1][ik2+2]-=fs[pe1]*fs[pb2]*mp; //EB,BE
+		  coupling_matrix_thr[ik1+1][ik2+3]-=fs[pe1]*fc[pb2]*mp; //EB,BB
+		  coupling_matrix_thr[ik1+2][ik2+0]+=fs[pb1]*fc[pe2]*mp; //BE,EE
+		  coupling_matrix_thr[ik1+2][ik2+1]-=fs[pb1]*fs[pe2]*mp; //BE,EB
+		  coupling_matrix_thr[ik1+2][ik2+2]+=fc[pb1]*fc[pe2]*mp; //BE,BE
+		  coupling_matrix_thr[ik1+2][ik2+3]-=fc[pb1]*fs[pe2]*mp; //BE,BB
+		  coupling_matrix_thr[ik1+3][ik2+0]+=fs[pb1]*fs[pb2]*mp; //BB,EE
+		  coupling_matrix_thr[ik1+3][ik2+1]+=fs[pb1]*fc[pb2]*mp; //BB,EB
+		  coupling_matrix_thr[ik1+3][ik2+2]+=fc[pb1]*fs[pb2]*mp; //BB,BE
+		  coupling_matrix_thr[ik1+3][ik2+3]+=fc[pb1]*fc[pb2]*mp; //BB,BB
 		}
 	      }
 	    }

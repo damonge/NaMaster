@@ -482,36 +482,34 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
       \int \frac{d{\bf l}^2}{(2\pi)^2}\,_s{\sf E}_{\bf l}({\bf x})_s{\sf E}^\dag_{{\bf l}}({\bf x}')={\sf 1}\,\delta({\bf x}-{\bf x}').
     \end{equation}
 
-  \subsection{$E$ and $B$ purification}
-    The analogue equations for the pure $B$ mode component in the flat-sky approximation are:
-    \begin{equation}
-      B^p_{\bf l}=\left(\tilde{P}_2\right)^B_{\bf l}+2\ell^{-1}\left(\tilde{P}_2\right)^B_{\bf l}+\ell^{-2}\left(\tilde{P}_0\right)^B_{\bf l},
-    \end{equation}
-    (and a similar relation for the pure $E$ component), where $P_n=(\eth^{2-n}w)^*(Q+iU)$, and $w$ is the sky mask. The derivatives of $w$
-    can be taken by using the following relation:
-    \begin{align}
-      &\eth^nw({\bf x})=\int\frac{d{\bf l}^2}{2\pi}\eth^ne^{i{\bf l}{\bf x}}w_{\bf l}=\int\frac{d{\bf l}^2}{2\pi}\,_n{\cal Y}_{\bf k}({\bf x})\,(l^nw_{\bf l})\hspace{6pt}
-      \longrightarrow\hspace{6pt}\,_nw_{\bf l}=\ell^nw_{\bf l}\\
-      &(\eth^nw({\bf x}))*=\bar{\eth}^nw({\bf x})=\int\frac{d{\bf l}^2}{2\pi}\,_{-n}{\cal Y}_{\bf k}({\bf x})\,((-l)^nw_{\bf l})\hspace{6pt}
-      \longrightarrow\hspace{6pt}\,_{-n}w_{\bf l}=(-1)^n\ell^nw_{\bf l}\\
-      &((\eth^nw({\bf x}))^E,(\eth^nw({\bf x}))^B)=(-\ell^nw_{\bf l},0)
-    \end{align}
-
-
-
   \subsection{Pseudo-$C_\ell$ estimator - continuum limit}
     The Fourier coefficients of the masked field are:
     \begin{align}
       {\bf a}^v_{\bf l}&=\int\int\frac{d{\bf k}^2d{\bf q}^2}{2\pi}\left[\int\frac{d{\bf x}^2}{(2\pi)^2}\,_{s_a}{\sf E}^\dag_{\bf l}({\bf x})\,_{s_a}{\sf E}_{\bf k}({\bf x})\,_0E_{\bf q}({\bf x})\right]{\bf a}_{\bf k}\,v_{\bf q}\\
-                       &=\int\frac{d{\bf k}^2}{2\pi}{\sf R}^\dag\left(s_a(\varphi_\ell-\varphi_k)\right)\,{\bf a}_{\bf k}v_{{\bf l}-{\bf k}}
+                       &=\int\frac{d{\bf k}^2}{2\pi}{\sf R}^\dag\left(s_a(\varphi_\ell-\varphi_k)\right)\,{\bf a}_{\bf k}v_{{\bf l}-{\bf k}},
     \end{align}
-    Then:
+    which, for instance, in the case of a spin-$2$ field, read:
+    \begin{equation}\label{eq:pseudo_flat_eb}
+     \left(
+     \begin{array}{c}
+      E^v_{\bf l} \\ B^v_{\bf l}
+     \end{array}\right)
+     =\int\frac{d{\bf k}^2}{2\pi}v_{{\bf l}-{\bf k}}
+     \left(
+     \begin{array}{cc}
+       \cos2\Delta\varphi & -\sin2\Delta\varphi \\
+       \sin2\Delta\varphi & \cos2\Delta\varphi
+     \end{array}\right)\,\left(
+     \begin{array}{c}
+      E_{\bf k} \\ B_{\bf k}
+     \end{array}\right),
+    \end{equation}
+    where $\Delta\varphi\equiv\varphi_\ell-\varphi_k$. Then, the covariance of the Fourier coefficients of two masked fields is:
     \begin{align}
       \left\langle\tilde{\bf a}_{\bf l}\,\tilde{\bf b}^\dag_{\bf l}\right\rangle
       &=\int\int\frac{d{\bf k}^2d{\bf q}^2}{(2\pi)^2}{\sf R}^\dag(s_a(\varphi_\ell-\varphi_k))\left\langle{\bf a}_{\bf k}{\bf b}^\dag_{\bf q}\right\rangle{\sf R}(s_b(\varphi_\ell-\varphi_q))v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf q}}\\
-      &=\int\frac{d{\bf k}^2}{(2\pi)^2}{\sf R}^\dag(s_a\Delta\varphi){\sf C}^{ab}_k{\sf R}(s_b\Delta\varphi)v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
+      &=\int\frac{d{\bf k}^2}{(2\pi)^2}{\sf R}^\dag(s_a\Delta\varphi){\sf C}^{ab}_k{\sf R}(s_b\Delta\varphi)v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}.
     \end{align}
-    where $\Delta\varphi\equiv\varphi_\ell-\varphi_k$.
     
     The pseudo-$C_\ell$ is defined as the nomalized angular average of ${\bf a}_{\bf l}{\bf b}^\dag_{\bf l}$:
     \begin{align}
@@ -673,7 +671,29 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
       &+M_{ij}{\bf f}^i_{\bf l}\,{\rm DFT}\left\{w({\bf x})\,{\rm DFT}^{-1}\left[\hat{\sf C}^{ab\dag}_{\ell_1}{\rm DFT}\left(v\,{\bf f}^j\right)^{s_a}_{{\bf l}_1}\right]^{s_b}_{\bf x}\right\}^{s_b\dag}_{\bf l}-\\
       &-M_{ij}N^*_{pq}\left\{\sum_{\bf x} \Delta{\bf x}^D\,v({\bf x})\,{\bf f}^{j\dag}({\bf x})\,{\rm DFT}^{-1}\left[\hat{\sf C}^{ab}_{\ell_1}{\rm DFT}\left(w\,{\bf g}^q\right)^{s_b}_{{\bf l}_1}\right]^{s_a}_{\bf x}\right\}\,{\bf f}^i_{\bf l}{\bf g}^{p\dag}_{\bf l}
     \end{align}
-  
+
+
+  \subsection{$E$ and $B$ purification}
+    The analogue equations for the pure $B$ mode component in the flat-sky approximation are:
+    \begin{equation}
+      B^p_{\bf l}=\left(\tilde{P}_2\right)^B_{\bf l}+2\ell^{-1}\left(\tilde{P}_1\right)^B_{\bf l}+\ell^{-2}\left(\tilde{P}_0\right)^B_{\bf l},
+    \end{equation}
+    (and a similar relation for the pure $E$ component), where $P_n=(\eth^{2-n}w)^*(Q+iU)$, and $w$ is the sky mask. The derivatives of $w$
+    can be taken by using the following relation:
+    \begin{align}
+      &\eth^nw({\bf x})=\int\frac{d{\bf l}^2}{2\pi}\eth^ne^{i{\bf l}{\bf x}}w_{\bf l}=\int\frac{d{\bf l}^2}{2\pi}\,_n{\cal Y}_{\bf k}({\bf x})\,(l^nw_{\bf l})\hspace{6pt}
+      \longrightarrow\hspace{6pt}\,_nw_{\bf l}=\ell^nw_{\bf l}\\
+      &(\eth^nw({\bf x}))*=\bar{\eth}^nw({\bf x})=\int\frac{d{\bf l}^2}{2\pi}\,_{-n}{\cal Y}_{\bf k}({\bf x})\,((-l)^nw_{\bf l})\hspace{6pt}
+      \longrightarrow\hspace{6pt}\,_{-n}w_{\bf l}=(-1)^n\ell^nw_{\bf l}\\
+      &((\eth^nw({\bf x}))^E,(\eth^nw({\bf x}))^B)=(-\ell^nw_{\bf l},0)
+    \end{align}
+    
+    Note that a mathematically simpler relation for the pure components is:
+    \begin{equation}
+      B^p_{\bf l}=\int\frac{d{\bf k}^2}{2\pi}B_{\bf k}w_{{\bf l}-{\bf k}}\frac{k^2}{\ell^2}
+    \end{equation}
+    (and similarly for $E^p_{\bf l}$). Comparing with Eq. \ref{eq:pseudo_flat_eb}, we see that the key to work out the expressions for the pure-$E$ and $B$ coupling matrices is to substitute all factors of $\cos2\Delta\varphi$ for $k^2/\ell^2$, and all factors of $\sin2\Delta\varphi$ for 0.
+    
 \begin{thebibliography}{}
  \bibitem{2002ApJ...567....2H} Hivon, E., G{\'o}rski, K.~M., Netterfield, C.~B., et al.\ 2002, \apj, 567, 2 
  \bibitem{2017MNRAS.465.1847E} Elsner, F., Leistedt, B., \& Peiris, H.~V.\ 2017, \mnras, 465, 1847 

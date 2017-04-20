@@ -456,13 +456,19 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
 	      w->coupling_matrix_unbinned[1*ll2+0][1*ll3+0]+=wfac; //TT,TT
 	    }
 	    if(w->ncls==2) {
-	      if(pure_any)
-		wfac=wigner_22[j22]+fac_12*wigner_12[j12]+fac_02*wigner_02[j02];
-	      else
-		wfac=wigner_22[j22];
-	      wfac*=w->pcl_masks[l1]*wigner_00[j00];
-	      w->coupling_matrix_unbinned[2*ll2+0][2*ll3+0]+=wfac; //TE,TE
-	      w->coupling_matrix_unbinned[2*ll2+1][2*ll3+1]+=wfac; //TB,TB
+	      double wfac_ispure[2];
+	      if(pure_any) {
+		wfac_ispure[0]=wigner_22[j22];
+		wfac_ispure[1]=wigner_22[j22]+fac_12*wigner_12[j12]+fac_02*wigner_02[j02];
+		wfac_ispure[0]*=w->pcl_masks[l1]*wigner_00[j00];
+		wfac_ispure[1]*=w->pcl_masks[l1]*wigner_00[j00];
+	      }
+	      else {
+		wfac_ispure[0]=wigner_22[j22]*w->pcl_masks[l1]*wigner_00[j00];
+		wfac_ispure[1]=wfac_ispure[0];
+	      }
+	      w->coupling_matrix_unbinned[2*ll2+0][2*ll3+0]+=wfac_ispure[pe1+pe2]; //TE,TE
+	      w->coupling_matrix_unbinned[2*ll2+1][2*ll3+1]+=wfac_ispure[pb1+pb2]; //TB,TB
 	    }
 	    if(w->ncls==4) {
 	      double wfac_ispure[3];
