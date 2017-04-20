@@ -22,7 +22,7 @@ import sys
 from mock import Mock as MagicMock
 sys.path.insert(0, os.path.abspath('../../'))
 
-autodoc_mock_imports = ['nmtlib']
+autodoc_mock_imports = ['nmtlib','_nmtlib']
 
 class Mock(MagicMock):
     @classmethod
