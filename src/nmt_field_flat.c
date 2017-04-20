@@ -128,9 +128,176 @@ void nmt_field_flat_free(nmt_field_flat *fl)
   free(fl);
 }
 
+
+static void walm_x_lpower(nmt_flatsky_info *fs,fcomplex **walm_in,fcomplex **walm_out,int power)
+{
+#pragma omp parallel default(none) \
+  shared(fs,walm_in,walm_out,power)
+  {
+
+    int iy;
+    flouble dkx=2*M_PI/fs->nx;
+    flouble dky=2*M_PI/fs->ny;
+
+#pragma omp for   
+    for(iy=0;iy<fs->ny;iy++) {
+      int ix;
+      flouble ky;
+      if(2*iy<=fs->ny)
+	ky=iy*dky;
+      else
+	ky=-(fs->ny-iy)*dky;
+      for(ix=0;ix<=fs->nx/2;ix++) {
+	int ipow;
+	flouble kpow=1;
+	flouble kx=ix*dkx;
+	long index=ix+(fs->nx/2+1)*iy;
+	flouble kmod=sqrt(kx*kx+ky*ky);
+	for(ipow=0;ipow<power;ipow++)
+	  kpow*=kmod;
+	walm_out[0][index]=-walm_in[0][index]*kpow;
+	walm_out[1][index]=0;
+      }
+    } //end omp for
+  } //end omp parallel
+}
+
 static void nmt_purify_flat(nmt_field_flat *fl)
 {
-  return; //Placeholder
+  long ip;
+  int imap;
+  int purify[2]={0,0};
+  flouble  **pmap0=my_malloc(fl->nmaps*sizeof(flouble *));
+  flouble  **pmap=my_malloc(fl->nmaps*sizeof(flouble *));
+  flouble  **wmap=my_malloc(fl->nmaps*sizeof(flouble *));
+  fcomplex **walm=my_malloc(fl->nmaps*sizeof(fcomplex *));
+  fcomplex **walm_bak=my_malloc(fl->nmaps*sizeof(fcomplex *));
+  fcomplex **palm=my_malloc(fl->nmaps*sizeof(fcomplex *));
+  fcomplex **alm_out=my_malloc(fl->nmaps*sizeof(fcomplex *));
+  for(imap=0;imap<fl->nmaps;imap++) {
+    walm[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+    walm_bak[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+    palm[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+    pmap[imap]=dftw_malloc(fl->npix*sizeof(flouble));
+    pmap0[imap]=dftw_malloc(fl->npix*sizeof(flouble));
+    wmap[imap]=dftw_malloc(fl->npix*sizeof(flouble));
+    memcpy(pmap0[imap],fl->maps[imap],fl->npix*sizeof(flouble));
+    alm_out[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+  }
+
+  if(fl->pure_e)
+    purify[0]=1;
+  if(fl->pure_b)
+    purify[1]=1;
+
+  //Compute mask DFT
+  fs_map2alm(fl->fs,1,0,&(fl->mask),walm);
+
+  //Product with spin-0 mask
+  for(imap=0;imap<fl->nmaps;imap++) {
+    fs_map_product(fl->fs,pmap0[imap],fl->mask,pmap[imap]);
+    memcpy(fl->maps[imap],pmap[imap],fl->npix*sizeof(flouble));
+    memcpy(walm_bak[imap],walm[imap],fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+  }
+  //Compute SHT and store in alm_out
+  fs_map2alm(fl->fs,1,2,pmap,alm_out);
+
+  //Compute spin-1 mask
+  walm_x_lpower(fl->fs,walm_bak,walm,1);
+  fs_alm2map(fl->fs,1,1,wmap,walm);
+  //Product with spin-1 mask
+  for(ip=0;ip<fl->npix;ip++) {
+    pmap[0][ip]=wmap[0][ip]*pmap0[0][ip]+wmap[1][ip]*pmap0[1][ip];
+    pmap[1][ip]=wmap[0][ip]*pmap0[1][ip]-wmap[1][ip]*pmap0[0][ip];
+  }
+  //Compute DFT, multiply by 2/l and add to alm_out
+  fs_map2alm(fl->fs,1,1,pmap,palm);
+  for(imap=0;imap<fl->nmaps;imap++) {
+    if(purify[imap]) {
+#pragma omp parallel default(none) shared(fl,imap,alm_out,palm)
+      {
+	int iy;
+	flouble dkx=2*M_PI/fl->fs->nx;
+	flouble dky=2*M_PI/fl->fs->ny;
+	
+#pragma omp for
+	for(iy=0;iy<fl->fs->ny;iy++) {
+	  int ix;
+	  flouble ky;
+	  if(2*iy<=fl->fs->ny)
+	    ky=iy*dky;
+	  else
+	    ky=-(fl->fs->ny-iy)*dky;
+	  for(ix=0;ix<=fl->fs->nx/2;ix++) {
+	    flouble kx=ix*dkx;
+	    long index=ix+(fl->fs->nx/2+1)*iy;
+	    flouble kmod=sqrt(kx*kx+ky*ky);
+	    if(kmod>0)
+	      alm_out[imap][index]+=2*palm[imap][index]/kmod;
+	  }
+	} //end omp for
+      } //end omp parallel
+    }
+  }
+
+  //Compute spin-2 mask
+  walm_x_lpower(fl->fs,walm_bak,walm,2);
+  fs_alm2map(fl->fs,1,2,wmap,walm);
+  //Product with spin-2 mask
+  for(ip=0;ip<fl->npix;ip++) { //Extra minus sign because of the scalar SHT below
+    pmap[0][ip]=-1*(wmap[0][ip]*pmap0[0][ip]+wmap[1][ip]*pmap0[1][ip]);
+    pmap[1][ip]=-1*(wmap[0][ip]*pmap0[1][ip]-wmap[1][ip]*pmap0[0][ip]);
+  }
+  //Compute DFT, multiply by 1/l^2 and add to alm_out
+  fs_map2alm(fl->fs,2,0,pmap,palm);
+  for(imap=0;imap<fl->nmaps;imap++) {
+    if(purify[imap]) {
+#pragma omp parallel default(none) shared(fl,imap,alm_out,palm)
+      {
+	int iy;
+	flouble dkx=2*M_PI/fl->fs->nx;
+	flouble dky=2*M_PI/fl->fs->ny;
+	
+#pragma omp for
+	for(iy=0;iy<fl->fs->ny;iy++) {
+	  int ix;
+	  flouble ky;
+	  if(2*iy<=fl->fs->ny)
+	    ky=iy*dky;
+	  else
+	    ky=-(fl->fs->ny-iy)*dky;
+	  for(ix=0;ix<=fl->fs->nx/2;ix++) {
+	    flouble kx=ix*dkx;
+	    long index=ix+(fl->fs->nx/2+1)*iy;
+	    flouble kmod2=kx*kx+ky*ky;
+	    if(kmod2>0)
+	      alm_out[imap][index]+=palm[imap][index]/kmod2;
+	  }
+	} //end omp for
+      } //end omp parallel
+    }
+  }
+
+  for(imap=0;imap<fl->nmaps;imap++)
+    memcpy(fl->alms[imap],alm_out[imap],fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+  fs_alm2map(fl->fs,1,2,fl->maps,fl->alms);
+
+  for(imap=0;imap<fl->nmaps;imap++) {
+    dftw_free(pmap0[imap]);
+    dftw_free(pmap[imap]);
+    dftw_free(wmap[imap]);
+    dftw_free(palm[imap]);
+    dftw_free(walm[imap]);
+    dftw_free(walm_bak[imap]);
+    dftw_free(alm_out[imap]);
+  }
+  free(pmap0);
+  free(pmap0);
+  free(wmap);
+  free(walm);
+  free(walm_bak);
+  free(palm);
+  free(alm_out);
 }
 
 nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,

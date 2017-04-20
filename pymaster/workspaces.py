@@ -324,9 +324,11 @@ def compute_full_master_flat(f1,f2,b,cl_noise=None,cl_guess=None,ells_guess=None
         clg=np.zeros([f1.fl.nmaps*f2.fl.nmaps,f1.fl.fs.n_ell])
 
     if workspace==None :
-        cl1d=lib.comp_pspec_flat(f1.fl,f2.fl,b.bin,None,nell_rebin,cln,lf,clg,len(cln)*b.bin.n_bands)
+        cl1d=lib.comp_pspec_flat(f1.fl,f2.fl,b.bin,None,nell_rebin,method,
+                                 cln,lf,clg,len(cln)*b.bin.n_bands)
     else :
-        cl1d=lib.comp_pspec_flat(f1.fl,f2.fl,b.bin,workspace.wsp,nell_rebin,cln,lf,clg,len(cln)*b.bin.n_bands)
+        cl1d=lib.comp_pspec_flat(f1.fl,f2.fl,b.bin,workspace.wsp,nell_rebin,method,
+                                 cln,lf,clg,len(cln)*b.bin.n_bands)
 
     clout=np.reshape(cl1d,[len(cln),b.bin.n_bands])
 

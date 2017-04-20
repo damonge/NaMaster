@@ -162,7 +162,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
     \left(\tilde{P}_2\right)^B_{\ell m}+
     2\frac{\alpha_{\ell,2}}{\alpha_{\ell,1}}\left(\tilde{P}_1\right)^B_{\ell m}+\alpha_{\ell,2}\left(\tilde{P}_2\right)^B_{\ell m},
   \end{equation}
-  where $(f)^B_{\ell m}$ stands for the $B$-mode of field $f$, and we have defined the fields $\tilde{P}_n=(\eth^nw)^*(Q+iU)$, where $Q$ and $U$ are the real and imaginary parts of the field $P$.
+  where $(f)^B_{\ell m}$ stands for the $B$-mode of field $f$, and we have defined the fields $\tilde{P}_n=(\eth^{2-n}w)^*(Q+iU)$, where $Q$ and $U$ are the real and imaginary parts of the field $P$.
   
   Note that the derivatives of $w$ can be computed as:
   \begin{equation}
@@ -481,6 +481,22 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
       \int \frac{d{\bf x}^2}{(2\pi)^2}\,_s{\sf E}_{\bf l}({\bf x})_s{\sf E}^\dag_{{\bf l}'}({\bf x})={\sf 1}\,\delta({\bf l}-{\bf l}'),\hspace{12pt}
       \int \frac{d{\bf l}^2}{(2\pi)^2}\,_s{\sf E}_{\bf l}({\bf x})_s{\sf E}^\dag_{{\bf l}}({\bf x}')={\sf 1}\,\delta({\bf x}-{\bf x}').
     \end{equation}
+
+  \subsection{$E$ and $B$ purification}
+    The analogue equations for the pure $B$ mode component in the flat-sky approximation are:
+    \begin{equation}
+      B^p_{\bf l}=\left(\tilde{P}_2\right)^B_{\bf l}+2\ell^{-1}\left(\tilde{P}_2\right)^B_{\bf l}+\ell^{-2}\left(\tilde{P}_0\right)^B_{\bf l},
+    \end{equation}
+    (and a similar relation for the pure $E$ component), where $P_n=(\eth^{2-n}w)^*(Q+iU)$, and $w$ is the sky mask. The derivatives of $w$
+    can be taken by using the following relation:
+    \begin{align}
+      &\eth^nw({\bf x})=\int\frac{d{\bf l}^2}{2\pi}\eth^ne^{i{\bf l}{\bf x}}w_{\bf l}=\int\frac{d{\bf l}^2}{2\pi}\,_n{\cal Y}_{\bf k}({\bf x})\,(l^nw_{\bf l})\hspace{6pt}
+      \longrightarrow\hspace{6pt}\,_nw_{\bf l}=\ell^nw_{\bf l}\\
+      &(\eth^nw({\bf x}))*=\bar{\eth}^nw({\bf x})=\int\frac{d{\bf l}^2}{2\pi}\,_{-n}{\cal Y}_{\bf k}({\bf x})\,((-l)^nw_{\bf l})\hspace{6pt}
+      \longrightarrow\hspace{6pt}\,_{-n}w_{\bf l}=(-1)^n\ell^nw_{\bf l}\\
+      &((\eth^nw({\bf x}))^E,(\eth^nw({\bf x}))^B)=(-\ell^nw_{\bf l},0)
+    \end{align}
+
 
 
   \subsection{Pseudo-$C_\ell$ estimator - continuum limit}

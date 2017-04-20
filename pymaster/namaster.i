@@ -681,7 +681,7 @@ void comp_pspec_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 		     int ncl1,int nell1,double *cls1,
 		     int nell3,double *weights,
 		     int ncl2,int nell2,double *cls2,
-		     double *dout,int ndout)
+		     double *dout,int ndout,int method)
 {
   int i;
   double **cl_noise,**cl_guess,**cl_out;
@@ -704,7 +704,7 @@ void comp_pspec_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
     cl_out[i]=&(dout[i*bin->n_bands]);
   }
 
-  w=nmt_compute_power_spectra_flat(fl1,fl2,bin,n_rebin,201,w0,cl_noise,nell3,weights,cl_guess,cl_out);
+  w=nmt_compute_power_spectra_flat(fl1,fl2,bin,n_rebin,method,w0,cl_noise,nell3,weights,cl_guess,cl_out);
 
   free(cl_out);
   free(cl_guess);
