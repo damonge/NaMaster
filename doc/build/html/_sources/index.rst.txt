@@ -6,7 +6,7 @@
 Welcome to pymaster's documentation!
 ====================================
 
-pymaster is the python implementation of the NaMaster library. The main purpose of this library is to help in computing the MASTER or pseudo-CL estimator of the power spectrum between to general fields defined on the sphere.
+pymaster is the python implementation of the NaMaster library. The main purpose of this library is to provide support to compute the angular power spectrum of fields defined on a limited region of the sphere using the so-called pseudo-CL formalism.
 
 Below you can find links to pymaster's full documentation and 5 different example scripts showcasing its usage. Understanding the last script in particular will allow you to make the most efficient use of this module.
 
