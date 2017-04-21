@@ -22,6 +22,8 @@ We recommend that users read NaMaster's :download:`scientific documentation <../
    sample_fields
    sample_masks
    sample_workspaces
+   sample_pureb
+   sample_flat
 
 
 Indices and tables

@@ -3881,7 +3881,7 @@ void comp_pspec_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 		     int ncl1,int nell1,double *cls1,
 		     int nell3,double *weights,
 		     int ncl2,int nell2,double *cls2,
-		     double *dout,int ndout)
+		     double *dout,int ndout,int method)
 {
   int i;
   double **cl_noise,**cl_guess,**cl_out;
@@ -3904,7 +3904,7 @@ void comp_pspec_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
     cl_out[i]=&(dout[i*bin->n_bands]);
   }
 
-  w=nmt_compute_power_spectra_flat(fl1,fl2,bin,n_rebin,201,w0,cl_noise,nell3,weights,cl_guess,cl_out);
+  w=nmt_compute_power_spectra_flat(fl1,fl2,bin,n_rebin,method,w0,cl_noise,nell3,weights,cl_guess,cl_out);
 
   free(cl_out);
   free(cl_guess);
@@ -15021,6 +15021,7 @@ SWIGINTERN PyObject *_wrap_comp_pspec_flat(PyObject *SWIGUNUSEDPARM(self), PyObj
   double *arg13 = (double *) 0 ;
   double *arg14 = (double *) 0 ;
   int arg15 ;
+  int arg16 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   void *argp2 = 0 ;
@@ -15038,6 +15039,8 @@ SWIGINTERN PyObject *_wrap_comp_pspec_flat(PyObject *SWIGUNUSEDPARM(self), PyObj
   PyArrayObject *array11 = NULL ;
   int is_new_object11 = 0 ;
   PyObject *array14 = NULL ;
+  int val16 ;
+  int ecode16 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
@@ -15047,8 +15050,9 @@ SWIGINTERN PyObject *_wrap_comp_pspec_flat(PyObject *SWIGUNUSEDPARM(self), PyObj
   PyObject * obj6 = 0 ;
   PyObject * obj7 = 0 ;
   PyObject * obj8 = 0 ;
+  PyObject * obj9 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOO:comp_pspec_flat",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOOOOOO:comp_pspec_flat",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5,&obj6,&obj7,&obj8,&obj9)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field_flat, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "comp_pspec_flat" "', argument " "1"" of type '" "nmt_field_flat *""'"); 
@@ -15128,9 +15132,14 @@ SWIGINTERN PyObject *_wrap_comp_pspec_flat(PyObject *SWIGUNUSEDPARM(self), PyObj
     if (!array14) SWIG_fail;
     arg14 = (double*) array_data(array14);
   }
+  ecode16 = SWIG_AsVal_int(obj9, &val16);
+  if (!SWIG_IsOK(ecode16)) {
+    SWIG_exception_fail(SWIG_ArgError(ecode16), "in method '" "comp_pspec_flat" "', argument " "16"" of type '" "int""'");
+  } 
+  arg16 = (int)(val16);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    comp_pspec_flat(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15);
+    comp_pspec_flat(arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15,arg16);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_Py_Void();

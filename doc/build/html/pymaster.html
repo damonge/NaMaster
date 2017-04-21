@@ -92,6 +92,8 @@
 <li class="toctree-l1"><a class="reference internal" href="sample_fields.html">Example 3: Fields</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sample_masks.html">Example 4: Masks</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sample_workspaces.html">Example 5: Using workspaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sample_pureb.html">Example 6: Pure E and B</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sample_flat.html">Example 7: Flat-sky fields</a></li>
 </ul>
 
             
@@ -144,26 +146,24 @@
 <li><a class="reference internal" href="#pymaster.bins.NmtBin" title="pymaster.bins.NmtBin"><code class="xref py py-class docutils literal"><span class="pre">pymaster.bins.NmtBin</span></code></a></li>
 <li><a class="reference internal" href="#pymaster.workspaces.NmtWorkspace" title="pymaster.workspaces.NmtWorkspace"><code class="xref py py-class docutils literal"><span class="pre">pymaster.workspaces.NmtWorkspace</span></code></a></li>
 </ul>
-<p>and their flat-sky equivalents:</p>
-<ul class="simple">
-<li><a class="reference internal" href="#pymaster.field.NmtFieldFlat" title="pymaster.field.NmtFieldFlat"><code class="xref py py-class docutils literal"><span class="pre">pymaster.field.NmtFieldFlat</span></code></a></li>
-<li><a class="reference internal" href="#pymaster.bins.NmtBinFlat" title="pymaster.bins.NmtBinFlat"><code class="xref py py-class docutils literal"><span class="pre">pymaster.bins.NmtBinFlat</span></code></a></li>
-<li><a class="reference internal" href="#pymaster.workspaces.NmtWorkspaceFlat" title="pymaster.workspaces.NmtWorkspaceFlat"><code class="xref py py-class docutils literal"><span class="pre">pymaster.workspaces.NmtWorkspaceFlat</span></code></a></li>
-</ul>
-<p>And a number of functions</p>
+<p>and a number of functions</p>
 <ul class="simple">
 <li><a class="reference internal" href="#pymaster.workspaces.deprojection_bias" title="pymaster.workspaces.deprojection_bias"><code class="xref py py-func docutils literal"><span class="pre">pymaster.workspaces.deprojection_bias()</span></code></a></li>
 <li><a class="reference internal" href="#pymaster.workspaces.compute_coupled_cell" title="pymaster.workspaces.compute_coupled_cell"><code class="xref py py-func docutils literal"><span class="pre">pymaster.workspaces.compute_coupled_cell()</span></code></a></li>
 <li><a class="reference internal" href="#pymaster.workspaces.compute_full_master" title="pymaster.workspaces.compute_full_master"><code class="xref py py-func docutils literal"><span class="pre">pymaster.workspaces.compute_full_master()</span></code></a></li>
 <li><a class="reference internal" href="#pymaster.utils.mask_apodization" title="pymaster.utils.mask_apodization"><code class="xref py py-func docutils literal"><span class="pre">pymaster.utils.mask_apodization()</span></code></a></li>
 <li><a class="reference internal" href="#pymaster.utils.synfast_spherical" title="pymaster.utils.synfast_spherical"><code class="xref py py-func docutils literal"><span class="pre">pymaster.utils.synfast_spherical()</span></code></a></li>
-<li><a class="reference internal" href="#pymaster.utils.synfast_flat" title="pymaster.utils.synfast_flat"><code class="xref py py-func docutils literal"><span class="pre">pymaster.utils.synfast_flat()</span></code></a></li>
 </ul>
-<p>(together with their flat-sky versions)</p>
+<p><a class="reference internal" href="#module-pymaster" title="pymaster"><code class="xref py py-mod docutils literal"><span class="pre">pymaster</span></code></a> also comes with a flat-sky version, which supports the same classes and functions:</p>
 <ul class="simple">
+<li><a class="reference internal" href="#pymaster.field.NmtFieldFlat" title="pymaster.field.NmtFieldFlat"><code class="xref py py-class docutils literal"><span class="pre">pymaster.field.NmtFieldFlat</span></code></a></li>
+<li><a class="reference internal" href="#pymaster.bins.NmtBinFlat" title="pymaster.bins.NmtBinFlat"><code class="xref py py-class docutils literal"><span class="pre">pymaster.bins.NmtBinFlat</span></code></a></li>
+<li><a class="reference internal" href="#pymaster.workspaces.NmtWorkspaceFlat" title="pymaster.workspaces.NmtWorkspaceFlat"><code class="xref py py-class docutils literal"><span class="pre">pymaster.workspaces.NmtWorkspaceFlat</span></code></a></li>
 <li><a class="reference internal" href="#pymaster.workspaces.deprojection_bias_flat" title="pymaster.workspaces.deprojection_bias_flat"><code class="xref py py-func docutils literal"><span class="pre">pymaster.workspaces.deprojection_bias_flat()</span></code></a></li>
 <li><a class="reference internal" href="#pymaster.workspaces.compute_coupled_cell_flat" title="pymaster.workspaces.compute_coupled_cell_flat"><code class="xref py py-func docutils literal"><span class="pre">pymaster.workspaces.compute_coupled_cell_flat()</span></code></a></li>
 <li><a class="reference internal" href="#pymaster.workspaces.compute_full_master_flat" title="pymaster.workspaces.compute_full_master_flat"><code class="xref py py-func docutils literal"><span class="pre">pymaster.workspaces.compute_full_master_flat()</span></code></a></li>
+<li><a class="reference internal" href="#pymaster.utils.mask_apodization_flat" title="pymaster.utils.mask_apodization_flat"><code class="xref py py-func docutils literal"><span class="pre">pymaster.utils.mask_apodization_flat()</span></code></a></li>
+<li><a class="reference internal" href="#pymaster.utils.synfast_flat" title="pymaster.utils.synfast_flat"><code class="xref py py-func docutils literal"><span class="pre">pymaster.utils.synfast_flat()</span></code></a></li>
 </ul>
 <p>Many of these function accept or return sets of power spectra (arrays with one element per angular multipole) or bandpowers (binned versions of power spectra). In all cases, these are returned and provided as 2D arrays with shape [n_cls][nl], where n_cls is the number of power spectra and nl is either the number of multipoles or bandpowers. In all cases, n_cls should correspond with the spins of the two fields being correlated, and the ordering is as follows:</p>
 <ul class="simple">
