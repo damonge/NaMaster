@@ -175,14 +175,14 @@ static void nmt_purify_flat(nmt_field_flat *fl)
   fcomplex **palm=my_malloc(fl->nmaps*sizeof(fcomplex *));
   fcomplex **alm_out=my_malloc(fl->nmaps*sizeof(fcomplex *));
   for(imap=0;imap<fl->nmaps;imap++) {
+    pmap0[imap]=dftw_malloc(fl->npix*sizeof(flouble));
+    pmap[imap]=dftw_malloc(fl->npix*sizeof(flouble));
+    wmap[imap]=dftw_malloc(fl->npix*sizeof(flouble));
     walm[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
     walm_bak[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
     palm[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
-    pmap[imap]=dftw_malloc(fl->npix*sizeof(flouble));
-    pmap0[imap]=dftw_malloc(fl->npix*sizeof(flouble));
-    wmap[imap]=dftw_malloc(fl->npix*sizeof(flouble));
+    alm_out[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex)); 
     memcpy(pmap0[imap],fl->maps[imap],fl->npix*sizeof(flouble));
-    alm_out[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
   }
 
   if(fl->pure_e)
@@ -286,13 +286,13 @@ static void nmt_purify_flat(nmt_field_flat *fl)
     dftw_free(pmap0[imap]);
     dftw_free(pmap[imap]);
     dftw_free(wmap[imap]);
-    dftw_free(palm[imap]);
     dftw_free(walm[imap]);
     dftw_free(walm_bak[imap]);
+    dftw_free(palm[imap]);
     dftw_free(alm_out[imap]);
   }
   free(pmap0);
-  free(pmap0);
+  free(pmap);
   free(wmap);
   free(walm);
   free(walm_bak);
