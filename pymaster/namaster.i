@@ -455,9 +455,10 @@ void comp_deproj_bias(nmt_field *fl1,nmt_field *fl2,
 }
 
 void comp_deproj_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
-			  int nell3,double *weights,
-			  int ncl1,int nell1,double *cls1,
-			  double *dout,int ndout)
+			   flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y,
+			   int nell3,double *weights,
+			   int ncl1,int nell1,double *cls1,
+			   double *dout,int ndout)
 {
   int i;
   double **cl_bias,**cl_guess;
@@ -475,7 +476,7 @@ void comp_deproj_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
     cl_bias[i]=&(dout[fl1->fs->n_ell*i]);
   }
 
-  nmt_compute_deprojection_bias_flat(fl1,fl2,nell3,weights,cl_guess,cl_bias);
+  nmt_compute_deprojection_bias_flat(fl1,fl2,lmn_x,lmx_x,lmn_y,lmx_y,nell3,weights,cl_guess,cl_bias);
 
   free(cl_bias);
   free(cl_guess);
@@ -498,7 +499,8 @@ void comp_pspec_coupled(nmt_field *fl1,nmt_field *fl2,
 }
 
 void comp_pspec_coupled_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
-			     double *dout,int ndout)
+			     double *dout,int ndout,
+			     flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y)
 {
   int i;
   double **cl_out,*larr;
@@ -512,7 +514,7 @@ void comp_pspec_coupled_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
   for(i=0;i<fl1->nmaps*fl2->nmaps;i++)
     cl_out[i]=&(dout[i*fl1->fs->n_ell]);
 
-  nmt_compute_coupled_cell_flat(fl1,fl2,larr,cl_out);
+  nmt_compute_coupled_cell_flat(fl1,fl2,larr,cl_out,lmn_x,lmx_x,lmn_y,lmx_y);
 
   free(larr);
   free(cl_out);
@@ -681,7 +683,8 @@ void comp_pspec_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 		     int ncl1,int nell1,double *cls1,
 		     int nell3,double *weights,
 		     int ncl2,int nell2,double *cls2,
-		     double *dout,int ndout,int method)
+		     double *dout,int ndout,int method,
+		     flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y)
 {
   int i;
   double **cl_noise,**cl_guess,**cl_out;
@@ -704,7 +707,8 @@ void comp_pspec_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
     cl_out[i]=&(dout[i*bin->n_bands]);
   }
 
-  w=nmt_compute_power_spectra_flat(fl1,fl2,bin,n_rebin,method,w0,cl_noise,nell3,weights,cl_guess,cl_out);
+  w=nmt_compute_power_spectra_flat(fl1,fl2,bin,n_rebin,method,lmn_x,lmx_x,lmn_y,lmx_y,
+				   w0,cl_noise,nell3,weights,cl_guess,cl_out);
 
   free(cl_out);
   free(cl_guess);

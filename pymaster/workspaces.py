@@ -106,18 +106,22 @@ class NmtWorkspaceFlat(object) :
             lib.workspace_flat_free(self.wsp)
         self.wsp=lib.workspace_flat_read(fname);
         
-    def compute_coupling_matrix(self,fl1,fl2,bins,nell_rebin=2,method=203) :
+    def compute_coupling_matrix(self,fl1,fl2,bins,nell_rebin=2,method=203,ell_cut_x=[1.,-1.],ell_cut_y=[1.,-1.]) :
         """
         Computes coupling matrix associated with the cross-power spectrum of two NmtFieldFlats and an NmtBinFlat binning scheme.
 
         :param NmtFieldFlat fl1,fl2: fields to correlate
         :param NmtBinFlat bin: binning scheme
         :param int nell_rebin: number of sub-intervals into which the base k-intervals will be sub-sampled to compute the coupling matrix
+        :param int method: algorithm to compute the coupling matrix (only 203 has been fully validated so far).
+        :param float(2) ell_cut_x: remove all modes with ell_x in the interval [ell_cut_x[0],ell_cut_x[1]] from the calculation.
+        :param float(2) ell_cut_y: remove all modes with ell_y in the interval [ell_cut_y[0],ell_cut_y[1]] from the calculation.
         """
         if self.wsp!=None :
             lib.workspace_flat_free(self.wsp)
 
-        self.wsp=lib.compute_coupling_matrix_flat(fl1.fl,fl2.fl,bins.bin,nell_rebin,method)
+        self.wsp=lib.compute_coupling_matrix_flat(fl1.fl,fl2.fl,bins.bin,nell_rebin,method,
+                                                  ell_cut_x[0],ell_cut_x[1],ell_cut_y[0],ell_cut_y[1])
 
     def write_to(self,fname) :
         """
@@ -199,20 +203,23 @@ def deprojection_bias(f1,f2,cls_guess) :
 
     return cl2d
 
-def deprojection_bias_flat(f1,f2,ells,cls_guess) :
+def deprojection_bias_flat(f1,f2,ells,cls_guess,ell_cut_x=[1.,-1.],ell_cut_y=[1.,-1.]) :
     """
     Computes the bias associated to contaminant removal to the cross-pseudo-Cl of two flat-sky fields. The returned power spectrum is defined at the multipoles returned by the method :func:`get_ell_sampling` of either f1 or f2.
 
     :param NmtFieldFlat f1,f2: fields to correlate
     :param ells: list of multipoles on which the proposal power spectra are defined
     :param cls_guess: set of power spectra corresponding to a best-guess of the true power spectra of f1 and f2.
+    :param float(2) ell_cut_x: remove all modes with ell_x in the interval [ell_cut_x[0],ell_cut_x[1]] from the calculation.
+    :param float(2) ell_cut_y: remove all modes with ell_y in the interval [ell_cut_y[0],ell_cut_y[1]] from the calculation.
     :return: deprojection bias power spectra.
     """
     if(len(cls_guess)!=f1.fl.nmaps*f2.fl.nmaps) :
         raise KeyError("Proposal Cell doesn't match number of maps")
     if(len(cls_guess[0])!=len(ells)) :
         raise KeyError("Proposal Cell doesn't match map resolution")
-    cl1d=lib.comp_deproj_bias_flat(f1.fl,f2.fl,ells,cls_guess,len(cls_guess)*len(cls_guess[0]))
+    cl1d=lib.comp_deproj_bias_flat(f1.fl,f2.fl,ell_cut_x[0],ell_cut_x[1],ell_cut_y[0],ell_cut_y[1],
+                                   ells,cls_guess,len(cls_guess)*len(cls_guess[0]))
     cl2d=np.reshape(cl1d,[len(cls_guess),len(cls_guess[0])])
 
     return cl2d
@@ -233,17 +240,20 @@ def compute_coupled_cell(f1,f2,n_iter=3) :
 
     return clout
 
-def compute_coupled_cell_flat(f1,f2) :
+def compute_coupled_cell_flat(f1,f2,ell_cut_x=[1.,-1.],ell_cut_y=[1.,-1.]) :
     """
     Computes the angular power spectra of two masked flat-sky fields (f1 and f2) without aiming to deconvolve the mode-coupling matrix. Effectively, this is equivalent to computing the map FFTs and averaging over rings of wavenumber.  The returned power spectrum is defined at the multipoles returned by the method :func:`get_ell_sampling` of either f1 or f2.
 
     :param NmtFieldFlat f1,f2: fields to correlate
+    :param float(2) ell_cut_x: remove all modes with ell_x in the interval [ell_cut_x[0],ell_cut_x[1]] from the calculation.
+    :param float(2) ell_cut_y: remove all modes with ell_y in the interval [ell_cut_y[0],ell_cut_y[1]] from the calculation.
     :return: array of coupled power spectra
     """
     if((f1.nx!=f2.nx) or (f1.ny!=f2.ny)) :
         raise KeyError("Fields must have same resolution")
     
-    cl1d=lib.comp_pspec_coupled_flat(f1.fl,f2.fl,f1.fl.nmaps*f2.fl.nmaps*f1.fl.fs.n_ell)
+    cl1d=lib.comp_pspec_coupled_flat(f1.fl,f2.fl,f1.fl.nmaps*f2.fl.nmaps*f1.fl.fs.n_ell,
+                                     ell_cut_x[0],ell_cut_x[1],ell_cut_y[0],ell_cut_y[1])
     clout=np.reshape(cl1d,[f1.fl.nmaps*f2.fl.nmaps,f1.fl.fs.n_ell])
 
     return clout
@@ -288,7 +298,8 @@ def compute_full_master(f1,f2,b,cl_noise=None,cl_guess=None,workspace=None) :
 
     return clout
 
-def compute_full_master_flat(f1,f2,b,cl_noise=None,cl_guess=None,ells_guess=None,workspace=None,nell_rebin=2) :
+def compute_full_master_flat(f1,f2,b,cl_noise=None,cl_guess=None,ells_guess=None,workspace=None,nell_rebin=2,
+                             ell_cut_x=[1.,-1.],ell_cut_y=[1.,-1.]) :
     """
     Computes the full MASTER estimate of the power spectrum of two flat-sky fields (f1 and f2). This is equivalent to successively calling:
 
@@ -304,6 +315,8 @@ def compute_full_master_flat(f1,f2,b,cl_noise=None,cl_guess=None,ells_guess=None
     :param ells_guess: multipoles at which cl_guess is defined.
     :param NmtWorkspaceFlat workspace: object containing the mode-coupling matrix associated with an incomplete sky coverage. If provided, the function will skip the computation of the mode-coupling matrix and use the information encoded in this object.
     :param int nell_rebin: number of sub-intervals into which the base k-intervals will be sub-sampled to compute the coupling matrix
+    :param float(2) ell_cut_x: remove all modes with ell_x in the interval [ell_cut_x[0],ell_cut_x[1]] from the calculation.
+    :param float(2) ell_cut_y: remove all modes with ell_y in the interval [ell_cut_y[0],ell_cut_y[1]] from the calculation.
     :return: set of decoupled bandpowers
     """
     if((f1.nx!=f2.nx) or (f1.ny!=f2.ny)) :
@@ -325,10 +338,12 @@ def compute_full_master_flat(f1,f2,b,cl_noise=None,cl_guess=None,ells_guess=None
 
     if workspace==None :
         cl1d=lib.comp_pspec_flat(f1.fl,f2.fl,b.bin,None,nell_rebin,method,
-                                 cln,lf,clg,len(cln)*b.bin.n_bands)
+                                 cln,lf,clg,len(cln)*b.bin.n_bands,
+                                 ell_cut_x[0],ell_cut_x[1],ell_cut_y[0],ell_cut_y[1])
     else :
         cl1d=lib.comp_pspec_flat(f1.fl,f2.fl,b.bin,workspace.wsp,nell_rebin,method,
-                                 cln,lf,clg,len(cln)*b.bin.n_bands)
+                                 cln,lf,clg,len(cln)*b.bin.n_bands,
+                                 ell_cut_x[0],ell_cut_x[1],ell_cut_y[0],ell_cut_y[1])
 
     clout=np.reshape(cl1d,[len(cln),b.bin.n_bands])
 

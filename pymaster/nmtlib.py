@@ -448,6 +448,12 @@ class workspace_flat(_object):
     __swig_setmethods__["nells"] = _nmtlib.workspace_flat_nells_set
     __swig_getmethods__["nells"] = _nmtlib.workspace_flat_nells_get
     if _newclass:nells = _swig_property(_nmtlib.workspace_flat_nells_get, _nmtlib.workspace_flat_nells_set)
+    __swig_setmethods__["ellcut_x"] = _nmtlib.workspace_flat_ellcut_x_set
+    __swig_getmethods__["ellcut_x"] = _nmtlib.workspace_flat_ellcut_x_get
+    if _newclass:ellcut_x = _swig_property(_nmtlib.workspace_flat_ellcut_x_get, _nmtlib.workspace_flat_ellcut_x_set)
+    __swig_setmethods__["ellcut_y"] = _nmtlib.workspace_flat_ellcut_y_set
+    __swig_getmethods__["ellcut_y"] = _nmtlib.workspace_flat_ellcut_y_get
+    if _newclass:ellcut_y = _swig_property(_nmtlib.workspace_flat_ellcut_y_get, _nmtlib.workspace_flat_ellcut_y_set)
     __swig_setmethods__["fs"] = _nmtlib.workspace_flat_fs_set
     __swig_getmethods__["fs"] = _nmtlib.workspace_flat_fs_get
     if _newclass:fs = _swig_property(_nmtlib.workspace_flat_fs_get, _nmtlib.workspace_flat_fs_set)

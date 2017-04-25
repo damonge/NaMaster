@@ -328,9 +328,11 @@ void fs_alter_alm(nmt_flatsky_info *fs,double fwhm_amin,fcomplex *alm_in,fcomple
   if(window==NULL) nmt_k_function_free(beam);
 }
 
-void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls)
+void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls,
+	       flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y)
 {
   int i1,nmaps_1=1,nmaps_2=1;
+  int *n_cells=my_malloc(fs->n_ell*sizeof(int));
   if(pol_1) nmaps_1=2;
   if(pol_2) nmaps_2=2;
 
@@ -342,11 +344,14 @@ void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_
       fcomplex *alm2=alms_2[i2];
       int index_cl=i2+nmaps_2*i1;
       flouble norm_factor=4*M_PI*M_PI/(fs->lx*fs->ly);
-      for(il=0;il<fs->n_ell;il++)
+      for(il=0;il<fs->n_ell;il++) {
 	cls[index_cl][il]=0;
+	n_cells[il]=0;
+      }
 
 #pragma omp parallel default(none)		\
-  shared(fs,alm1,alm2,index_cl,cls)
+  shared(fs,alm1,alm2,index_cl,cls)		\
+  shared(lmn_x,lmx_x,lmn_y,lmx_y,n_cells)
       {
 	int iy;
 	flouble dkx=2*M_PI/fs->lx;
@@ -356,31 +361,47 @@ void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_
 	for(iy=0;iy<fs->ny;iy++) {
 	  int ix;
 	  flouble ky;
-	  if(2*iy<=fs->ny)
-	    ky=iy*dky;
-	  else
-	    ky=-(fs->ny-iy)*dky;
-	  for(ix=0;ix<=fs->nx/2;ix++) {
-	    flouble kx=ix*dkx;
-	    long index=ix+(fs->nx/2+1)*iy;
-	    flouble kmod=sqrt(kx*kx+ky*ky);
-	    int ik=(int)(kmod*fs->i_dell);
+	  if(2*iy<=fs->ny) ky=iy*dky;
+	  else ky=-(fs->ny-iy)*dky;
+	  if((ky>=lmn_y) && (ky<=lmx_y))
+	    continue;
+	  for(ix=0;ix<fs->nx;ix++) {
+	    int ik,ix_here;
+	    long index;
+	    flouble kmod,kx;
+	    if(2*ix<=fs->nx) {
+	      kx=ix*dkx;
+	      ix_here=ix;
+	    }
+	    else {
+	      kx=-(fs->nx-ix)*dkx;
+	      ix_here=fs->nx-ix;
+	    }
+	    if((kx>=lmn_x) && (kx<=lmx_x))
+	      continue;
+
+	    index=ix_here+(fs->nx/2+1)*iy;
+	    kmod=sqrt(kx*kx+ky*ky);
+	    ik=(int)(kmod*fs->i_dell);
 	    if(ik<fs->n_ell) {
 #pragma omp atomic
 	      cls[index_cl][ik]+=(creal(alm1[index])*creal(alm2[index])+cimag(alm1[index])*cimag(alm2[index]));
+#pragma omp atomic
+	      n_cells[ik]++;
 	    }
 	  }
 	} //end omp for
       } //end omp parallel
 
       for(il=0;il<fs->n_ell;il++) {
-	if(fs->n_cells[il]<=0)
+	if(n_cells[il]<=0)
 	  cls[index_cl][il]=0;
 	else
-	  cls[index_cl][il]*=norm_factor/fs->n_cells[il];
+	  cls[index_cl][il]*=norm_factor/n_cells[il];
       }
     }
   }
+  free(n_cells);
 }
 
 void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls)
@@ -405,7 +426,7 @@ void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,int pol_1
     fs_map2alm(fs,1,2*pol_2,maps_2,alms_2);
   }
 
-  fs_alm2cl(fs,alms_1,alms_2,pol_1,pol_2,cls);
+  fs_alm2cl(fs,alms_1,alms_2,pol_1,pol_2,cls,1.,-1.,1.,-1.);
 
   for(i1=0;i1<nmaps_1;i1++)
     dftw_free(alms_1[i1]);
