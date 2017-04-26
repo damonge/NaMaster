@@ -659,7 +659,6 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
     } //end omp critical
     free(n_cells_thr);
   } //end omp parallel
-
   free(x_out_range);
   free(y_out_range);
 
@@ -688,7 +687,7 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
 	      int index2=ix2+fs->nx*iy2;
 	      int ik2=i_band[index2];
 	      if(ik2>=0) {
-		flouble cdiff=1,sdiff=1,kr=1,mp=1;
+		flouble cdiff=1,sdiff=0,kr=1,mp;
 		int index;
 		int iy=iy1-iy2;
 		int ix=ix1-ix2;
@@ -716,8 +715,7 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
 		  fc[0]=cdiff*mp;
 		  fs[0]=sdiff*mp;
 		  if(pure_any) {
-		    fc[1]=kr*mp;
-		    fs[1]=0;
+		    fc[1]=kr*mp; fs[1]=0;
 		  }
 		  coupling_matrix_thr[ik1+0][ik2+0]+=fc[pe1+pe2]; //TE,TE
 		  coupling_matrix_thr[ik1+0][ik2+1]-=fs[pe1+pe2]; //TE,TB

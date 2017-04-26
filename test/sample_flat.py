@@ -9,11 +9,9 @@ import matplotlib.pyplot as plt
 #Dimensions:
 #First, a flat-sky field is defined by four quantities:
 # - Lx and Ly: the size of the patch in the x and y dimensions (in radians)
-#Lx=72.*np.pi/180; Ly=48.*np.pi/180;
-Lx=60.*np.pi/180; Ly=60.*np.pi/180;
+Lx=72.*np.pi/180; Ly=48.*np.pi/180;
 # - Nx and Ny: the number of pixels in the x and y dimensions
-#Nx=602; Ny=410;
-Nx=512; Ny=512;
+Nx=602; Ny=410;
 
 #Gaussian simulations:
 #pymaster allows you to generate random realizations of both spherical and
@@ -48,7 +46,6 @@ mask[np.where(yarr.flatten()<Ly/16.)]=0; mask[np.where(yarr.flatten()>15*Ly/16.)
 mask=mask.reshape([Ny,Nx])
 #You can also apodize it in the same way you do for full-sky masks:
 mask=nmt.mask_apodization_flat(mask,Lx,Ly,aposize=2.,apotype="C1");
-mask[:,:]=1
 plt.figure(); plt.imshow(mask,interpolation='nearest',origin='lower'); plt.colorbar()
 plt.show()
 
@@ -57,7 +54,7 @@ plt.show()
 #case, you can also pass contaminant templates and flags for E and B purification
 #(see the documentation for more details)
 f0=nmt.NmtFieldFlat(Lx,Ly,mask,[mpt])
-f2=nmt.NmtFieldFlat(Lx,Ly,mask,[mpq,mpu],purify_e=True)
+f2=nmt.NmtFieldFlat(Lx,Ly,mask,[mpq,mpu])
 #If you compute the power spectrum of two fields (without caring for mode coupling),
 #pymaster will return it with at a hard-coded resolution in ell-space determined
 #by the size and number of pixels of the patch.

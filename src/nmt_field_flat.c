@@ -208,7 +208,6 @@ static void nmt_purify_flat(nmt_field_flat *fl)
   //Compute SHT and store in alm_out
   fs_map2alm(fl->fs,1,2,pmap,alm_out);
 
-  /*
   //Compute spin-1 mask
   walm_x_lpower(fl->fs,walm_bak,walm,1);
   fs_alm2map(fl->fs,1,1,wmap,walm);
@@ -284,14 +283,13 @@ static void nmt_purify_flat(nmt_field_flat *fl)
       } //end omp parallel
     }
   }
-  */
 
   for(imap=0;imap<fl->nmaps;imap++) {
     for(ip=0;ip<fl->fs->ny*(fl->fs->nx/2+1);ip++)
       fl->alms[imap][ip]=alm_out[imap][ip];
     //    memcpy(fl->alms[imap],alm_out[imap],fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
   }
-  fs_alm2map(fl->fs,1,2,fl->maps,fl->alms);
+  fs_alm2map(fl->fs,1,2,fl->maps,alm_out);
 
   for(imap=0;imap<fl->nmaps;imap++) {
     dftw_free(pmap0[imap]);
