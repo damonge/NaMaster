@@ -530,7 +530,7 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,
 		if(iy==0)
 		  alms[imp1][index]=(fcomplex)(M_SQRT2*a_re+I*0*a_im);
 		else {
-		  int iyy=ny-iy;	
+		  int iyy=ny-iy;
 		  alms[imp1][index]=(fcomplex)(a_re+I*a_im);
 		  alms[imp1][ix+(nx/2+1)*iyy]=(fcomplex)(a_re-I*a_im);
 		}

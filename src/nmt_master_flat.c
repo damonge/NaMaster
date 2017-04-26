@@ -539,7 +539,8 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
 							      flouble lmn_y,flouble lmx_y)
 {
   int ii;
-  nmt_workspace_flat *w=nmt_workspace_flat_new(1,fl1->nmaps*fl2->nmaps,fl1->fs,bin,lmn_x,lmx_x,lmn_y,lmx_y);
+  nmt_workspace_flat *w=nmt_workspace_flat_new(1,fl1->nmaps*fl2->nmaps,fl1->fs,bin,
+					       lmn_x,lmx_x,lmn_y,lmx_y);
   nmt_flatsky_info *fs=fl1->fs;
   
   gsl_interp_accel *intacc=gsl_interp_accel_alloc();
@@ -699,7 +700,10 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
 		if(w->ncls>1) {
 		  cdiff=cosarr[index1]*cosarr[index2]+sinarr[index1]*sinarr[index2];
 		  sdiff=sinarr[index1]*cosarr[index2]-cosarr[index1]*sinarr[index2];
-		  kr=kmodarr[index2]*inv_k1;
+		  if((index1==0) && (index2==0))
+		    kr=1;
+		  else
+		    kr=kmodarr[index2]*inv_k1;
 		  kr*=kr;
 		}
 		mp=maskprod[index];

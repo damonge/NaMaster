@@ -182,7 +182,9 @@ static void nmt_purify_flat(nmt_field_flat *fl)
     walm_bak[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
     palm[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
     alm_out[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex)); 
-    memcpy(pmap0[imap],fl->maps[imap],fl->npix*sizeof(flouble));
+    for(ip=0;ip<fl->npix;ip++)
+      pmap0[imap][ip]=fl->maps[imap][ip];
+    //    memcpy(pmap0[imap],fl->maps[imap],fl->npix*sizeof(flouble));
   }
 
   if(fl->pure_e)
@@ -196,12 +198,17 @@ static void nmt_purify_flat(nmt_field_flat *fl)
   //Product with spin-0 mask
   for(imap=0;imap<fl->nmaps;imap++) {
     fs_map_product(fl->fs,pmap0[imap],fl->mask,pmap[imap]);
-    memcpy(fl->maps[imap],pmap[imap],fl->npix*sizeof(flouble));
-    memcpy(walm_bak[imap],walm[imap],fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+    for(ip=0;ip<fl->npix;ip++)
+      fl->maps[imap][ip]=pmap[imap][ip];
+    //    memcpy(fl->maps[imap],pmap[imap],fl->npix*sizeof(flouble));
+    for(ip=0;ip<fl->fs->ny*(fl->fs->nx/2+1);ip++)
+      walm_bak[imap][ip]=walm[imap][ip];
+    //    memcpy(walm_bak[imap],walm[imap],fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
   }
   //Compute SHT and store in alm_out
   fs_map2alm(fl->fs,1,2,pmap,alm_out);
 
+  /*
   //Compute spin-1 mask
   walm_x_lpower(fl->fs,walm_bak,walm,1);
   fs_alm2map(fl->fs,1,1,wmap,walm);
@@ -277,9 +284,13 @@ static void nmt_purify_flat(nmt_field_flat *fl)
       } //end omp parallel
     }
   }
+  */
 
-  for(imap=0;imap<fl->nmaps;imap++)
-    memcpy(fl->alms[imap],alm_out[imap],fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+  for(imap=0;imap<fl->nmaps;imap++) {
+    for(ip=0;ip<fl->fs->ny*(fl->fs->nx/2+1);ip++)
+      fl->alms[imap][ip]=alm_out[imap][ip];
+    //    memcpy(fl->alms[imap],alm_out[imap],fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+  }
   fs_alm2map(fl->fs,1,2,fl->maps,fl->alms);
 
   for(imap=0;imap<fl->nmaps;imap++) {

@@ -12,7 +12,7 @@ except AttributeError:
     numpy_include = numpy.get_numpy_include()
 
 
-use_icc=False #Set to True if you compiled libsharp with icc
+use_icc=True #Set to True if you compiled libsharp with icc
 if use_icc :
     libs=['nmt','fftw3','fftw3_omp','sharp','fftpack','c_utils','chealpix','cfitsio','gsl','gslcblas','m','gomp','iomp5']
     extra=['-openmp',]
@@ -23,6 +23,7 @@ else :
 
 _nmtlib = Extension("_nmtlib",
                     ["pymaster/namaster_wrap.c"],
+                    library_dirs=['/usr/local/shared/intel/Compiler/11.1/064/lib/intel64/'],
                     libraries = libs,
                     include_dirs = [numpy_include, "../src/"],
                     extra_compile_args=extra,
