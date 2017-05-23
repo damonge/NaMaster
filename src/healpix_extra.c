@@ -641,7 +641,7 @@ void he_query_disc(int nside,double cth0,double phi,flouble radius,
 }
 
 
-#ifdef _WITH_SHT
+//#ifdef _WITH_SHT
 //HE_SHT
 #define MAX_SHT 32
 
@@ -1373,4 +1373,4 @@ fcomplex **he_map2needlet(he_needlet_params *par,flouble **map,flouble ***nt,
   return alm;
 }
 #endif //_WITH_NEEDLET
-#endif //_WITH_SHT
+//#endif //_WITH_SHT
