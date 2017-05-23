@@ -5,213 +5,7 @@
 #include <sharp_geomhelpers.h>
 #include <sharp.h>
 
-#define MAX_SHT 32
-
-long he_nside2npix(long nside)
-{
-  return 12*nside*nside;
-}
-
-void he_pix2vec_ring(long nside, long ipix, double *vec)
-{
-  pix2vec_ring(nside,ipix,vec);
-}
-
-long he_nalms(int lmax)
-{
-  return ((lmax+1)*(lmax+2))/2;
-}
-
-long he_indexlm(int l,int m,int lmax)
-{
-  if(m>0)
-    return l+m*lmax-(m*(m-1))/2;
-  else
-    return l;
-}
-
-static void sht_wrapper(int spin,int lmax,int nside,int ntrans,flouble **maps,fcomplex **alms,int alm2map)
-{
-  double time=0;
-  sharp_alm_info *alm_info;
-  sharp_geom_info *geom_info;
-#ifdef _SPREC
-  int flags=0;
-#else //_SPREC
-  int flags=SHARP_DP;
-#endif //_SPREC
-
-  sharp_make_triangular_alm_info(lmax,lmax,1,&alm_info);
-  sharp_make_weighted_healpix_geom_info(nside,1,NULL,&geom_info);
-#ifdef _NEW_SHARP
-  sharp_execute(alm2map,spin,0,alm,map,geom_info,alm_info,ntrans,flags,0,&time,NULL);
-#else //_NEW_SHARP
-  sharp_execute(alm2map,spin,alms,maps,geom_info,alm_info,ntrans,flags,&time,NULL);
-#endif //_NEW_SHARP
-  sharp_destroy_geom_info(geom_info);
-  sharp_destroy_alm_info(alm_info);
-}
-
-void he_alm2map(int nside,int lmax,int ntrans,int spin,flouble **maps,fcomplex **alms)
-{
-  int nbatches,nodd,itrans,nmaps=1;
-  if(spin)
-    nmaps=2;
-  nbatches=ntrans/MAX_SHT;
-  nodd=ntrans%MAX_SHT;
-
-  for(itrans=0;itrans<nbatches;itrans++) {
-    sht_wrapper(spin,lmax,nside,MAX_SHT,&(maps[itrans*nmaps*MAX_SHT]),
-		&(alms[itrans*nmaps*MAX_SHT]),SHARP_ALM2MAP);
-  }
-  if(nodd>0) {
-    sht_wrapper(spin,lmax,nside,nodd,&(maps[nbatches*nmaps*MAX_SHT]),
-		&(alms[nbatches*nmaps*MAX_SHT]),SHARP_ALM2MAP);
-  }
-}
-
-void he_map2alm(int nside,int lmax,int ntrans,int spin,flouble **maps,fcomplex **alms,int niter)
-{
-  int nbatches,nodd,itrans,nmaps=1;
-  if(spin)
-    nmaps=2;
-  nbatches=ntrans/MAX_SHT;
-  nodd=ntrans%MAX_SHT;
-
-  for(itrans=0;itrans<nbatches;itrans++) {
-    sht_wrapper(spin,lmax,nside,MAX_SHT,&(maps[itrans*nmaps*MAX_SHT]),
-		&(alms[itrans*nmaps*MAX_SHT]),SHARP_MAP2ALM);
-  }
-  if(nodd>0) {
-    sht_wrapper(spin,lmax,nside,nodd,&(maps[nbatches*nmaps*MAX_SHT]),
-		&(alms[nbatches*nmaps*MAX_SHT]),SHARP_MAP2ALM);
-  }
-
-  if(niter) {
-    int ii,iter;
-    int npix=12*nside*nside;
-    int nalm=he_nalms(lmax);
-    flouble **maps_2=my_malloc(ntrans*nmaps*sizeof(flouble *));
-    fcomplex **alms_2=my_malloc(ntrans*nmaps*sizeof(complex *));
-
-    for(ii=0;ii<ntrans*nmaps;ii++) {
-      maps_2[ii]=my_malloc(npix*sizeof(flouble));
-      alms_2[ii]=my_malloc(nalm*sizeof(fcomplex));
-    }
-
-    for(iter=0;iter<niter;iter++) {
-      //Get new map
-      for(itrans=0;itrans<nbatches;itrans++) {
-	sht_wrapper(spin,lmax,nside,MAX_SHT,&(maps_2[itrans*nmaps*MAX_SHT]),
-		    &(alms[itrans*nmaps*MAX_SHT]),SHARP_ALM2MAP);
-      }
-      if(nodd>0) {
-	sht_wrapper(spin,lmax,nside,nodd,&(maps_2[nbatches*nmaps*MAX_SHT]),
-		    &(alms[nbatches*nmaps*MAX_SHT]),SHARP_ALM2MAP);
-      }
-
-      //Subtract from original map
-      for(ii=0;ii<ntrans*nmaps;ii++) {
-	int ip;
-	for(ip=0;ip<npix;ip++)
-	  maps_2[ii][ip]=maps[ii][ip]-maps_2[ii][ip];
-      }
-
-      //Get alms of difference
-      for(itrans=0;itrans<nbatches;itrans++) {
-	sht_wrapper(spin,lmax,nside,MAX_SHT,&(maps_2[itrans*nmaps*MAX_SHT]),
-		    &(alms_2[itrans*nmaps*MAX_SHT]),SHARP_MAP2ALM);
-      }
-      if(nodd>0) {
-	sht_wrapper(spin,lmax,nside,nodd,&(maps_2[nbatches*nmaps*MAX_SHT]),
-		    &(alms_2[nbatches*nmaps*MAX_SHT]),SHARP_MAP2ALM);
-      }
-
-      //Add to original alm
-      for(ii=0;ii<ntrans*nmaps;ii++) {
-	int ilm;
-	for(ilm=0;ilm<nalm;ilm++)
-	  alms[ii][ilm]+=alms_2[ii][ilm];
-      }
-    }
-
-    for(ii=0;ii<ntrans*nmaps;ii++) {
-      free(maps_2[ii]);
-      free(alms_2[ii]);
-    }
-    free(maps_2);
-    free(alms_2);
-  }
-}
-
-void he_alm2cl(fcomplex **alms_1,fcomplex **alms_2,
-	       int pol_1,int pol_2,
-	       flouble **cls,int lmax)
-{
-  int i1,index_cl;
-  int nmaps_1=1,nmaps_2=1;
-  if(pol_1) nmaps_1=2;
-  if(pol_2) nmaps_2=2;
-
-  index_cl=0;
-  for(i1=0;i1<nmaps_1;i1++) {
-    int i2;
-    fcomplex *alm1=alms_1[i1];
-    for(i2=0;i2<nmaps_2;i2++) {
-      int l;
-      fcomplex *alm2=alms_2[i2];
-      for(l=0;l<=lmax;l++) {
-	int m;
-	cls[index_cl][l]=creal(alm1[he_indexlm(l,0,lmax)])*creal(alm2[he_indexlm(l,0,lmax)]);
-
-	for(m=1;m<=l;m++) {
-	  long index_lm=he_indexlm(l,m,lmax);
-	  cls[index_cl][l]+=2*(creal(alm1[index_lm])*creal(alm2[index_lm])+
-			       cimag(alm1[index_lm])*cimag(alm2[index_lm]));
-	}
-	cls[index_cl][l]/=(2*l+1.);
-      }
-      index_cl++;
-    }
-  }
-}
-
-void he_anafast(flouble **maps_1,flouble **maps_2,
-		int pol_1,int pol_2,flouble **cls,
-		int nside,int lmax,int iter)
-{
-  fcomplex **alms_1,**alms_2;
-  int i1,lmax_here=3*nside-1;
-  int nmaps_1=1, nmaps_2=1;
-  if(pol_1) nmaps_1=2;
-  if(pol_2) nmaps_2=2;
-
-  alms_1=my_malloc(nmaps_1*sizeof(fcomplex *));
-  for(i1=0;i1<nmaps_1;i1++)
-    alms_1[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
-  he_map2alm(nside,lmax,1,2*pol_1,maps_1,alms_1,iter);
-
-  if(maps_1==maps_2)
-    alms_2=alms_1;
-  else {
-    alms_2=my_malloc(nmaps_2*sizeof(fcomplex *));
-    for(i1=0;i1<nmaps_2;i1++)
-      alms_2[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
-    he_map2alm(nside,lmax,1,2*pol_2,maps_2,alms_2,iter);
-  }
-
-  he_alm2cl(alms_1,alms_2,pol_1,pol_2,cls,lmax);
-
-  for(i1=0;i1<nmaps_1;i1++)
-    free(alms_1[i1]);
-  free(alms_1);
-  if(alms_1!=alms_2) {
-    for(i1=0;i1<nmaps_2;i1++)
-      free(alms_2[i1]);
-    free(alms_2);
-  }
-}
-
+//HE_IO
 void he_write_healpix_map(flouble **tmap,int nfields,long nside,char *fname)
 {
   fitsfile *fptr;
@@ -264,37 +58,6 @@ void he_write_healpix_map(flouble **tmap,int nfields,long nside,char *fname)
   free(tunit);
 }
 
-void he_get_file_params(char *fname,long *nside,int *nfields,int *isnest)
-{
-  //////
-  // Reads a healpix map from file fname. The map will be
-  // read from column #nfield. It also returns the map's nside.
-  int status=0,hdutype,nfound;
-  long naxes,*naxis;
-  fitsfile *fptr;
-  char order_in_file[32];
-
-  fits_open_file(&fptr,fname,READONLY,&status);
-  fits_movabs_hdu(fptr,2,&hdutype,&status);
-  fits_read_key_lng(fptr,"NAXIS",&naxes,NULL,&status);
-  naxis=my_malloc(naxes*sizeof(long));
-  fits_read_keys_lng(fptr,"NAXIS",1,naxes,naxis,&nfound,&status);
-  fits_read_key_lng(fptr,"NSIDE",nside,NULL,&status);
-
-  if (fits_read_key(fptr, TSTRING, "ORDERING", order_in_file, NULL, &status)) {
-    report_error(1,"WARNING: Could not find %s keyword in in file %s\n",
-		 "ORDERING",fname);
-  }
-
-  if(!strncmp(order_in_file,"NEST",4))
-    *isnest=1;
-  else
-    *isnest=0;
-  fits_get_num_cols(fptr,nfields,&status);
-  free(naxis);
-  fits_close_file(fptr,&status);
-}
-
 flouble *he_read_healpix_map(char *fname,long *nside,int nfield)
 {
   //////
@@ -317,10 +80,8 @@ flouble *he_read_healpix_map(char *fname,long *nside,int nfield)
   if(npix%naxis[1]!=0)
     report_error(1,"FITS file %s corrupt\n",fname);
 
-  if (fits_read_key(fptr, TSTRING, "ORDERING", order_in_file, NULL, &status)) {
-    report_error(1,"WARNING: Could not find %s keyword in in file %s\n",
-		 "ORDERING",fname);
-  }
+  if (fits_read_key(fptr, TSTRING, "ORDERING", order_in_file, NULL, &status))
+    report_error(1,"WARNING: Could not find %s keyword in in file %s\n","ORDERING",fname);
   if(!strncmp(order_in_file,"NEST",4))
     nested_in_file=1;
 
@@ -355,53 +116,39 @@ flouble *he_read_healpix_map(char *fname,long *nside,int nfield)
   return map_ring;
 }
 
-static double fmodulo (double v1, double v2)
+void he_get_file_params(char *fname,long *nside,int *nfields,int *isnest)
 {
-  if (v1>=0)
-    return (v1<v2) ? v1 : fmod(v1,v2);
-  double tmp=fmod(v1,v2)+v2;
-  return (tmp==v2) ? 0. : tmp;
+  //////
+  // Reads a healpix map from file fname. The map will be
+  // read from column #nfield. It also returns the map's nside.
+  int status=0,hdutype,nfound;
+  long naxes,*naxis;
+  fitsfile *fptr;
+  char order_in_file[32];
+
+  fits_open_file(&fptr,fname,READONLY,&status);
+  fits_movabs_hdu(fptr,2,&hdutype,&status);
+  fits_read_key_lng(fptr,"NAXIS",&naxes,NULL,&status);
+  naxis=my_malloc(naxes*sizeof(long));
+  fits_read_keys_lng(fptr,"NAXIS",1,naxes,naxis,&nfound,&status);
+  fits_read_key_lng(fptr,"NSIDE",nside,NULL,&status);
+
+  if (fits_read_key(fptr, TSTRING, "ORDERING", order_in_file, NULL, &status)) {
+    report_error(1,"WARNING: Could not find %s keyword in in file %s\n",
+		 "ORDERING",fname);
+  }
+
+  if(!strncmp(order_in_file,"NEST",4))
+    *isnest=1;
+  else
+    *isnest=0;
+  fits_get_num_cols(fptr,nfields,&status);
+  free(naxis);
+  fits_close_file(fptr,&status);
 }
 
-static int imodulo (int v1, int v2)
-{ int v=v1%v2; return (v>=0) ? v : v+v2; }
 
-static const double twopi=6.283185307179586476925286766559005768394;
-static const double twothird=2.0/3.0;
-static const double inv_halfpi=0.6366197723675813430755350534900574;
-long he_ang2pix(long nside,double cth,double phi)
-{
-  double ctha=fabs(cth);
-  double tt=fmodulo(phi,twopi)*inv_halfpi; /* in [0,4) */
-
-  if (ctha<=twothird) {/* Equatorial region */
-    double temp1=nside*(0.5+tt);
-    double temp2=nside*cth*0.75;
-    int jp=(int)(temp1-temp2); /* index of  ascending edge line */
-    int jm=(int)(temp1+temp2); /* index of descending edge line */
-    int ir=nside+1+jp-jm; /* ring number counted from cth=2/3 */ /* in {1,2n+1} */
-    int kshift=1-(ir&1); /* kshift=1 if ir even, 0 otherwise */
-    int ip=(jp+jm-nside+kshift+1)/2; /* in {0,4n-1} */
-    ip=imodulo(ip,4*nside);
-
-    return nside*(nside-1)*2 + (ir-1)*4*nside + ip;
-  }
-  else {  /* North & South polar caps */
-    double tp=tt-(int)(tt);
-    double tmp=nside*sqrt(3*(1-ctha));
-    int jp=(int)(tp*tmp); /* increasing edge line index */
-    int jm=(int)((1.0-tp)*tmp); /* decreasing edge line index */
-    int ir=jp+jm+1; /* ring number counted from the closest pole */
-    int ip=(int)(tt*ir); /* in {0,4*ir-1} */
-    ip = imodulo(ip,4*ir);
-
-    if (cth>0)
-      return 2*ir*(ir-1)+ip;
-    else
-      return 12*nside*nside-2*ir*(ir+1)+ip;
-  }
-}
-
+//HE_PIX
 int he_ring_num(long nside,double z)
 {
   //Returns ring index for normalized height z
@@ -524,6 +271,7 @@ void he_nest2ring_inplace(flouble *map_in,long nside)
   shared(map_in,nside,npix,map_out)
   {
     long ip;
+
 #pragma omp for
     for(ip=0;ip<npix;ip++) {
       long iring;
@@ -535,6 +283,127 @@ void he_nest2ring_inplace(flouble *map_in,long nside)
   memcpy(map_in,map_out,npix*sizeof(flouble));
 
   free(map_out);
+}
+
+void he_udgrade(flouble *map_in,long nside_in,
+		flouble *map_out,long nside_out,
+		int nest)
+{
+  long npix_in=he_nside2npix(nside_in);
+  long npix_out=he_nside2npix(nside_out);
+
+  if(nside_in>nside_out) {
+    long ii;
+    long np_ratio=npix_in/npix_out;
+    double i_np_ratio=1./((double)np_ratio);
+    
+    for(ii=0;ii<npix_out;ii++) {
+      int jj;
+      double tot=0;
+
+      if(nest) {
+	for(jj=0;jj<np_ratio;jj++)
+	  tot+=map_in[jj+ii*np_ratio];
+	map_out[ii]=tot*i_np_ratio;
+      }
+      else {
+	long inest_out;
+
+	ring2nest(nside_out,ii,&inest_out);
+	for(jj=0;jj<np_ratio;jj++) {
+	  long iring_in;
+	  
+	  nest2ring(nside_in,jj+np_ratio*inest_out,&iring_in);
+	  tot+=map_in[iring_in];
+	}
+	map_out[ii]=tot*i_np_ratio;
+      }
+    }
+  }
+  else {
+    long ii;
+    long np_ratio=npix_out/npix_in;
+    
+    for(ii=0;ii<npix_in;ii++) {
+      int jj;
+      
+      if(nest) {
+	flouble value=map_in[ii];
+
+	for(jj=0;jj<np_ratio;jj++)
+	  map_out[jj+ii*np_ratio]=value;
+      }
+      else {
+	long inest_in;
+	flouble value=map_in[ii];
+	ring2nest(nside_in,ii,&inest_in);
+	
+	for(jj=0;jj<np_ratio;jj++) {
+	  long iring_out;
+	  
+	  nest2ring(nside_out,jj+inest_in*np_ratio,&iring_out);
+	  map_out[iring_out]=value;
+	}
+      }
+    }
+  }
+}
+
+long he_nside2npix(long nside)
+{
+  return 12*nside*nside;
+}
+
+void he_pix2vec_ring(long nside, long ipix, double *vec)
+{
+  pix2vec_ring(nside,ipix,vec);
+}
+
+static double fmodulo (double v1, double v2)
+{
+  if (v1>=0)
+    return (v1<v2) ? v1 : fmod(v1,v2);
+  double tmp=fmod(v1,v2)+v2;
+  return (tmp==v2) ? 0. : tmp;
+}
+
+static int imodulo (int v1, int v2)
+{ int v=v1%v2; return (v>=0) ? v : v+v2; }
+
+static const double twopi=6.283185307179586476925286766559005768394;
+static const double twothird=2.0/3.0;
+static const double inv_halfpi=0.6366197723675813430755350534900574;
+long he_ang2pix(long nside,double cth,double phi)
+{
+  double ctha=fabs(cth);
+  double tt=fmodulo(phi,twopi)*inv_halfpi; /* in [0,4) */
+
+  if (ctha<=twothird) {/* Equatorial region */
+    double temp1=nside*(0.5+tt);
+    double temp2=nside*cth*0.75;
+    int jp=(int)(temp1-temp2); /* index of  ascending edge line */
+    int jm=(int)(temp1+temp2); /* index of descending edge line */
+    int ir=nside+1+jp-jm; /* ring number counted from cth=2/3 */ /* in {1,2n+1} */
+    int kshift=1-(ir&1); /* kshift=1 if ir even, 0 otherwise */
+    int ip=(jp+jm-nside+kshift+1)/2; /* in {0,4n-1} */
+    ip=imodulo(ip,4*nside);
+
+    return nside*(nside-1)*2 + (ir-1)*4*nside + ip;
+  }
+  else {  /* North & South polar caps */
+    double tp=tt-(int)(tt);
+    double tmp=nside*sqrt(3*(1-ctha));
+    int jp=(int)(tp*tmp); /* increasing edge line index */
+    int jm=(int)((1.0-tp)*tmp); /* decreasing edge line index */
+    int ir=jp+jm+1; /* ring number counted from the closest pole */
+    int ip=(int)(tt*ir); /* in {0,4*ir-1} */
+    ip = imodulo(ip,4*ir);
+
+    if (cth>0)
+      return 2*ir*(ir-1)+ip;
+    else
+      return 12*nside*nside-2*ir*(ir+1)+ip;
+  }
 }
 
 static int nint_he(double n)
@@ -771,67 +640,203 @@ void he_query_disc(int nside,double cth0,double phi,flouble radius,
   *nlist=ilist;
 }
 
-void he_udgrade(flouble *map_in,long nside_in,
-		flouble *map_out,long nside_out,
-		int nest)
+
+#ifdef _WITH_SHT
+//HE_SHT
+#define MAX_SHT 32
+
+long he_nalms(int lmax)
 {
-  long npix_in=he_nside2npix(nside_in);
-  long npix_out=he_nside2npix(nside_out);
+  return ((lmax+1)*(lmax+2))/2;
+}
 
-  if(nside_in>nside_out) {
-    long ii;
-    long np_ratio=npix_in/npix_out;
-    double i_np_ratio=1./((double)np_ratio);
-    
-    for(ii=0;ii<npix_out;ii++) {
-      int jj;
-      double tot=0;
+long he_indexlm(int l,int m,int lmax)
+{
+  if(m>0)
+    return l+m*lmax-(m*(m-1))/2;
+  else
+    return l;
+}
 
-      if(nest) {
-	for(jj=0;jj<np_ratio;jj++)
-	  tot+=map_in[jj+ii*np_ratio];
-	map_out[ii]=tot*i_np_ratio;
+static void sht_wrapper(int spin,int lmax,int nside,int ntrans,flouble **maps,fcomplex **alms,int alm2map)
+{
+  double time=0;
+  sharp_alm_info *alm_info;
+  sharp_geom_info *geom_info;
+#ifdef _SPREC
+  int flags=0;
+#else //_SPREC
+  int flags=SHARP_DP;
+#endif //_SPREC
+
+  sharp_make_triangular_alm_info(lmax,lmax,1,&alm_info);
+  sharp_make_weighted_healpix_geom_info(nside,1,NULL,&geom_info);
+#ifdef _NEW_SHARP
+  sharp_execute(alm2map,spin,0,alm,map,geom_info,alm_info,ntrans,flags,0,&time,NULL);
+#else //_NEW_SHARP
+  sharp_execute(alm2map,spin,alms,maps,geom_info,alm_info,ntrans,flags,&time,NULL);
+#endif //_NEW_SHARP
+  sharp_destroy_geom_info(geom_info);
+  sharp_destroy_alm_info(alm_info);
+}
+
+void he_alm2map(int nside,int lmax,int ntrans,int spin,flouble **maps,fcomplex **alms)
+{
+  int nbatches,nodd,itrans,nmaps=1;
+  if(spin)
+    nmaps=2;
+  nbatches=ntrans/MAX_SHT;
+  nodd=ntrans%MAX_SHT;
+
+  for(itrans=0;itrans<nbatches;itrans++) {
+    sht_wrapper(spin,lmax,nside,MAX_SHT,&(maps[itrans*nmaps*MAX_SHT]),
+		&(alms[itrans*nmaps*MAX_SHT]),SHARP_ALM2MAP);
+  }
+  if(nodd>0) {
+    sht_wrapper(spin,lmax,nside,nodd,&(maps[nbatches*nmaps*MAX_SHT]),
+		&(alms[nbatches*nmaps*MAX_SHT]),SHARP_ALM2MAP);
+  }
+}
+
+void he_map2alm(int nside,int lmax,int ntrans,int spin,flouble **maps,fcomplex **alms,int niter)
+{
+  int nbatches,nodd,itrans,nmaps=1;
+  if(spin)
+    nmaps=2;
+  nbatches=ntrans/MAX_SHT;
+  nodd=ntrans%MAX_SHT;
+
+  for(itrans=0;itrans<nbatches;itrans++) {
+    sht_wrapper(spin,lmax,nside,MAX_SHT,&(maps[itrans*nmaps*MAX_SHT]),
+		&(alms[itrans*nmaps*MAX_SHT]),SHARP_MAP2ALM);
+  }
+  if(nodd>0) {
+    sht_wrapper(spin,lmax,nside,nodd,&(maps[nbatches*nmaps*MAX_SHT]),
+		&(alms[nbatches*nmaps*MAX_SHT]),SHARP_MAP2ALM);
+  }
+
+  if(niter) {
+    int ii,iter;
+    int npix=12*nside*nside;
+    int nalm=he_nalms(lmax);
+    flouble **maps_2=my_malloc(ntrans*nmaps*sizeof(flouble *));
+    fcomplex **alms_2=my_malloc(ntrans*nmaps*sizeof(complex *));
+
+    for(ii=0;ii<ntrans*nmaps;ii++) {
+      maps_2[ii]=my_malloc(npix*sizeof(flouble));
+      alms_2[ii]=my_malloc(nalm*sizeof(fcomplex));
+    }
+
+    for(iter=0;iter<niter;iter++) {
+      //Get new map
+      for(itrans=0;itrans<nbatches;itrans++) {
+	sht_wrapper(spin,lmax,nside,MAX_SHT,&(maps_2[itrans*nmaps*MAX_SHT]),
+		    &(alms[itrans*nmaps*MAX_SHT]),SHARP_ALM2MAP);
       }
-      else {
-	long inest_out;
+      if(nodd>0) {
+	sht_wrapper(spin,lmax,nside,nodd,&(maps_2[nbatches*nmaps*MAX_SHT]),
+		    &(alms[nbatches*nmaps*MAX_SHT]),SHARP_ALM2MAP);
+      }
 
-	ring2nest(nside_out,ii,&inest_out);
-	for(jj=0;jj<np_ratio;jj++) {
-	  long iring_in;
-	  
-	  nest2ring(nside_in,jj+np_ratio*inest_out,&iring_in);
-	  tot+=map_in[iring_in];
+      //Subtract from original map
+      for(ii=0;ii<ntrans*nmaps;ii++) {
+	int ip;
+	for(ip=0;ip<npix;ip++)
+	  maps_2[ii][ip]=maps[ii][ip]-maps_2[ii][ip];
+      }
+
+      //Get alms of difference
+      for(itrans=0;itrans<nbatches;itrans++) {
+	sht_wrapper(spin,lmax,nside,MAX_SHT,&(maps_2[itrans*nmaps*MAX_SHT]),
+		    &(alms_2[itrans*nmaps*MAX_SHT]),SHARP_MAP2ALM);
+      }
+      if(nodd>0) {
+	sht_wrapper(spin,lmax,nside,nodd,&(maps_2[nbatches*nmaps*MAX_SHT]),
+		    &(alms_2[nbatches*nmaps*MAX_SHT]),SHARP_MAP2ALM);
+      }
+
+      //Add to original alm
+      for(ii=0;ii<ntrans*nmaps;ii++) {
+	int ilm;
+	for(ilm=0;ilm<nalm;ilm++)
+	  alms[ii][ilm]+=alms_2[ii][ilm];
+      }
+    }
+
+    for(ii=0;ii<ntrans*nmaps;ii++) {
+      free(maps_2[ii]);
+      free(alms_2[ii]);
+    }
+    free(maps_2);
+    free(alms_2);
+  }
+}
+
+void he_alm2cl(fcomplex **alms_1,fcomplex **alms_2,
+	       int pol_1,int pol_2,
+	       flouble **cls,int lmax)
+{
+  int i1,index_cl;
+  int nmaps_1=1,nmaps_2=1;
+  if(pol_1) nmaps_1=2;
+  if(pol_2) nmaps_2=2;
+
+  index_cl=0;
+  for(i1=0;i1<nmaps_1;i1++) {
+    int i2;
+    fcomplex *alm1=alms_1[i1];
+    for(i2=0;i2<nmaps_2;i2++) {
+      int l;
+      fcomplex *alm2=alms_2[i2];
+      for(l=0;l<=lmax;l++) {
+	int m;
+	cls[index_cl][l]=creal(alm1[he_indexlm(l,0,lmax)])*creal(alm2[he_indexlm(l,0,lmax)]);
+
+	for(m=1;m<=l;m++) {
+	  long index_lm=he_indexlm(l,m,lmax);
+	  cls[index_cl][l]+=2*(creal(alm1[index_lm])*creal(alm2[index_lm])+
+			       cimag(alm1[index_lm])*cimag(alm2[index_lm]));
 	}
-	map_out[ii]=tot*i_np_ratio;
+	cls[index_cl][l]/=(2*l+1.);
       }
+      index_cl++;
     }
   }
-  else {
-    long ii;
-    long np_ratio=npix_out/npix_in;
-    
-    for(ii=0;ii<npix_in;ii++) {
-      int jj;
-      
-      if(nest) {
-	flouble value=map_in[ii];
+}
 
-	for(jj=0;jj<np_ratio;jj++)
-	  map_out[jj+ii*np_ratio]=value;
-      }
-      else {
-	long inest_in;
-	flouble value=map_in[ii];
-	ring2nest(nside_in,ii,&inest_in);
-	
-	for(jj=0;jj<np_ratio;jj++) {
-	  long iring_out;
-	  
-	  nest2ring(nside_out,jj+inest_in*np_ratio,&iring_out);
-	  map_out[iring_out]=value;
-	}
-      }
-    }
+void he_anafast(flouble **maps_1,flouble **maps_2,
+		int pol_1,int pol_2,flouble **cls,
+		int nside,int lmax,int iter)
+{
+  fcomplex **alms_1,**alms_2;
+  int i1,lmax_here=3*nside-1;
+  int nmaps_1=1, nmaps_2=1;
+  if(pol_1) nmaps_1=2;
+  if(pol_2) nmaps_2=2;
+
+  alms_1=my_malloc(nmaps_1*sizeof(fcomplex *));
+  for(i1=0;i1<nmaps_1;i1++)
+    alms_1[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
+  he_map2alm(nside,lmax,1,2*pol_1,maps_1,alms_1,iter);
+
+  if(maps_1==maps_2)
+    alms_2=alms_1;
+  else {
+    alms_2=my_malloc(nmaps_2*sizeof(fcomplex *));
+    for(i1=0;i1<nmaps_2;i1++)
+      alms_2[i1]=my_malloc(he_nalms(lmax_here)*sizeof(fcomplex));
+    he_map2alm(nside,lmax,1,2*pol_2,maps_2,alms_2,iter);
+  }
+
+  he_alm2cl(alms_1,alms_2,pol_1,pol_2,cls,lmax);
+
+  for(i1=0;i1<nmaps_1;i1++)
+    free(alms_1[i1]);
+  free(alms_1);
+  if(alms_1!=alms_2) {
+    for(i1=0;i1<nmaps_2;i1++)
+      free(alms_2[i1]);
+    free(alms_2);
   }
 }
 
@@ -1039,6 +1044,7 @@ fcomplex **he_synalm(int nside,int nmaps,int lmax,flouble **cells,flouble **beam
 }
 
 #ifdef _WITH_NEEDLET
+//HE_NT
 static double func_fx(double x,void *pars)
 {
   return exp(-1./(1.-x*x));
@@ -1047,14 +1053,12 @@ static double func_fx(double x,void *pars)
 static double func_psix(double x,gsl_integration_workspace *w,const gsl_function *f)
 {
   double result,eresult;
-  gsl_integration_qag(f,-1,x,0,HE_NL_INTPREC,1000,GSL_INTEG_GAUSS61,
-		      w,&result,&eresult);
+  gsl_integration_qag(f,-1,x,0,HE_NL_INTPREC,1000,GSL_INTEG_GAUSS61,w,&result,&eresult);
 
   return result*HE_NORM_FT;
 }
 
-static double func_phix(double x,double invB,
-			gsl_integration_workspace *w,const gsl_function *f)
+static double func_phix(double x,double invB,gsl_integration_workspace *w,const gsl_function *f)
 {
   if(x<0)
     report_error(1,"Something went wrong");
@@ -1122,7 +1126,6 @@ he_needlet_params *he_nt_init(flouble b_nt,int nside0,int niter)
     double dlmx=pow(par->b,ii+1+par->jmax_min);
     int lmx=(int)(dlmx)+1;
     int ns=pow(2,(int)(log((double)lmx)/log(2.))+1);
-    //    par->nside_arr[ii]=par->nside0;
     par->nside_arr[ii]=NMT_MAX((NMT_MIN(ns,par->nside0)),HE_NT_NSIDE_MIN);
     par->lmax_arr[ii]=3*par->nside_arr[ii]-1;
   }
@@ -1253,12 +1256,12 @@ fcomplex **he_needlet2map(he_needlet_params *par,flouble **map,flouble ***nt,
     int imap;
 
     //Compute alm's for j-th needlet
-    he_map2alm(0,par->nside_arr[j],par->lmax_arr[j],1,&(nt[j][0]),&(alm_dum[0]),par->niter); 
+    he_map2alm(par->nside_arr[j],par->lmax_arr[j],1,0,&(nt[j][0]),&(alm_dum[0]),par->niter); 
     if(pol) {
       if(input_TEB)
-	he_map2alm(0,par->nside_arr[j],par->lmax_arr[j],2,&(nt[j][1]),&(alm_dum[1]),par->niter);
+	he_map2alm(par->nside_arr[j],par->lmax_arr[j],2,0,&(nt[j][1]),&(alm_dum[1]),par->niter);
       else
-	he_map2alm(2,par->nside_arr[j],par->lmax_arr[j],1,&(nt[j][1]),&(alm_dum[1]),par->niter);
+	he_map2alm(par->nside_arr[j],par->lmax_arr[j],1,2,&(nt[j][1]),&(alm_dum[1]),par->niter);
     }
 
     //Loop over spin components
@@ -1276,12 +1279,12 @@ fcomplex **he_needlet2map(he_needlet_params *par,flouble **map,flouble ***nt,
   }
 
   //Transform total alm back to map
-  he_alm2map(0,par->nside0,l_max,1,&(map[0]),&(alm[0]));
+  he_alm2map(par->nside0,l_max,1,0,&(map[0]),&(alm[0]));
   if(pol) {
     if(output_TEB)
-      he_alm2map(0,par->nside0,l_max,2,&(map[1]),&(alm[1]));
+      he_alm2map(par->nside0,l_max,2,0,&(map[1]),&(alm[1]));
     else
-      he_alm2map(2,par->nside0,l_max,1,&(map[1]),&(alm[1]));
+      he_alm2map(par->nside0,l_max,1,2,&(map[1]),&(alm[1]));
   }
 
   if(!return_alm) {
@@ -1318,12 +1321,12 @@ fcomplex **he_map2needlet(he_needlet_params *par,flouble **map,flouble ***nt,
   }
 
   //SHT
-  he_map2alm(0,par->nside0,l_max,1,&(map[0]),&(alm[0]),par->niter);
+  he_map2alm(par->nside0,l_max,1,0,&(map[0]),&(alm[0]),par->niter);
   if(pol) {
     if(input_TEB)
-      he_map2alm(0,par->nside0,l_max,2,&(map[1]),&(alm[1]),par->niter);
+      he_map2alm(par->nside0,l_max,2,0,&(map[1]),&(alm[1]),par->niter);
     else
-      he_map2alm(2,par->nside0,l_max,1,&(map[1]),&(alm[1]),par->niter);
+      he_map2alm(par->nside0,l_max,1,2,&(map[1]),&(alm[1]),par->niter);
   }
 
   //Iterate over scales
@@ -1348,12 +1351,12 @@ fcomplex **he_map2needlet(he_needlet_params *par,flouble **map,flouble ***nt,
     }
 
     //SHT^-1
-    he_alm2map(0,par->nside_arr[j],par->lmax_arr[j],1,&(nt[j][0]),&(alm_dum[0]));
+    he_alm2map(par->nside_arr[j],par->lmax_arr[j],1,0,&(nt[j][0]),&(alm_dum[0]));
     if(pol) {
       if(output_TEB)
-	he_alm2map(0,par->nside_arr[j],par->lmax_arr[j],2,&(nt[j][1]),&(alm_dum[1]));
+	he_alm2map(par->nside_arr[j],par->lmax_arr[j],2,0,&(nt[j][1]),&(alm_dum[1]));
       else
-	he_alm2map(2,par->nside_arr[j],par->lmax_arr[j],1,&(nt[j][1]),&(alm_dum[1]));
+	he_alm2map(par->nside_arr[j],par->lmax_arr[j],1,2,&(nt[j][1]),&(alm_dum[1]));
     }
   }
 
@@ -1370,3 +1373,4 @@ fcomplex **he_map2needlet(he_needlet_params *par,flouble **map,flouble ***nt,
   return alm;
 }
 #endif //_WITH_NEEDLET
+#endif //_WITH_SHT
