@@ -392,6 +392,23 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
   \end{equation}
   where we the overline $\bar{\,}$ denotes theoretical predictions.
 
+\section{Gaussian covariance matrices}
+  For three scalar fields $a$, $b$, $c$ and $d$, with masks $w^a$, $w^b$, $w^c$ and $w^d$, the covariance matrix element between the coupled pseudo-$C_\ell$ for $(a,b)$ and $(c,d)$ is given by:
+  \begin{equation}
+    \left\langle\Delta\tilde{C}^{ab}_\ell\Delta\tilde{C}^{cd}_{\ell'}\right\rangle=\sum_{mm'}\sum_{{\bf l}_1{\bf l}_2}\left(C^{ac}_{\ell_1}C^{bd}_{\ell_2}W^a_{{\bf l}{\bf l}_1}W^b_{{\bf l}{\bf l}_2}W^c_{{\bf l}{\bf l}_1}W^d_{{\bf l}{\bf l}_2}+C^{ad}_{\ell_1}C^{bc}_{\ell_2}W^a_{{\bf l}{\bf l}_1}W^b_{{\bf l}{\bf l}_2}W^c_{{\bf l}{\bf l}_2}W^d_{{\bf l}{\bf l}_1}\right)
+  \end{equation}
+  Under the approximation $C^{ac}_{\ell_1}C^{bd}_{\ell_2}\rightarrow C^{ac}_{(\ell}C^{bd}_{\ell')}$\footnote{The approximation made by e.g. \cite{2004MNRAS.349..603E,2005MNRAS.360.1262B} is $C^{ac}_{\ell_1}C^{bd}_{\ell_2}\rightarrow \sqrt{C^{ac}_{\ell}C^{ac}_{\ell'}C^{bd}_{\ell}C^{bd}_{\ell'}}$, however this is not possible for possibly-negative cross-correlations, which motivates the arithmetic rather than geometrical mean used here.}, where $X_{(a}Y_{b)}\equiv(X_aY_b+X_bY_a)/2$, this gets simplified to:
+  \begin{equation}
+    \left\langle\Delta\tilde{C}^{ab}_\ell\Delta\tilde{C}^{cd}_{\ell'}\right\rangle\simeq
+    C^{ac}_{(\ell}C^{bd}_{\ell')}\,\Xi_{\ell\ell'}(w^aw^c,w^bw^d)+C^{ad}_{(\ell}C^{bc}_{\ell')}\,\Xi_{\ell\ell'}(w^aw^d,w^bw^c).
+  \end{equation}
+  Here:
+  \begin{equation}
+    \Xi_{\ell\ell'}(\phi,\psi)\equiv\sum_{\ell_1}\frac{2\ell_1+1}{4\pi}\wtj{\ell}{\ell'}{\ell_1}{0}{0}{0}^2C^{\phi\psi}_{\ell_1}
+  \end{equation}
+
+
+
 \section{Flat-sky}
   \subsection{Fourier transforms}
     In the flat sky we will write the directional vector $\nv$ as ${\bf x}$. Let ${\bf a}({\bf x})$ be a spin-$s_a$ quantity. Under the approximation $\sin\theta\sim1$, $\Delta\theta\rightarrow \Delta x$, $\Delta\varphi\rightarrow\Delta y$, the differential operator $\eth$ now takes the form:
@@ -699,6 +716,8 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
  \bibitem{2017MNRAS.465.1847E} Elsner, F., Leistedt, B., \& Peiris, H.~V.\ 2017, \mnras, 465, 1847 
  \bibitem{2003ApJS..148..161K} Kogut, A., Spergel, D.~N., Barnes, C., et al.\ 2003, \apjs, 148, 161 
  \bibitem{2016arXiv161204664A} Asgari, M., Taylor, A., Joachimi, B., \& Kitching, T.~D.\ 2016, arXiv:1612.04664 
+ \bibitem{2004MNRAS.349..603E} Efstathiou, G.\ 2004, \mnras, 349, 603
+ \bibitem{2005MNRAS.360.1262B} Brown, M.~L., Castro, P.~G., \& Taylor, A.~N.\ 2005, \mnras, 360, 1262 
 \end{thebibliography}
 
 \end{document}
