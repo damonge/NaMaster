@@ -49,7 +49,7 @@ nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
   flouble dky=2*M_PI/ly;
   flouble kmax_x=dkx*(nx/2);
   flouble kmax_y=dky*(ny/2);
-  double dk=NMT_MAX(dkx,dky);
+  double dk=NMT_MIN(dkx,dky);
   double kmax=NMT_MAX(kmax_y,kmax_x);
   fs->dell=N_DELL*dk;
   fs->i_dell=1./fs->dell;
@@ -175,14 +175,16 @@ static void nmt_purify_flat(nmt_field_flat *fl)
   fcomplex **palm=my_malloc(fl->nmaps*sizeof(fcomplex *));
   fcomplex **alm_out=my_malloc(fl->nmaps*sizeof(fcomplex *));
   for(imap=0;imap<fl->nmaps;imap++) {
+    pmap0[imap]=dftw_malloc(fl->npix*sizeof(flouble));
+    pmap[imap]=dftw_malloc(fl->npix*sizeof(flouble));
+    wmap[imap]=dftw_malloc(fl->npix*sizeof(flouble));
     walm[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
     walm_bak[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
     palm[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
-    pmap[imap]=dftw_malloc(fl->npix*sizeof(flouble));
-    pmap0[imap]=dftw_malloc(fl->npix*sizeof(flouble));
-    wmap[imap]=dftw_malloc(fl->npix*sizeof(flouble));
-    memcpy(pmap0[imap],fl->maps[imap],fl->npix*sizeof(flouble));
-    alm_out[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+    alm_out[imap]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex)); 
+    for(ip=0;ip<fl->npix;ip++)
+      pmap0[imap][ip]=fl->maps[imap][ip];
+    //    memcpy(pmap0[imap],fl->maps[imap],fl->npix*sizeof(flouble));
   }
 
   if(fl->pure_e)
@@ -196,8 +198,12 @@ static void nmt_purify_flat(nmt_field_flat *fl)
   //Product with spin-0 mask
   for(imap=0;imap<fl->nmaps;imap++) {
     fs_map_product(fl->fs,pmap0[imap],fl->mask,pmap[imap]);
-    memcpy(fl->maps[imap],pmap[imap],fl->npix*sizeof(flouble));
-    memcpy(walm_bak[imap],walm[imap],fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+    for(ip=0;ip<fl->npix;ip++)
+      fl->maps[imap][ip]=pmap[imap][ip];
+    //    memcpy(fl->maps[imap],pmap[imap],fl->npix*sizeof(flouble));
+    for(ip=0;ip<fl->fs->ny*(fl->fs->nx/2+1);ip++)
+      walm_bak[imap][ip]=walm[imap][ip];
+    //    memcpy(walm_bak[imap],walm[imap],fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
   }
   //Compute SHT and store in alm_out
   fs_map2alm(fl->fs,1,2,pmap,alm_out);
@@ -278,21 +284,24 @@ static void nmt_purify_flat(nmt_field_flat *fl)
     }
   }
 
-  for(imap=0;imap<fl->nmaps;imap++)
-    memcpy(fl->alms[imap],alm_out[imap],fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
-  fs_alm2map(fl->fs,1,2,fl->maps,fl->alms);
+  for(imap=0;imap<fl->nmaps;imap++) {
+    for(ip=0;ip<fl->fs->ny*(fl->fs->nx/2+1);ip++)
+      fl->alms[imap][ip]=alm_out[imap][ip];
+    //    memcpy(fl->alms[imap],alm_out[imap],fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+  }
+  fs_alm2map(fl->fs,1,2,fl->maps,alm_out);
 
   for(imap=0;imap<fl->nmaps;imap++) {
     dftw_free(pmap0[imap]);
     dftw_free(pmap[imap]);
     dftw_free(wmap[imap]);
-    dftw_free(palm[imap]);
     dftw_free(walm[imap]);
     dftw_free(walm_bak[imap]);
+    dftw_free(palm[imap]);
     dftw_free(alm_out[imap]);
   }
   free(pmap0);
-  free(pmap0);
+  free(pmap);
   free(wmap);
   free(walm);
   free(walm_bak);

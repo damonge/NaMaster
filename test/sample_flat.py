@@ -3,14 +3,15 @@ import healpy as hp
 import pymaster as nmt
 import matplotlib.pyplot as plt
 
+
 #This script describes the functionality of the flat-sky version of pymaster
 
 #Dimensions:
 #First, a flat-sky field is defined by four quantities:
 # - Lx and Ly: the size of the patch in the x and y dimensions (in radians)
-Lx=Ly=60.*np.pi/180;
+Lx=72.*np.pi/180; Ly=48.*np.pi/180;
 # - Nx and Ny: the number of pixels in the x and y dimensions
-Nx=Ny=512
+Nx=602; Ny=410;
 
 #Gaussian simulations:
 #pymaster allows you to generate random realizations of both spherical and
@@ -53,7 +54,7 @@ plt.show()
 #case, you can also pass contaminant templates and flags for E and B purification
 #(see the documentation for more details)
 f0=nmt.NmtFieldFlat(Lx,Ly,mask,[mpt])
-f2=nmt.NmtFieldFlat(Lx,Ly,mask,[mpq,mpu])
+f2=nmt.NmtFieldFlat(Lx,Ly,mask,[mpq,mpu],purify_b=True)
 #If you compute the power spectrum of two fields (without caring for mode coupling),
 #pymaster will return it with at a hard-coded resolution in ell-space determined
 #by the size and number of pixels of the patch.

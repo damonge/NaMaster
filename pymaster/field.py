@@ -105,14 +105,14 @@ class NmtFieldFlat(object) :
         self.nx=shape_2D[1]
 
         #Flatten mask
-        msk=mask.flatten()
+        msk=(mask.astype(np.float64)).flatten()
 
         #Flatten maps
         mps=[]
         for m in maps :
             if np.shape(m)!=shape_2D :
                 KeyError("Mask and maps don't have the same shape")
-            mps.append(m.flatten())
+            mps.append((m.astype(np.float64)).flatten())
         mps=np.array(mps)
 
         #Flatten templates
@@ -123,7 +123,7 @@ class NmtFieldFlat(object) :
                 if len(t)!=nmaps :
                     KeyError("Maps and templates should have the same number of maps")
                 for m in t :
-                    tmp.append(m.flatten())
+                    tmp.append((m.astype(np.float64)).flatten())
                 tmps.append(tmp)
             tmps=np.array(tmps)
 
