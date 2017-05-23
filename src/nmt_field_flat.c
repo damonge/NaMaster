@@ -49,7 +49,7 @@ nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
   flouble dky=2*M_PI/ly;
   flouble kmax_x=dkx*(nx/2);
   flouble kmax_y=dky*(ny/2);
-  double dk=NMT_MAX(dkx,dky);
+  double dk=NMT_MIN(dkx,dky);
   double kmax=NMT_MAX(kmax_y,kmax_x);
   fs->dell=N_DELL*dk;
   fs->i_dell=1./fs->dell;

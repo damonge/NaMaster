@@ -54,7 +54,7 @@ plt.show()
 #case, you can also pass contaminant templates and flags for E and B purification
 #(see the documentation for more details)
 f0=nmt.NmtFieldFlat(Lx,Ly,mask,[mpt])
-f2=nmt.NmtFieldFlat(Lx,Ly,mask,[mpq,mpu])
+f2=nmt.NmtFieldFlat(Lx,Ly,mask,[mpq,mpu],purify_b=True)
 #If you compute the power spectrum of two fields (without caring for mode coupling),
 #pymaster will return it with at a hard-coded resolution in ell-space determined
 #by the size and number of pixels of the patch.
