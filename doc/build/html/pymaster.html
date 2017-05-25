@@ -598,7 +598,7 @@
 <dd><p>NmtWorkspaceFlat objects are used to compute and store the coupling matrix associated with an incomplete sky coverage, and used in the flat-sky version of the MASTER algorithm. When initialized, this object is practically empty. The information describing the coupling matrix must be computed or read from a file afterwards.</p>
 <dl class="method">
 <dt id="pymaster.workspaces.NmtWorkspaceFlat.compute_coupling_matrix">
-<code class="descname">compute_coupling_matrix</code><span class="sig-paren">(</span><em>fl1</em>, <em>fl2</em>, <em>bins</em>, <em>nell_rebin=2</em>, <em>method=203</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.workspaces.NmtWorkspaceFlat.compute_coupling_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="descname">compute_coupling_matrix</code><span class="sig-paren">(</span><em>fl1, fl2, bins, nell_rebin=2, method=203, ell_cut_x=[1.0, -1.0], ell_cut_y=[1.0, -1.0]</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.workspaces.NmtWorkspaceFlat.compute_coupling_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes coupling matrix associated with the cross-power spectrum of two NmtFieldFlats and an NmtBinFlat binning scheme.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -608,6 +608,9 @@
 <li><strong>fl1</strong><strong>,</strong><strong>fl2</strong> (<a class="reference internal" href="#pymaster.field.NmtFieldFlat" title="pymaster.field.NmtFieldFlat"><em>NmtFieldFlat</em></a>) &#8211; fields to correlate</li>
 <li><strong>bin</strong> (<a class="reference internal" href="#pymaster.bins.NmtBinFlat" title="pymaster.bins.NmtBinFlat"><em>NmtBinFlat</em></a>) &#8211; binning scheme</li>
 <li><strong>nell_rebin</strong> (<em>int</em>) &#8211; number of sub-intervals into which the base k-intervals will be sub-sampled to compute the coupling matrix</li>
+<li><strong>method</strong> (<em>int</em>) &#8211; algorithm to compute the coupling matrix (only 203 has been fully validated so far).</li>
+<li><strong>ell_cut_x</strong> (<em>float</em><em>(</em><em>2</em><em>)</em><em></em>) &#8211; remove all modes with ell_x in the interval [ell_cut_x[0],ell_cut_x[1]] from the calculation.</li>
+<li><strong>ell_cut_y</strong> (<em>float</em><em>(</em><em>2</em><em>)</em><em></em>) &#8211; remove all modes with ell_y in the interval [ell_cut_y[0],ell_cut_y[1]] from the calculation.</li>
 </ul>
 </td>
 </tr>
@@ -725,15 +728,21 @@
 
 <dl class="function">
 <dt id="pymaster.workspaces.compute_coupled_cell_flat">
-<code class="descclassname">pymaster.workspaces.</code><code class="descname">compute_coupled_cell_flat</code><span class="sig-paren">(</span><em>f1</em>, <em>f2</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.workspaces.compute_coupled_cell_flat" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pymaster.workspaces.</code><code class="descname">compute_coupled_cell_flat</code><span class="sig-paren">(</span><em>f1, f2, ell_cut_x=[1.0, -1.0], ell_cut_y=[1.0, -1.0]</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.workspaces.compute_coupled_cell_flat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the angular power spectra of two masked flat-sky fields (f1 and f2) without aiming to deconvolve the mode-coupling matrix. Effectively, this is equivalent to computing the map FFTs and averaging over rings of wavenumber.  The returned power spectrum is defined at the multipoles returned by the method <code class="xref py py-func docutils literal"><span class="pre">get_ell_sampling()</span></code> of either f1 or f2.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>f1</strong><strong>,</strong><strong>f2</strong> (<a class="reference internal" href="#pymaster.field.NmtFieldFlat" title="pymaster.field.NmtFieldFlat"><em>NmtFieldFlat</em></a>) &#8211; fields to correlate</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>f1</strong><strong>,</strong><strong>f2</strong> (<a class="reference internal" href="#pymaster.field.NmtFieldFlat" title="pymaster.field.NmtFieldFlat"><em>NmtFieldFlat</em></a>) &#8211; fields to correlate</li>
+<li><strong>ell_cut_x</strong> (<em>float</em><em>(</em><em>2</em><em>)</em><em></em>) &#8211; remove all modes with ell_x in the interval [ell_cut_x[0],ell_cut_x[1]] from the calculation.</li>
+<li><strong>ell_cut_y</strong> (<em>float</em><em>(</em><em>2</em><em>)</em><em></em>) &#8211; remove all modes with ell_y in the interval [ell_cut_y[0],ell_cut_y[1]] from the calculation.</li>
+</ul>
+</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array of coupled power spectra</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">array of coupled power spectra</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -771,7 +780,7 @@
 
 <dl class="function">
 <dt id="pymaster.workspaces.compute_full_master_flat">
-<code class="descclassname">pymaster.workspaces.</code><code class="descname">compute_full_master_flat</code><span class="sig-paren">(</span><em>f1</em>, <em>f2</em>, <em>b</em>, <em>cl_noise=None</em>, <em>cl_guess=None</em>, <em>ells_guess=None</em>, <em>workspace=None</em>, <em>nell_rebin=2</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.workspaces.compute_full_master_flat" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pymaster.workspaces.</code><code class="descname">compute_full_master_flat</code><span class="sig-paren">(</span><em>f1, f2, b, cl_noise=None, cl_guess=None, ells_guess=None, workspace=None, nell_rebin=2, ell_cut_x=[1.0, -1.0], ell_cut_y=[1.0, -1.0]</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.workspaces.compute_full_master_flat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the full MASTER estimate of the power spectrum of two flat-sky fields (f1 and f2). This is equivalent to successively calling:</p>
 <ul class="simple">
 <li><code class="xref py py-func docutils literal"><span class="pre">pymaster.NmtWorkspaceFlat.compute_coupling_matrix()</span></code></li>
@@ -791,6 +800,8 @@
 <li><strong>ells_guess</strong> &#8211; multipoles at which cl_guess is defined.</li>
 <li><strong>workspace</strong> (<a class="reference internal" href="#pymaster.workspaces.NmtWorkspaceFlat" title="pymaster.workspaces.NmtWorkspaceFlat"><em>NmtWorkspaceFlat</em></a>) &#8211; object containing the mode-coupling matrix associated with an incomplete sky coverage. If provided, the function will skip the computation of the mode-coupling matrix and use the information encoded in this object.</li>
 <li><strong>nell_rebin</strong> (<em>int</em>) &#8211; number of sub-intervals into which the base k-intervals will be sub-sampled to compute the coupling matrix</li>
+<li><strong>ell_cut_x</strong> (<em>float</em><em>(</em><em>2</em><em>)</em><em></em>) &#8211; remove all modes with ell_x in the interval [ell_cut_x[0],ell_cut_x[1]] from the calculation.</li>
+<li><strong>ell_cut_y</strong> (<em>float</em><em>(</em><em>2</em><em>)</em><em></em>) &#8211; remove all modes with ell_y in the interval [ell_cut_y[0],ell_cut_y[1]] from the calculation.</li>
 </ul>
 </td>
 </tr>
@@ -824,7 +835,7 @@
 
 <dl class="function">
 <dt id="pymaster.workspaces.deprojection_bias_flat">
-<code class="descclassname">pymaster.workspaces.</code><code class="descname">deprojection_bias_flat</code><span class="sig-paren">(</span><em>f1</em>, <em>f2</em>, <em>ells</em>, <em>cls_guess</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.workspaces.deprojection_bias_flat" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">pymaster.workspaces.</code><code class="descname">deprojection_bias_flat</code><span class="sig-paren">(</span><em>f1, f2, ells, cls_guess, ell_cut_x=[1.0, -1.0], ell_cut_y=[1.0, -1.0]</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.workspaces.deprojection_bias_flat" title="Permalink to this definition">¶</a></dt>
 <dd><p>Computes the bias associated to contaminant removal to the cross-pseudo-Cl of two flat-sky fields. The returned power spectrum is defined at the multipoles returned by the method <code class="xref py py-func docutils literal"><span class="pre">get_ell_sampling()</span></code> of either f1 or f2.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -834,10 +845,37 @@
 <li><strong>f1</strong><strong>,</strong><strong>f2</strong> (<a class="reference internal" href="#pymaster.field.NmtFieldFlat" title="pymaster.field.NmtFieldFlat"><em>NmtFieldFlat</em></a>) &#8211; fields to correlate</li>
 <li><strong>ells</strong> &#8211; list of multipoles on which the proposal power spectra are defined</li>
 <li><strong>cls_guess</strong> &#8211; set of power spectra corresponding to a best-guess of the true power spectra of f1 and f2.</li>
+<li><strong>ell_cut_x</strong> (<em>float</em><em>(</em><em>2</em><em>)</em><em></em>) &#8211; remove all modes with ell_x in the interval [ell_cut_x[0],ell_cut_x[1]] from the calculation.</li>
+<li><strong>ell_cut_y</strong> (<em>float</em><em>(</em><em>2</em><em>)</em><em></em>) &#8211; remove all modes with ell_y in the interval [ell_cut_y[0],ell_cut_y[1]] from the calculation.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">deprojection bias power spectra.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymaster.workspaces.gaussian_covariance">
+<code class="descclassname">pymaster.workspaces.</code><code class="descname">gaussian_covariance</code><span class="sig-paren">(</span><em>wa</em>, <em>wb</em>, <em>cla1b1</em>, <em>cla1b2</em>, <em>cla2b1</em>, <em>cla2b2</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.workspaces.gaussian_covariance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes Gaussian covariance matrix for power spectra computed with workspaces wa and wb.
+The description above assumes that wa was used to compute the cross correlation of two fields labelled a1 and a2
+(and b1, b2 for wb).
+Note that all fields should have the same resolution, and the predicted input power spectra should be defined
+for all ells &lt;=3*nside (where nside is the HEALPix resolution parameter).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>wa</strong><strong>,</strong><strong>wb</strong> (<a class="reference internal" href="#pymaster.workspaces.NmtWorkspace" title="pymaster.workspaces.NmtWorkspace"><em>NmtWorkspace</em></a>) &#8211; workspaces used to compute pseudo-Cl estimators of power spectra.</li>
+<li><strong>cla1b1</strong> &#8211; prediction for the cross-power spectrum between a1 and b1.</li>
+<li><strong>cla1b2</strong> &#8211; prediction for the cross-power spectrum between a1 and b2.</li>
+<li><strong>cla2b1</strong> &#8211; prediction for the cross-power spectrum between a2 and b1.</li>
+<li><strong>cla2b2</strong> &#8211; prediction for the cross-power spectrum between a2 and b2.</li>
+</ul>
 </td>
 </tr>
 </tbody>

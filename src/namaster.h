@@ -196,6 +196,9 @@ nmt_workspace_flat *nmt_compute_power_spectra_flat(nmt_field_flat *fl1,nmt_field
 typedef struct {
   int lmax;
   int ncls;
+  int nside;
+  flouble *mask1;
+  flouble *mask2;
   flouble *pcl_masks;
   flouble **coupling_matrix_unbinned;
   nmt_binning_scheme *bin;
@@ -214,5 +217,8 @@ void nmt_compute_coupled_cell(nmt_field *fl1,nmt_field *fl2,flouble **cl_out,int
 nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,
 					 nmt_binning_scheme *bin,nmt_workspace *w0,
 					 flouble **cl_noise,flouble **cl_proposal,flouble **cl_out);
+void nmt_compute_gaussian_covariance(nmt_workspace *wa,nmt_workspace *wb,int nl,
+				     flouble *cla1b1,flouble *cla1b2,flouble *cla2b1,flouble *cla2b2,
+				     int n_el_covar,double *covar_out);
 
 #endif //_NAMASTER_H_

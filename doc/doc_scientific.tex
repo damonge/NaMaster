@@ -404,8 +404,19 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
   \end{equation}
   Here:
   \begin{equation}
-    \Xi_{\ell\ell'}(\phi,\psi)\equiv\sum_{\ell_1}\frac{2\ell_1+1}{4\pi}\wtj{\ell}{\ell'}{\ell_1}{0}{0}{0}^2C^{\phi\psi}_{\ell_1}
+    \Xi_{\ell\ell'}(\phi,\psi)\equiv\sum_{\ell_1}\frac{2\ell_1+1}{4\pi}\wtj{\ell}{\ell'}{\ell_1}{0}{0}{0}^2C^{\phi\psi}_{\ell_1}.
   \end{equation}
+  
+  Finally, we can compute the covariance of the coupled bandpowers by averaging within each bandpower:
+  \begin{equation}
+    {\rm Cov}^{(ab),(cd)}_{kk'}\equiv\left\langle\Delta\,_v\tilde{\sf B}^{ab}_k\Delta\,_v\tilde{\sf B}^{cd}_{k'}\right\rangle=\sum_{\ell\in k}\sum_{\ell'\in k'}w_k^\ell w_{k'}^{\ell'}\left\langle\Delta\tilde{C}^{ab}_\ell\Delta\tilde{C}^{cd}_{\ell'}\right\rangle,
+  \end{equation}
+  and the covariance of the uncoupled bandpowers is given by the linear transformation:
+  \begin{equation}
+    \left\langle\left(\Delta\,_v\hat{\sf B}^{ab}\right)\left(\Delta\,_v\hat{\sf B}^{cd}\right)^T\right\rangle=({\cal M}_{ab})^{-1}{\rm Cov}^{(ab),(cd)}\left(({\cal M}_{cd})^{-1}\right)^T
+  \end{equation}
+
+
 
 
 

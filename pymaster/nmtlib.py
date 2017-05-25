@@ -541,6 +541,15 @@ class workspace(_object):
     __swig_setmethods__["ncls"] = _nmtlib.workspace_ncls_set
     __swig_getmethods__["ncls"] = _nmtlib.workspace_ncls_get
     if _newclass:ncls = _swig_property(_nmtlib.workspace_ncls_get, _nmtlib.workspace_ncls_set)
+    __swig_setmethods__["nside"] = _nmtlib.workspace_nside_set
+    __swig_getmethods__["nside"] = _nmtlib.workspace_nside_get
+    if _newclass:nside = _swig_property(_nmtlib.workspace_nside_get, _nmtlib.workspace_nside_set)
+    __swig_setmethods__["mask1"] = _nmtlib.workspace_mask1_set
+    __swig_getmethods__["mask1"] = _nmtlib.workspace_mask1_get
+    if _newclass:mask1 = _swig_property(_nmtlib.workspace_mask1_get, _nmtlib.workspace_mask1_set)
+    __swig_setmethods__["mask2"] = _nmtlib.workspace_mask2_set
+    __swig_getmethods__["mask2"] = _nmtlib.workspace_mask2_get
+    if _newclass:mask2 = _swig_property(_nmtlib.workspace_mask2_get, _nmtlib.workspace_mask2_set)
     __swig_setmethods__["pcl_masks"] = _nmtlib.workspace_pcl_masks_set
     __swig_getmethods__["pcl_masks"] = _nmtlib.workspace_pcl_masks_get
     if _newclass:pcl_masks = _swig_property(_nmtlib.workspace_pcl_masks_get, _nmtlib.workspace_pcl_masks_set)
@@ -601,6 +610,10 @@ compute_coupled_cell = _nmtlib.compute_coupled_cell
 def compute_power_spectra(*args):
   return _nmtlib.compute_power_spectra(*args)
 compute_power_spectra = _nmtlib.compute_power_spectra
+
+def compute_gaussian_covariance(*args):
+  return _nmtlib.compute_gaussian_covariance(*args)
+compute_gaussian_covariance = _nmtlib.compute_gaussian_covariance
 
 def get_nell_list(*args):
   return _nmtlib.get_nell_list(*args)
@@ -705,6 +718,10 @@ comp_deproj_bias = _nmtlib.comp_deproj_bias
 def comp_deproj_bias_flat(*args):
   return _nmtlib.comp_deproj_bias_flat(*args)
 comp_deproj_bias_flat = _nmtlib.comp_deproj_bias_flat
+
+def comp_gaussian_covariance(*args):
+  return _nmtlib.comp_gaussian_covariance(*args)
+comp_gaussian_covariance = _nmtlib.comp_gaussian_covariance
 
 def comp_pspec_coupled(*args):
   return _nmtlib.comp_pspec_coupled(*args)
