@@ -24,6 +24,7 @@ We recommend that users read NaMaster's :download:`scientific documentation <../
    sample_workspaces
    sample_pureb
    sample_flat
+   sample_covariance
 
 
 Indices and tables

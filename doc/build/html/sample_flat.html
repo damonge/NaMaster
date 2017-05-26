@@ -145,14 +145,15 @@
 <span class="kn">import</span> <span class="nn">pymaster</span> <span class="kn">as</span> <span class="nn">nmt</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 
+
 <span class="c1">#This script describes the functionality of the flat-sky version of pymaster</span>
 
 <span class="c1">#Dimensions:</span>
 <span class="c1">#First, a flat-sky field is defined by four quantities:</span>
 <span class="c1"># - Lx and Ly: the size of the patch in the x and y dimensions (in radians)</span>
-<span class="n">Lx</span><span class="o">=</span><span class="n">Ly</span><span class="o">=</span><span class="mf">60.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">;</span>
+<span class="n">Lx</span><span class="o">=</span><span class="mf">72.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">;</span> <span class="n">Ly</span><span class="o">=</span><span class="mf">48.</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">;</span>
 <span class="c1"># - Nx and Ny: the number of pixels in the x and y dimensions</span>
-<span class="n">Nx</span><span class="o">=</span><span class="n">Ny</span><span class="o">=</span><span class="mi">512</span>
+<span class="n">Nx</span><span class="o">=</span><span class="mi">602</span><span class="p">;</span> <span class="n">Ny</span><span class="o">=</span><span class="mi">410</span><span class="p">;</span>
 
 <span class="c1">#Gaussian simulations:</span>
 <span class="c1">#pymaster allows you to generate random realizations of both spherical and</span>
@@ -195,7 +196,7 @@
 <span class="c1">#case, you can also pass contaminant templates and flags for E and B purification</span>
 <span class="c1">#(see the documentation for more details)</span>
 <span class="n">f0</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">NmtFieldFlat</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span><span class="n">Ly</span><span class="p">,</span><span class="n">mask</span><span class="p">,[</span><span class="n">mpt</span><span class="p">])</span>
-<span class="n">f2</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">NmtFieldFlat</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span><span class="n">Ly</span><span class="p">,</span><span class="n">mask</span><span class="p">,[</span><span class="n">mpq</span><span class="p">,</span><span class="n">mpu</span><span class="p">])</span>
+<span class="n">f2</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">NmtFieldFlat</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span><span class="n">Ly</span><span class="p">,</span><span class="n">mask</span><span class="p">,[</span><span class="n">mpq</span><span class="p">,</span><span class="n">mpu</span><span class="p">],</span><span class="n">purify_b</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="c1">#If you compute the power spectrum of two fields (without caring for mode coupling),</span>
 <span class="c1">#pymaster will return it with at a hard-coded resolution in ell-space determined</span>
 <span class="c1">#by the size and number of pixels of the patch.</span>
