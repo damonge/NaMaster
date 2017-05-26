@@ -10,6 +10,7 @@ and a number of functions
 - :func:`pymaster.workspaces.deprojection_bias`
 - :func:`pymaster.workspaces.compute_coupled_cell`
 - :func:`pymaster.workspaces.compute_full_master`
+- :func:`pymaster.workspaces.gaussian_covariance`
 - :func:`pymaster.utils.mask_apodization`
 - :func:`pymaster.utils.synfast_spherical`
 
