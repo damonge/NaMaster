@@ -10,6 +10,13 @@ libsharp is a C library for spherical harmonic transforms. Follow these steps to
 4. Create three directories: `bin`, `lib` and `include` in your home directory (unless they're already there). E.g. `mkdir $HOME/bin` etc.
 5. Move the contents of `auto/bin`, `auto/lib` and `auto/include` to the corresponding folders you just created in your home directory.
 
+Note that you should also have HEALPix installed. At NERSC, this is installed in 
+`/global/common/cori/contrib/hpcosmo/hpcports_gnu-4.0/healpix-3.30.1_62c0405b-4.0/`
+so just make sure this is included in your paths.
+
+It's also useful to load anaconda 2.7 (e.g. `module load python/2.7-anaconda`).
+
+
 ## 2 Edit your .bashrc.ext
 From your home directory, open the file `.bashrc.ext` with your favourite text editor and add the following lines at the end of it:
 ```
