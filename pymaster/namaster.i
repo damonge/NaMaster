@@ -486,7 +486,7 @@ void comp_deproj_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
   free(cl_guess);
 }
 
-void comp_gaussian_covariance(nmt_workspace *wa,nmt_workspace *wb,
+void comp_gaussian_covariance(nmt_covar_workspace *cw,
 			      int nell11,double *c11,
 			      int nell12,double *c12,
 			      int nell21,double *c21,
@@ -496,8 +496,7 @@ void comp_gaussian_covariance(nmt_workspace *wa,nmt_workspace *wb,
   assert(nell11==nell12);
   assert(nell11==nell21);
   assert(nell11==nell22);
-  assert(ndout==wa->ncls*wa->bin->n_bands*wb->ncls*wb->bin->n_bands);
-  nmt_compute_gaussian_covariance(wa,wb,nell11,c11,c12,c21,c22,ndout,dout);
+  nmt_compute_gaussian_covariance(cw,c11,c12,c21,c22,dout);
 }
 
 void comp_pspec_coupled(nmt_field *fl1,nmt_field *fl2,

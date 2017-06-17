@@ -4,17 +4,18 @@
 - :class:`pymaster.field.NmtField`
 - :class:`pymaster.bins.NmtBin`
 - :class:`pymaster.workspaces.NmtWorkspace`
+- :class:`pymaster.covariance.NmtCovarianceWorkspace`
 
 and a number of functions
 
 - :func:`pymaster.workspaces.deprojection_bias`
 - :func:`pymaster.workspaces.compute_coupled_cell`
 - :func:`pymaster.workspaces.compute_full_master`
-- :func:`pymaster.workspaces.gaussian_covariance`
+- :func:`pymaster.covariance.gaussian_covariance`
 - :func:`pymaster.utils.mask_apodization`
 - :func:`pymaster.utils.synfast_spherical`
 
-:mod:`pymaster` also comes with a flat-sky version, which supports the same classes and functions:
+:mod:`pymaster` also comes with a flat-sky version with most of the same functionality:
 
 - :class:`pymaster.field.NmtFieldFlat`
 - :class:`pymaster.bins.NmtBinFlat`
@@ -40,4 +41,5 @@ import numpy as np
 from utils import mask_apodization, mask_apodization_flat, synfast_spherical, synfast_flat
 from field import NmtField, NmtFieldFlat
 from bins import NmtBin, NmtBinFlat
-from workspaces import NmtWorkspace, NmtWorkspaceFlat, deprojection_bias, compute_coupled_cell, compute_full_master, deprojection_bias_flat, compute_coupled_cell_flat, compute_full_master_flat, gaussian_covariance
+from workspaces import NmtWorkspace, NmtWorkspaceFlat, deprojection_bias, compute_coupled_cell, compute_full_master, deprojection_bias_flat, compute_coupled_cell_flat, compute_full_master_flat
+from covariance import NmtCovarianceWorkspace, gaussian_covariance

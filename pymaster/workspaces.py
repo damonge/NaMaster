@@ -186,34 +186,6 @@ class NmtWorkspaceFlat(object) :
 
         return clout
 
-def gaussian_covariance(wa,wb,cla1b1,cla1b2,cla2b1,cla2b2) :
-    """
-    Computes Gaussian covariance matrix for power spectra computed with workspaces wa and wb.
-    The description above assumes that wa was used to compute the cross correlation of two fields labelled a1 and a2
-    (and b1, b2 for wb).
-    Note that all fields should have the same resolution, and the predicted input power spectra should be defined
-    for all ells <=3*nside (where nside is the HEALPix resolution parameter).
-
-    :param NmtWorkspace wa,wb: workspaces used to compute pseudo-Cl estimators of power spectra.
-    :param cla1b1: prediction for the cross-power spectrum between a1 and b1.
-    :param cla1b2: prediction for the cross-power spectrum between a1 and b2.
-    :param cla2b1: prediction for the cross-power spectrum between a2 and b1.
-    :param cla2b2: prediction for the cross-power spectrum between a2 and b2.
-    """
-    ns=wa.wsp.nside;
-    if(wa.wsp.nside!=wb.wsp.nside) :
-        raise ValueError("Everything should have the same resolution!")
-    if((wa.wsp.ncls!=1) or (wb.wsp.ncls!=1)) :
-        raise ValueError("Gaussian covariances only supported for spin-0 fields")
-    if((len(cla1b1)!=wa.wsp.lmax+1) or (len(cla1b2)!=wa.wsp.lmax+1) or (len(cla2b1)!=wa.wsp.lmax+1) or (len(cla2b2)!=wa.wsp.lmax+1)) :
-        raise ValueError("Input C_ls have a weird length")
-    len_a=wa.wsp.ncls*wa.wsp.bin.n_bands
-    len_b=wb.wsp.ncls*wb.wsp.bin.n_bands
-
-    covar1d=lib.comp_gaussian_covariance(wa.wsp,wb.wsp,cla1b1,cla1b2,cla2b1,cla2b2,len_a*len_b)
-    covar=np.reshape(covar1d,[len_a,len_b])
-    return covar
-
 def deprojection_bias(f1,f2,cls_guess) :
     """
     Computes the bias associated to contaminant removal to the cross-pseudo-Cl of two fields.

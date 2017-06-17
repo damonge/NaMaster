@@ -45,7 +45,11 @@ cl_0=compute_master(f0,f0,w)[0]
 
 #Let's now compute the gaussian estimate of the covariance!
 print "Covariance"
-covar=nmt.gaussian_covariance(w,w,clarr,clarr,clarr,clarr)
+#First we generate a NmtCovarianceWorkspace object to precompute
+#and store the necessary coupling coefficients
+cw=nmt.NmtCovarianceWorkspace()
+cw.compute_coupling_coefficients(w,w) #<- This is the time-consuming operation
+covar=nmt.gaussian_covariance(cw,clarr,clarr,clarr,clarr)
 
 #Let's now compute the sample covariance
 print "Sample covariance"

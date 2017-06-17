@@ -217,8 +217,32 @@ void nmt_compute_coupled_cell(nmt_field *fl1,nmt_field *fl2,flouble **cl_out,int
 nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,
 					 nmt_binning_scheme *bin,nmt_workspace *w0,
 					 flouble **cl_noise,flouble **cl_proposal,flouble **cl_out);
-void nmt_compute_gaussian_covariance(nmt_workspace *wa,nmt_workspace *wb,int nl,
-				     flouble *cla1b1,flouble *cla1b2,flouble *cla2b1,flouble *cla2b2,
-				     int n_el_covar,double *covar_out);
+
+//Defined in covar.c
+typedef struct {
+  int lmax_a;
+  int lmax_b;
+  int ncls_a;
+  int ncls_b;
+  nmt_binning_scheme *bin_a;
+  nmt_binning_scheme *bin_b;
+  int nside;
+  flouble *cl_mask_1122;
+  flouble *cl_mask_1221;
+  flouble **xi_1122;
+  flouble **xi_1221;
+  gsl_matrix *coupling_binned_a;
+  gsl_matrix *coupling_binned_b;
+  gsl_permutation *coupling_binned_perm_a;
+  gsl_permutation *coupling_binned_perm_b;
+} nmt_covar_workspace;
+
+void nmt_covar_workspace_free(nmt_covar_workspace *cw);
+nmt_covar_workspace *nmt_covar_workspace_init(nmt_workspace *wa,nmt_workspace *wb);
+void  nmt_compute_gaussian_covariance(nmt_covar_workspace *cw,
+				      flouble *cla1b1,flouble *cla1b2,flouble *cla2b1,flouble *cla2b2,
+				      flouble *covar_out);
+void nmt_covar_workspace_write(nmt_covar_workspace *cw,char *fname);
+nmt_covar_workspace *nmt_covar_workspace_read(char *fname);
 
 #endif //_NAMASTER_H_

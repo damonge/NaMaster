@@ -188,7 +188,11 @@
 
 <span class="c1">#Let&#39;s now compute the gaussian estimate of the covariance!</span>
 <span class="k">print</span> <span class="s2">&quot;Covariance&quot;</span>
-<span class="n">covar</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">gaussian_covariance</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">clarr</span><span class="p">,</span><span class="n">clarr</span><span class="p">,</span><span class="n">clarr</span><span class="p">,</span><span class="n">clarr</span><span class="p">)</span>
+<span class="c1">#First we generate a NmtCovarianceWorkspace object to precompute</span>
+<span class="c1">#and store the necessary coupling coefficients</span>
+<span class="n">cw</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">NmtCovarianceWorkspace</span><span class="p">()</span>
+<span class="n">cw</span><span class="o">.</span><span class="n">compute_coupling_coefficients</span><span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">w</span><span class="p">)</span> <span class="c1">#&lt;- This is the time-consuming operation</span>
+<span class="n">covar</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">gaussian_covariance</span><span class="p">(</span><span class="n">cw</span><span class="p">,</span><span class="n">clarr</span><span class="p">,</span><span class="n">clarr</span><span class="p">,</span><span class="n">clarr</span><span class="p">,</span><span class="n">clarr</span><span class="p">)</span>
 
 <span class="c1">#Let&#39;s now compute the sample covariance</span>
 <span class="k">print</span> <span class="s2">&quot;Sample covariance&quot;</span>

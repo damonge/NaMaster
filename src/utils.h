@@ -17,6 +17,17 @@ void *my_calloc(size_t nmemb,size_t size);
 FILE *my_fopen(const char *path,const char *mode);
 size_t my_fwrite(const void *ptr, size_t size, size_t nmemb,FILE *stream);
 size_t my_fread(void *ptr,size_t size,size_t count,FILE *stream);
+//Returns all non-zero wigner-3j symbols
+// il2 (in) : l2
+// il3 (in) : l3
+// im2 (in) : m2
+// im3 (in) : m3
+// l1min_out (out) : min value for l1
+// l1max_out (out) : max value for l1
+// thrcof (out) : array with the values of the wigner-3j
+// size (in) : size allocated for thrcof
+int drc3jj(int il2,int il3,int im2, int im3,int *l1min_out,
+	   int *l1max_out,double *thrcof,int size);
 
 //Defined in flatsky_utils.c
 void *dftw_malloc(size_t n);

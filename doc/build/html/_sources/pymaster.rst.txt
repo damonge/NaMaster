@@ -13,5 +13,8 @@ Python API documentation
 .. automodule:: pymaster.workspaces
    :members:
 
+.. automodule:: pymaster.covariance
+   :members:
+
 .. automodule:: pymaster.utils
    :members:
