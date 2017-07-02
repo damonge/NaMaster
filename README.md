@@ -10,3 +10,4 @@ The following sources of documentation are available for users:
 * [Scientific documentation](doc/doc_scientific.pdf): description of the methods implemented in NaMaster
 * [C API documentation](doc/doc_C_API.pdf): description of the C library functionality and the NaMaster executable. Installation instructions and a description of all dependencies can also be found here.
 * [Python wrapper documentation](doc/build/html/index.html): description of the python wrapper functionality and example code (go to http://htmlpreview.github.io/ to render these html pages).
+* For the Python wrapper, the examples are also available via these [notebooks](http://nbviewer.jupyter.org/github/daniellenz/NaMaster/tree/master/notebooks/index.ipynb).
