@@ -21,7 +21,7 @@ It's also useful to load anaconda 2.7 (e.g. `module load python/2.7-anaconda`).
 From your home directory, open the file `.bashrc.ext` with your favourite text editor and add the following lines at the end of it:
 ```
 export PATH=$HOME/bin:$PATH
-export LD_LIBRARY_PATH=$HOME:/usr/common/software/gsl/2.1/intel/lib:/usr/common/software/cfitsio/3.370-reentrant/hsw/intel/lib:$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=$HOME/lib:/usr/common/software/gsl/2.1/intel/lib:/usr/common/software/cfitsio/3.370-reentrant/hsw/intel/lib:$LD_LIBRARY_PATH
 export LDFLAGS="-L/usr/common/software/gsl/2.1/intel/lib -L/usr/common/software/cfitsio/3.370-reentrant/hsw/intel/lib -L$HOME/lib"
 export CPPFLAGS="-I/usr/common/software/gsl/2.1/intel/include -I/usr/common/software/cfitsio/3.370-reentrant/hsw/intel/include -I$HOME/include"
 export CC=cc
