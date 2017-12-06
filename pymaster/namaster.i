@@ -3,6 +3,7 @@
 %{
 #define SWIG_FILE_WITH_INIT
 #include "../src/namaster.h"
+#include "../src/utils.h"
 %}
 
 %include "numpy.i"
@@ -424,10 +425,9 @@ void synfast_new_flat(int nx,int ny,double lx,double ly,int pol,int seed,
 
   maps=nmt_synfast_flat(nx,ny,lx,ly,nfields,spin_arr,
 			nell3,larr,beams,nell1,larr,cls,seed);
-
   for(icl=0;icl<nmaps;icl++) {
     memcpy(&(dout[npix*icl]),maps[icl],npix*sizeof(double));
-    free(maps[icl]);
+    dftw_free(maps[icl]);
   }
   free(maps);
   free(beams);
