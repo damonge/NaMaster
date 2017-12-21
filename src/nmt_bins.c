@@ -20,6 +20,7 @@ nmt_binning_scheme *nmt_bins_constant(int nlb,int lmax)
   flouble w0=1./nlb;
 
   nmt_binning_scheme *bins=my_malloc(sizeof(nmt_binning_scheme));
+  bins->ell_max=lmax;
   bins->n_bands=nband_max;
   bins->nell_list=my_calloc(nband_max,sizeof(int));
   bins->ell_list=my_malloc(nband_max*sizeof(int *));
@@ -53,6 +54,7 @@ nmt_binning_scheme *nmt_bins_create(int nell,int *bpws,int *ells,flouble *weight
   nband_max++;
 
   bins=my_malloc(sizeof(nmt_binning_scheme));
+  bins->ell_max=lmax;
   bins->n_bands=nband_max;
   bins->nell_list=my_calloc(nband_max,sizeof(int));
   bins->ell_list=my_malloc(nband_max*sizeof(int *));

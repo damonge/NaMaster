@@ -33,7 +33,7 @@ flouble nmt_k_function_eval(nmt_k_function *f,flouble k,gsl_interp_accel *intacc
     return gsl_spline_eval(f->spl,k,intacc);
 }
 
-#define N_DELL 1
+//#define N_DELL 1
 nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
 {
   nmt_flatsky_info *fs=my_malloc(sizeof(nmt_flatsky_info));
@@ -44,6 +44,7 @@ nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
   fs->ly=ly;
   fs->pixsize=lx*ly/(nx*ny);
 
+  /*
   int ii;
   flouble dkx=2*M_PI/lx;
   flouble dky=2*M_PI/ly;
@@ -85,14 +86,15 @@ nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
       }
     } //end omp for
   } //end omp parallel
+  */
 
   return fs;
 }
 
 void nmt_flatsky_info_free(nmt_flatsky_info *fs)
 {
-  free(fs->ell_min);
-  free(fs->n_cells);
+  //  free(fs->ell_min);
+  //  free(fs->n_cells);
   free(fs);
 }
 

@@ -9,11 +9,11 @@ static flouble weigh_l(int l)
 #endif //_WEIGH_L2
 }
 
-static nmt_workspace *nmt_workspace_new(int nside,int lmax,int ncls,nmt_binning_scheme *bin)
+static nmt_workspace *nmt_workspace_new(int nside,int ncls,nmt_binning_scheme *bin)
 {
   int ii;
   nmt_workspace *w=my_malloc(sizeof(nmt_workspace));
-  w->lmax=lmax;
+  w->lmax=bin->ell_max;
   w->ncls=ncls;
 
   w->nside=nside;
@@ -167,15 +167,19 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
 {
   int l2;
   nmt_workspace *w;
+  flouble *beam_prod;
   int n_cl=fl1->nmaps*fl2->nmaps;
-  flouble *beam_prod=my_malloc((fl1->lmax+1)*sizeof(flouble));
+
   if(fl1->nside!=fl2->nside)
     report_error(1,"Can't correlate fields with different resolutions\n");
-  w=nmt_workspace_new(fl1->nside,fl1->lmax,n_cl,bin);
+  if(bin->ell_max>=3*fl1->nside)
+    report_error(1,"Requesting bandpowers for too high a multipole given map resolution\n");
+  w=nmt_workspace_new(fl1->nside,n_cl,bin);
+  beam_prod=my_malloc((w->lmax+1)*sizeof(flouble));
   memcpy(w->mask1,fl1->mask,he_nside2npix(w->nside)*sizeof(flouble));
   memcpy(w->mask2,fl2->mask,he_nside2npix(w->nside)*sizeof(flouble));
-  he_anafast(&(fl1->mask),&(fl2->mask),0,0,&(w->pcl_masks),fl1->nside,fl1->lmax,HE_NITER_DEFAULT);
-  for(l2=0;l2<=fl1->lmax;l2++) {
+  he_anafast(&(fl1->mask),&(fl2->mask),0,0,&(w->pcl_masks),fl1->nside,w->lmax,HE_NITER_DEFAULT);
+  for(l2=0;l2<=w->lmax;l2++) {
     w->pcl_masks[l2]*=(2*l2+1.);
     beam_prod[l2]=fl1->beam[l2]*fl2->beam[l2];
   }
@@ -561,14 +565,17 @@ nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,
 
   if(w0==NULL)
     w=nmt_compute_coupling_matrix(fl1,fl2,bin);
-  else
+  else {
     w=w0;
+    if(w->lmax>=3*fl1->nside)
+      report_error(1,"Requesting bandpowers for too high a multipole given map resolution\n");
+  }
 
   cl_bias=my_malloc(w->ncls*sizeof(flouble *));
   cl_data=my_malloc(w->ncls*sizeof(flouble *));
   for(ii=0;ii<w->ncls;ii++) {
-    cl_bias[ii]=my_calloc((w->lmax+1),sizeof(flouble));
-    cl_data[ii]=my_calloc((w->lmax+1),sizeof(flouble));
+    cl_bias[ii]=my_calloc((fl1->lmax+1),sizeof(flouble));
+    cl_data[ii]=my_calloc((fl1->lmax+1),sizeof(flouble));
   }
   nmt_compute_coupled_cell(fl1,fl2,cl_data,HE_NITER_DEFAULT);
   nmt_compute_deprojection_bias(fl1,fl2,cl_proposal,cl_bias);
