@@ -43,7 +43,7 @@ class NmtCovarianceWorkspace(object) :
 
         :param str fname: output file name
         """
-        if self.wsp==None :
+        if self.wsp is None :
             raise KeyError("Must initialize workspace before writing")
         lib.covar_workspace_write(self.wsp,fname)
 

@@ -64,7 +64,7 @@ def synfast_spherical(nside,cls,pol=False,beam=None) :
         lmax=len(cls)-1
         cls_use=np.array([cls])
 
-    if beam==None :
+    if beam is None :
         beam_use=np.ones(lmax+1)
     else :
         if len(beam)!=lmax+1 :
@@ -115,7 +115,7 @@ def synfast_flat(nx,ny,lx,ly,cls,pol=False,beam=None) :
         lmax=len(cls)-1
         cls_use=np.array([cls])
 
-    if beam==None :
+    if beam is None :
         beam_use=np.ones(lmax+1)
     else :
         if len(beam)!=lmax+1 :

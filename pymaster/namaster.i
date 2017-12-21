@@ -425,6 +425,7 @@ void synfast_new_flat(int nx,int ny,double lx,double ly,int pol,int seed,
 
   maps=nmt_synfast_flat(nx,ny,lx,ly,nfields,spin_arr,
 			nell3,larr,beams,nell1,larr,cls,seed);
+
   for(icl=0;icl<nmaps;icl++) {
     memcpy(&(dout[npix*icl]),maps[icl],npix*sizeof(double));
     dftw_free(maps[icl]);
@@ -459,6 +460,7 @@ void comp_deproj_bias(nmt_field *fl1,nmt_field *fl2,
 }
 
 void comp_deproj_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
+			   nmt_binning_scheme_flat *bin,
 			   flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y,
 			   int nell3,double *weights,
 			   int ncl1,int nell1,double *cls1,
@@ -472,15 +474,15 @@ void comp_deproj_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
   assert(fl1->ly==fl2->ly);
   assert(ncl1==fl1->nmaps*fl2->nmaps);
   assert(nell1==nell3);
-  assert(ndout==fl1->fs->n_ell*ncl1);
+  assert(ndout==bin->n_bands*ncl1);
   cl_bias=malloc(ncl1*sizeof(double *));
   cl_guess=malloc(ncl1*sizeof(double *));
   for(i=0;i<ncl1;i++) {
     cl_guess[i]=&(cls1[nell1*i]);
-    cl_bias[i]=&(dout[fl1->fs->n_ell*i]);
+    cl_bias[i]=&(dout[bin->n_bands*i]);
   }
 
-  nmt_compute_deprojection_bias_flat(fl1,fl2,lmn_x,lmx_x,lmn_y,lmx_y,nell3,weights,cl_guess,cl_bias);
+  nmt_compute_deprojection_bias_flat(fl1,fl2,bin,lmn_x,lmx_x,lmn_y,lmx_y,nell3,weights,cl_guess,cl_bias);
 
   free(cl_bias);
   free(cl_guess);
@@ -516,24 +518,23 @@ void comp_pspec_coupled(nmt_field *fl1,nmt_field *fl2,
 }
 
 void comp_pspec_coupled_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
+			     nmt_binning_scheme_flat *bin,
 			     double *dout,int ndout,
 			     flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y)
 {
   int i;
-  double **cl_out,*larr;
+  double **cl_out;
   assert(fl1->nx==fl2->nx);
   assert(fl1->ny==fl2->ny);
   assert(fl1->lx==fl2->lx);
   assert(fl1->ly==fl2->ly);
-  assert(ndout==fl1->nmaps*fl2->nmaps*fl1->fs->n_ell);
+  assert(ndout==fl1->nmaps*fl2->nmaps*bin->n_bands);
   cl_out=malloc(fl1->nmaps*fl2->nmaps*sizeof(double *));
-  larr=malloc(fl1->fs->n_ell*sizeof(double));
   for(i=0;i<fl1->nmaps*fl2->nmaps;i++)
-    cl_out[i]=&(dout[i*fl1->fs->n_ell]);
+    cl_out[i]=&(dout[i*bin->n_bands]);
 
-  nmt_compute_coupled_cell_flat(fl1,fl2,larr,cl_out,lmn_x,lmx_x,lmn_y,lmx_y);
+  nmt_compute_coupled_cell_flat(fl1,fl2,bin,cl_out,lmn_x,lmx_x,lmn_y,lmx_y);
 
-  free(larr);
   free(cl_out);
 }
 
@@ -584,7 +585,7 @@ void decouple_cell_py_flat(nmt_workspace_flat *w,
   assert(ncl1==w->ncls);
   assert(nell1==nell2);
   assert(nell2==nell3);
-  assert(nell1==w->fs->n_ell);
+  assert(nell1==w->bin->n_bands);
   assert(ndout==w->bin->n_bands*ncl1);
   cl_in=   malloc(ncl1*sizeof(double *));
   cl_noise=malloc(ncl2*sizeof(double *));
@@ -634,32 +635,16 @@ void couple_cell_py_flat(nmt_workspace_flat *w,
   double **cl_in,**cl_out;
   assert(nell3==nell1);
   assert(ncl1==w->ncls);
-  assert(ncl1*w->fs->n_ell==ndout);
+  assert(ncl1*w->bin->n_bands==ndout);
   cl_in=malloc(ncl1*sizeof(double *));
   cl_out=malloc(ncl1*sizeof(double *));
   for(i=0;i<ncl1;i++) {
     cl_in[i]=&(cls1[i*nell1]);
-    cl_out[i]=&(dout[i*w->fs->n_ell]);
+    cl_out[i]=&(dout[i*w->bin->n_bands]);
   }
   nmt_couple_cl_l_flat(w,nell3,weights,cl_in,cl_out);
   free(cl_in);
   free(cl_out);
-}
-
-void get_ell_sampling_flat_wsp(nmt_workspace_flat *w,
-			       double *dout,int ndout)
-{
-  assert(ndout==w->nells);
-  memcpy(dout,w->l_arr,w->nells*sizeof(double));
-}
-
-void get_ell_sampling_flat_field(nmt_field_flat *fl,
-				 double *dout,int ndout)
-{
-  int ii;
-  assert(ndout==fl->fs->n_ell);
-  for(ii=0;ii<fl->fs->n_ell;ii++)
-    dout[ii]=fl->fs->ell_min[ii]+0.5*fl->fs->dell;
 }
 
 void comp_pspec(nmt_field *fl1,nmt_field *fl2,
@@ -696,11 +681,11 @@ void comp_pspec(nmt_field *fl1,nmt_field *fl2,
 }
 
 void comp_pspec_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
-		     nmt_binning_scheme_flat *bin,nmt_workspace_flat *w0,int n_rebin,
+		     nmt_binning_scheme_flat *bin,nmt_workspace_flat *w0,
 		     int ncl1,int nell1,double *cls1,
 		     int nell3,double *weights,
 		     int ncl2,int nell2,double *cls2,
-		     double *dout,int ndout,int method,
+		     double *dout,int ndout,
 		     flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y)
 {
   int i;
@@ -711,7 +696,7 @@ void comp_pspec_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
   assert(fl1->lx==fl2->lx);
   assert(fl1->ly==fl2->ly);
   assert(ncl1==fl1->nmaps*fl2->nmaps);
-  assert(nell1==fl1->fs->n_ell);
+  assert(nell1==bin->n_bands);
   assert(ndout==bin->n_bands*ncl1);
   assert(nell3==nell2);
   assert(ncl1==ncl2);
@@ -724,7 +709,7 @@ void comp_pspec_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
     cl_out[i]=&(dout[i*bin->n_bands]);
   }
 
-  w=nmt_compute_power_spectra_flat(fl1,fl2,bin,n_rebin,method,lmn_x,lmx_x,lmn_y,lmx_y,
+  w=nmt_compute_power_spectra_flat(fl1,fl2,bin,lmn_x,lmx_x,lmn_y,lmx_y,
 				   w0,cl_noise,nell3,weights,cl_guess,cl_out);
 
   free(cl_out);
