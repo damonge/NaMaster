@@ -34,7 +34,7 @@ class NmtField(object) :
             if((len(templates[0])!=1) and (len(templates[0])!=2)) :
                 raise KeyError("Must supply 1 or 2 maps per field")
         else :
-            if(templates!=None) :
+            if(templates is not None) :
                 raise KeyError("Input templates can only be an array or None\n")
 
         if isinstance(beam,(list,tuple,np.ndarray)) :
@@ -42,7 +42,7 @@ class NmtField(object) :
                 raise KeyError("Input beam must have 3*nside elements")
             beam_use=beam
         else :
-            if(beam==None) :
+            if(beam is None) :
                 beam_use=np.ones(3*nside)
             else :
                 raise KeyError("Input beam can only be an array or None\n")

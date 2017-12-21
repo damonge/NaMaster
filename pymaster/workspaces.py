@@ -9,7 +9,7 @@ class NmtWorkspace(object) :
         self.wsp=None
 
     def __del__(self) :
-        if(self.wsp!=None) :
+        if(self.wsp is not None) :
             lib.workspace_free(self.wsp)
 
     def read_from(self,fname) :
@@ -18,7 +18,7 @@ class NmtWorkspace(object) :
 
         :param str fname: input file name
         """
-        if self.wsp!=None :
+        if self.wsp is not None :
             lib.workspace_free(self.wsp)
         self.wsp=lib.workspace_read(fname);
         
@@ -29,7 +29,7 @@ class NmtWorkspace(object) :
         :param NmtField fl1,fl2: fields to correlate
         :param NmtBin bin: binning scheme
         """
-        if self.wsp!=None :
+        if self.wsp is not None :
             lib.workspace_free(self.wsp)
         self.wsp=lib.compute_coupling_matrix(fl1.fl,fl2.fl,bins.bin)
 
@@ -67,13 +67,13 @@ class NmtWorkspace(object) :
         """
         if((len(cl_in)!=self.wsp.ncls) or (len(cl_in[0])<self.wsp.lmax+1)) :
             raise KeyError("Input power spectrum has wrong shape")
-        if cl_bias!=None :
+        if cl_bias is not None :
             if((len(cl_bias)!=self.wsp.ncls) or (len(cl_bias[0])<self.wsp.lmax+1)) :
                 raise KeyError("Input bias power spectrum has wrong shape")
             clb=cl_bias.copy()
         else :
             clb=np.zeros_like(cl_in)
-        if cl_noise!=None :
+        if cl_noise is not None :
             if((len(cl_noise)!=self.wsp.ncls) or (len(cl_noise[0])<self.wsp.lmax+1)) :
                 raise KeyError("Input noise power spectrum has wrong shape")
             cln=cl_noise.copy()
@@ -93,7 +93,7 @@ class NmtWorkspaceFlat(object) :
         self.wsp=None
 
     def __del__(self) :
-        if(self.wsp!=None) :
+        if(self.wsp is not None) :
             lib.workspace_flat_free(self.wsp)
 
     def read_from(self,fname) :
@@ -102,7 +102,7 @@ class NmtWorkspaceFlat(object) :
 
         :param str fname: input file name
         """
-        if self.wsp!=None :
+        if self.wsp is not None :
             lib.workspace_flat_free(self.wsp)
         self.wsp=lib.workspace_flat_read(fname);
         
@@ -115,7 +115,7 @@ class NmtWorkspaceFlat(object) :
         :param float(2) ell_cut_x: remove all modes with ell_x in the interval [ell_cut_x[0],ell_cut_x[1]] from the calculation.
         :param float(2) ell_cut_y: remove all modes with ell_y in the interval [ell_cut_y[0],ell_cut_y[1]] from the calculation.
         """
-        if self.wsp!=None :
+        if self.wsp is not None :
             lib.workspace_flat_free(self.wsp)
 
         self.wsp=lib.compute_coupling_matrix_flat(fl1.fl,fl2.fl,bins.bin,
@@ -156,13 +156,13 @@ class NmtWorkspaceFlat(object) :
         """
         if((len(cl_in)!=self.wsp.ncls) or (len(cl_in[0])!=self.wsp.bin.n_bands)) :
             raise KeyError("Input power spectrum has wrong shape")
-        if cl_bias!=None :
+        if cl_bias is not None :
             if((len(cl_bias)!=self.wsp.ncls) or (len(cl_bias[0])!=self.wsp.bin.n_bands)) :
                 raise KeyError("Input bias power spectrum has wrong shape")
             clb=cl_bias.copy()
         else :
             clb=np.zeros_like(cl_in)
-        if cl_noise!=None :
+        if cl_noise is not None :
             if((len(cl_noise)!=self.wsp.ncls) or (len(cl_noise[0])!=self.wsp.bin.n_bands)) :
                 raise KeyError("Input noise power spectrum has wrong shape")
             cln=cl_noise.copy()

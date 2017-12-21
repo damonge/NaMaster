@@ -55,11 +55,6 @@ plt.show()
 #(see the documentation for more details)
 f0=nmt.NmtFieldFlat(Lx,Ly,mask,[mpt])
 f2=nmt.NmtFieldFlat(Lx,Ly,mask,[mpq,mpu],purify_b=True)
-#If you compute the power spectrum of two fields (without caring for mode coupling),
-#pymaster will return it with at a hard-coded resolution in ell-space determined
-#by the size and number of pixels of the patch.
-#You can get the list of ells at which this is done by calling the following function:
-ells_coupled=f0.get_ell_sampling()
 
 #Bins:
 #For flat-sky fields, bandpowers are simply defined as intervals in ell, and
@@ -87,9 +82,9 @@ w22.write_to("w22_flat.dat"); w22.read_from("w22_flat.dat")
 #power spectra and then decoupling them by inverting the mode-coupling matrix.
 #This is done in two steps below, but pymaster provides convenience routines to do this
 #through a single function call
-cl00_coupled=nmt.compute_coupled_cell_flat(f0,f0); cl00_uncoupled=w00.decouple_cell(cl00_coupled)
-cl02_coupled=nmt.compute_coupled_cell_flat(f0,f2); cl02_uncoupled=w02.decouple_cell(cl02_coupled)
-cl22_coupled=nmt.compute_coupled_cell_flat(f2,f2); cl22_uncoupled=w22.decouple_cell(cl22_coupled)
+cl00_coupled=nmt.compute_coupled_cell_flat(f0,f0,b); cl00_uncoupled=w00.decouple_cell(cl00_coupled)
+cl02_coupled=nmt.compute_coupled_cell_flat(f0,f2,b); cl02_uncoupled=w02.decouple_cell(cl02_coupled)
+cl22_coupled=nmt.compute_coupled_cell_flat(f2,f2,b); cl22_uncoupled=w22.decouple_cell(cl22_coupled)
 
 #Let's look at the results!
 plt.figure()
@@ -97,10 +92,7 @@ plt.plot(l,cl_tt,'r-',label='Input TT')
 plt.plot(l,cl_ee,'g-',label='Input EE')
 plt.plot(l,cl_bb,'b-',label='Input BB')
 plt.plot(ells_uncoupled,cl00_uncoupled[0],'r--',label='Uncoupled')
-plt.plot(ells_coupled,cl00_coupled[0],'r-.',label='Coupled')
 plt.plot(ells_uncoupled,cl22_uncoupled[0],'g--')
-plt.plot(ells_coupled,cl22_coupled[0],'g-.')
 plt.plot(ells_uncoupled,cl22_uncoupled[3],'b--')
-plt.plot(ells_coupled,cl22_coupled[3],'b-.')
 plt.loglog();
 plt.show()
