@@ -588,7 +588,7 @@ void nmt_couple_cl_l_flat(nmt_workspace_flat *w,int nl,flouble *larr,flouble **c
   gsl_interp_accel *intacc=gsl_interp_accel_alloc();
   for(ii=0;ii<w->ncls;ii++) {
     nmt_k_function *fcl=nmt_k_function_alloc(nl,larr,cl_in[ii],cl_in[ii][0],0.,0);
-    cell_in[ii]=my_malloc(w->bin->n_bands*sizeof(flouble));
+    cell_in[ii]=my_calloc(w->bin->n_bands,sizeof(flouble));
 
     int iy;
     flouble dkx=2*M_PI/w->fs->lx;
@@ -639,7 +639,7 @@ void nmt_couple_cl_l_flat(nmt_workspace_flat *w,int nl,flouble *larr,flouble **c
 	int i2;
 	for(i2=0;i2<w->bin->n_bands;i2++) {
 	  int ind2=i2*w->ncls+icl2;
-	  cl_out[icl1][ind1]+=w->coupling_matrix_unbinned[ind1][ind2]*cell_in[icl2][i2];
+	  cl_out[icl1][i1]+=w->coupling_matrix_unbinned[ind1][ind2]*cell_in[icl2][i2];
 	}
       }
     }
