@@ -85,10 +85,10 @@ typedef struct {
   flouble lx;
   flouble ly;
   flouble pixsize;
-  //  int n_ell;
-  //  flouble i_dell;
-  //  flouble dell;
-  //  flouble *ell_min;
+  int n_ell;
+  flouble i_dell;
+  flouble dell;
+  flouble *ell_min;
   //  int *n_cells;
 } nmt_flatsky_info;
 nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly);
@@ -158,15 +158,23 @@ typedef struct {
   int ncls;
   flouble ellcut_x[2];
   flouble ellcut_y[2];
+  int pe1;
+  int pe2;
+  int pb1;
+  int pb2;
   nmt_flatsky_info *fs;
+#ifdef _ENABLE_FLAT_THEORY_ACCURATE
+  flouble *maskprod;
+#endif //_ENABLE_FLAT_THEORY_ACCURATE
   //  flouble *pcl_masks;
   //  flouble *l_arr;
   //  int *i_band;
   int *n_cells;
   flouble **coupling_matrix_unbinned;
+  flouble **coupling_matrix_binned;
   nmt_binning_scheme_flat *bin;
   flouble lmax;
-  gsl_matrix *coupling_matrix_binned;
+  gsl_matrix *coupling_matrix_binned_gsl;
   gsl_permutation *coupling_matrix_perm;
 } nmt_workspace_flat;
 void nmt_workspace_flat_free(nmt_workspace_flat *w); //
@@ -181,7 +189,11 @@ void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 					flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y,
 					int nl_prop,flouble *l_prop,flouble **cl_proposal,
 					flouble **cl_bias);
-void nmt_couple_cl_l_flat(nmt_workspace_flat *w,int nl,flouble *larr,flouble **cl_in,flouble **cl_out);
+#ifdef _ENABLE_FLAT_THEORY_ACCURATE
+void nmt_couple_cl_l_flat_accurate(nmt_workspace_flat *w,int nl,flouble *larr,flouble **cl_in,flouble **cl_out);
+#endif //_ENABLE_FLAT_THEORY_ACCURATE
+void nmt_couple_cl_l_flat_fast(nmt_workspace_flat *w,int nl,flouble *larr,flouble **cl_in,flouble **cl_out);
+void nmt_couple_cl_l_flat_quick(nmt_workspace_flat *w,int nl,flouble *larr,flouble **cl_in,flouble **cl_out);
 void nmt_decouple_cl_l_flat(nmt_workspace_flat *w,flouble **cl_in,flouble **cl_noise_in,
 			    flouble **cl_bias,flouble **cl_out);
 void nmt_compute_coupled_cell_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,nmt_binning_scheme_flat *bin,flouble **cl_out,

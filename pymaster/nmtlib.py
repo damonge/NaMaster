@@ -302,6 +302,22 @@ class flatsky_info(_object):
     __swig_getmethods__["pixsize"] = _nmtlib.flatsky_info_pixsize_get
     if _newclass:
         pixsize = _swig_property(_nmtlib.flatsky_info_pixsize_get, _nmtlib.flatsky_info_pixsize_set)
+    __swig_setmethods__["n_ell"] = _nmtlib.flatsky_info_n_ell_set
+    __swig_getmethods__["n_ell"] = _nmtlib.flatsky_info_n_ell_get
+    if _newclass:
+        n_ell = _swig_property(_nmtlib.flatsky_info_n_ell_get, _nmtlib.flatsky_info_n_ell_set)
+    __swig_setmethods__["i_dell"] = _nmtlib.flatsky_info_i_dell_set
+    __swig_getmethods__["i_dell"] = _nmtlib.flatsky_info_i_dell_get
+    if _newclass:
+        i_dell = _swig_property(_nmtlib.flatsky_info_i_dell_get, _nmtlib.flatsky_info_i_dell_set)
+    __swig_setmethods__["dell"] = _nmtlib.flatsky_info_dell_set
+    __swig_getmethods__["dell"] = _nmtlib.flatsky_info_dell_get
+    if _newclass:
+        dell = _swig_property(_nmtlib.flatsky_info_dell_get, _nmtlib.flatsky_info_dell_set)
+    __swig_setmethods__["ell_min"] = _nmtlib.flatsky_info_ell_min_set
+    __swig_getmethods__["ell_min"] = _nmtlib.flatsky_info_ell_min_get
+    if _newclass:
+        ell_min = _swig_property(_nmtlib.flatsky_info_ell_min_get, _nmtlib.flatsky_info_ell_min_set)
 
     def __init__(self):
         this = _nmtlib.new_flatsky_info()
@@ -528,6 +544,22 @@ class workspace_flat(_object):
     __swig_getmethods__["ellcut_y"] = _nmtlib.workspace_flat_ellcut_y_get
     if _newclass:
         ellcut_y = _swig_property(_nmtlib.workspace_flat_ellcut_y_get, _nmtlib.workspace_flat_ellcut_y_set)
+    __swig_setmethods__["pe1"] = _nmtlib.workspace_flat_pe1_set
+    __swig_getmethods__["pe1"] = _nmtlib.workspace_flat_pe1_get
+    if _newclass:
+        pe1 = _swig_property(_nmtlib.workspace_flat_pe1_get, _nmtlib.workspace_flat_pe1_set)
+    __swig_setmethods__["pe2"] = _nmtlib.workspace_flat_pe2_set
+    __swig_getmethods__["pe2"] = _nmtlib.workspace_flat_pe2_get
+    if _newclass:
+        pe2 = _swig_property(_nmtlib.workspace_flat_pe2_get, _nmtlib.workspace_flat_pe2_set)
+    __swig_setmethods__["pb1"] = _nmtlib.workspace_flat_pb1_set
+    __swig_getmethods__["pb1"] = _nmtlib.workspace_flat_pb1_get
+    if _newclass:
+        pb1 = _swig_property(_nmtlib.workspace_flat_pb1_get, _nmtlib.workspace_flat_pb1_set)
+    __swig_setmethods__["pb2"] = _nmtlib.workspace_flat_pb2_set
+    __swig_getmethods__["pb2"] = _nmtlib.workspace_flat_pb2_get
+    if _newclass:
+        pb2 = _swig_property(_nmtlib.workspace_flat_pb2_get, _nmtlib.workspace_flat_pb2_set)
     __swig_setmethods__["fs"] = _nmtlib.workspace_flat_fs_set
     __swig_getmethods__["fs"] = _nmtlib.workspace_flat_fs_get
     if _newclass:
@@ -540,6 +572,10 @@ class workspace_flat(_object):
     __swig_getmethods__["coupling_matrix_unbinned"] = _nmtlib.workspace_flat_coupling_matrix_unbinned_get
     if _newclass:
         coupling_matrix_unbinned = _swig_property(_nmtlib.workspace_flat_coupling_matrix_unbinned_get, _nmtlib.workspace_flat_coupling_matrix_unbinned_set)
+    __swig_setmethods__["coupling_matrix_binned"] = _nmtlib.workspace_flat_coupling_matrix_binned_set
+    __swig_getmethods__["coupling_matrix_binned"] = _nmtlib.workspace_flat_coupling_matrix_binned_get
+    if _newclass:
+        coupling_matrix_binned = _swig_property(_nmtlib.workspace_flat_coupling_matrix_binned_get, _nmtlib.workspace_flat_coupling_matrix_binned_set)
     __swig_setmethods__["bin"] = _nmtlib.workspace_flat_bin_set
     __swig_getmethods__["bin"] = _nmtlib.workspace_flat_bin_get
     if _newclass:
@@ -548,10 +584,10 @@ class workspace_flat(_object):
     __swig_getmethods__["lmax"] = _nmtlib.workspace_flat_lmax_get
     if _newclass:
         lmax = _swig_property(_nmtlib.workspace_flat_lmax_get, _nmtlib.workspace_flat_lmax_set)
-    __swig_setmethods__["coupling_matrix_binned"] = _nmtlib.workspace_flat_coupling_matrix_binned_set
-    __swig_getmethods__["coupling_matrix_binned"] = _nmtlib.workspace_flat_coupling_matrix_binned_get
+    __swig_setmethods__["coupling_matrix_binned_gsl"] = _nmtlib.workspace_flat_coupling_matrix_binned_gsl_set
+    __swig_getmethods__["coupling_matrix_binned_gsl"] = _nmtlib.workspace_flat_coupling_matrix_binned_gsl_get
     if _newclass:
-        coupling_matrix_binned = _swig_property(_nmtlib.workspace_flat_coupling_matrix_binned_get, _nmtlib.workspace_flat_coupling_matrix_binned_set)
+        coupling_matrix_binned_gsl = _swig_property(_nmtlib.workspace_flat_coupling_matrix_binned_gsl_get, _nmtlib.workspace_flat_coupling_matrix_binned_gsl_set)
     __swig_setmethods__["coupling_matrix_perm"] = _nmtlib.workspace_flat_coupling_matrix_perm_set
     __swig_getmethods__["coupling_matrix_perm"] = _nmtlib.workspace_flat_coupling_matrix_perm_get
     if _newclass:
@@ -589,9 +625,13 @@ def compute_deprojection_bias_flat(fl1, fl2, bin, lmn_x, lmx_x, lmn_y, lmx_y, nl
     return _nmtlib.compute_deprojection_bias_flat(fl1, fl2, bin, lmn_x, lmx_x, lmn_y, lmx_y, nl_prop, l_prop, cl_proposal, cl_bias)
 compute_deprojection_bias_flat = _nmtlib.compute_deprojection_bias_flat
 
-def couple_cl_l_flat(w, nl, larr, cl_in, cl_out):
-    return _nmtlib.couple_cl_l_flat(w, nl, larr, cl_in, cl_out)
-couple_cl_l_flat = _nmtlib.couple_cl_l_flat
+def couple_cl_l_flat_fast(w, nl, larr, cl_in, cl_out):
+    return _nmtlib.couple_cl_l_flat_fast(w, nl, larr, cl_in, cl_out)
+couple_cl_l_flat_fast = _nmtlib.couple_cl_l_flat_fast
+
+def couple_cl_l_flat_quick(w, nl, larr, cl_in, cl_out):
+    return _nmtlib.couple_cl_l_flat_quick(w, nl, larr, cl_in, cl_out)
+couple_cl_l_flat_quick = _nmtlib.couple_cl_l_flat_quick
 
 def decouple_cl_l_flat(w, cl_in, cl_noise_in, cl_bias, cl_out):
     return _nmtlib.decouple_cl_l_flat(w, cl_in, cl_noise_in, cl_bias, cl_out)

@@ -123,7 +123,7 @@ cl02_th=w02.decouple_cell(w02.couple_cell(ell,np.array([clte,0*clte])))
 cl22_th=w22.decouple_cell(w22.couple_cell(ell,np.array([clee,0*clee,0*clbb,clbb])))
 
 #Compute mean and variance over nsims simulations
-nsims=1000
+nsims=10000
 cl00_all=[]
 cl02_all=[]
 cl22_all=[]
@@ -148,7 +148,7 @@ plt.errorbar(b.get_effective_ells(),np.mean(cl00_all,axis=0)[0]/cl00_th[0]-1,yer
 plt.errorbar(b.get_effective_ells(),np.mean(cl02_all,axis=0)[0]/cl02_th[0]-1,yerr=np.std(cl02_all,axis=0)[0]/cl02_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\gamma_E$',fmt='go')
 plt.errorbar(b.get_effective_ells(),np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),label='$\\gamma_E-\\gamma_E$',fmt='bo')
 plt.xlabel('$\\ell$',fontsize=16)
-plt.ylabel('$C_\ell$',fontsize=16)
+plt.ylabel('$\\Delta C_\\ell/C_\\ell$',fontsize=16)
 plt.legend(loc='lower right',frameon=False,fontsize=16)
 plt.xscale('log')
 

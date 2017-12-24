@@ -33,7 +33,7 @@ flouble nmt_k_function_eval(nmt_k_function *f,flouble k,gsl_interp_accel *intacc
     return gsl_spline_eval(f->spl,k,intacc);
 }
 
-//#define N_DELL 1
+#define N_DELL 1
 nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
 {
   nmt_flatsky_info *fs=my_malloc(sizeof(nmt_flatsky_info));
@@ -44,24 +44,23 @@ nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
   fs->ly=ly;
   fs->pixsize=lx*ly/(nx*ny);
 
-  /*
   int ii;
   flouble dkx=2*M_PI/lx;
   flouble dky=2*M_PI/ly;
   flouble kmax_x=dkx*(nx/2);
   flouble kmax_y=dky*(ny/2);
   double dk=NMT_MIN(dkx,dky);
-  double kmax=NMT_MAX(kmax_y,kmax_x);
+  double kmax=sqrt(kmax_y*kmax_y+kmax_x*kmax_x);
   fs->dell=N_DELL*dk;
   fs->i_dell=1./fs->dell;
   fs->n_ell=0;
   while((fs->n_ell+1)*fs->dell<=kmax)
     fs->n_ell++;
   fs->ell_min=my_malloc(fs->n_ell*sizeof(flouble));
-  fs->n_cells=my_calloc(fs->n_ell,sizeof(int));
+  //  fs->n_cells=my_calloc(fs->n_ell,sizeof(int));
   for(ii=0;ii<fs->n_ell;ii++)
     fs->ell_min[ii]=ii*fs->dell;
-
+  /*
 #pragma omp parallel default(none) \
   shared(fs,dkx,dky)
   {
@@ -87,13 +86,12 @@ nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
     } //end omp for
   } //end omp parallel
   */
-
   return fs;
 }
 
 void nmt_flatsky_info_free(nmt_flatsky_info *fs)
 {
-  //  free(fs->ell_min);
+  free(fs->ell_min);
   //  free(fs->n_cells);
   free(fs);
 }

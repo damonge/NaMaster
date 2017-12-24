@@ -642,7 +642,7 @@ void couple_cell_py_flat(nmt_workspace_flat *w,
     cl_in[i]=&(cls1[i*nell1]);
     cl_out[i]=&(dout[i*w->bin->n_bands]);
   }
-  nmt_couple_cl_l_flat(w,nell3,weights,cl_in,cl_out);
+  nmt_couple_cl_l_flat_fast(w,nell3,weights,cl_in,cl_out);
   free(cl_in);
   free(cl_out);
 }
