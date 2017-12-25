@@ -81,7 +81,7 @@ if not os.path.isfile(fname_mask+'.fits') :
         ids=np.where((theta>theta0) & (theta<thetaf) &
                      (phi>phi0) & (phi<phif))[0]
         mask_raw=np.zeros(hp.nside2npix(nside)); mask_raw[ids]=1.
-        nholes=0 #15
+        nholes=15
         cths=cth0+(cthf-cth0)*np.random.rand(nholes)
         phis=phi0+(phif-phi0)*np.random.rand(nholes)
         ths=np.arccos(cths)
@@ -181,7 +181,6 @@ cl00_all=[]
 cl02_all=[]
 cl22_all=[]
 for i in np.arange(nsims) :
-    print i
     if i%100==0 :
         print "%d-th sim"%i
 

@@ -40,6 +40,7 @@ if not os.path.isfile('cls_flat.txt') :
 
     np.savetxt("cls_flat.txt",np.transpose([ell,cltt,clee,clbb,clte]))
 ell,cltt,clee,clbb,clte=np.loadtxt("cls_flat.txt",unpack=True)    
+cltt[0]=0; clee[0]=0; clbb[0]=0; clte[0]=0; 
 if plotres :
     plt.figure()
     plt.plot(ell,cltt,'r-',label='$\\delta_g-\\delta_g$')
@@ -49,6 +50,20 @@ if plotres :
     plt.xlabel('$\\ell$',fontsize=16)
     plt.ylabel('$C_\ell$',fontsize=16)
     plt.legend(loc='lower left',frameon=False,fontsize=16,labelspacing=0.1)
+
+if w_cont :
+    tilt_fg=-2.0
+    l0_fg=100.
+    clttfg=1E-5*((ell+10.)/(l0_fg+10.))**tilt_fg
+    cleefg=1E-5*((ell+30.)/(l0_fg+30.))**tilt_fg
+    cltefg=0.9*np.sqrt(clttfg*cleefg)
+    clbbfg=cleefg
+    clttfg[0]=0; cleefg[0]=0; clbbfg[0]=0; cltefg[0]=0; 
+    if plotres :
+        plt.plot(ell,clttfg,'r--',label='${\\rm FG},\\,TT$')
+        plt.plot(ell,cltefg,'g--',label='${\\rm FG},\\,TE$')
+        plt.plot(ell,cleefg,'b--',label='${\\rm FG},\\,EE$')
+        plt.plot(ell,clbbfg,'y--',label='${\\rm FG},\\,BB$')
 
 #This generates the mask with some padding and some holes
 np.random.seed(1001)
@@ -84,6 +99,17 @@ mask=mask.reshape([mi.ny,mi.nx])
 if plotres :
     mi.view_map(mask.flatten(),addColorbar=False,colorMax=1,colorMin=0)
 
+if w_cont :
+    if not os.path.isfile(prefix+"_contaminants.npz") :
+        fgt,fgq,fgu=nmt.synfast_flat(int(mi.nx),int(mi.ny),mi.lx*DTOR,mi.ly*DTOR,
+                                     [clttfg,cleefg,clbbfg,cltefg],pol=True)
+        mi.write_flat_map(prefix+"_contaminants",np.array([fgt.flatten(),fgq.flatten(),fgu.flatten()]))
+    else :
+        mii,fgs=fm.read_flat_map(prefix+"_contaminants.npz",i_map=-1)
+        fgt=fgs[0].reshape([mi.ny,mi.nx])
+        fgq=fgs[1].reshape([mi.ny,mi.nx])
+        fgu=fgs[2].reshape([mi.ny,mi.nx])
+
 #Binning scheme
 lx_rad=mi.lx*DTOR
 ly_rad=mi.ly*DTOR
@@ -99,13 +125,37 @@ b=nmt.NmtBinFlat(l_bpw[0,:],l_bpw[1,:])
 #Generate some initial fields
 print " - Res(x): %.3lf arcmin. Res(y): %.3lf arcmin."%(mi.lx*60/mi.nx,mi.ly*60/mi.ny)
 print " - lmax = %d, lmin = %d"%(int(ell_max),int(ell_min))
-mpt,mpq,mpu=nmt.synfast_flat(int(mi.nx),int(mi.ny),mi.lx*DTOR,mi.ly*DTOR,[cltt,clee,clbb,clte],pol=True)
-f0=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mpt])
-f2=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mpq,mpu])
+alpha_cont_0=0.5
+alpha_cont_2=0.015
+def get_fields() :
+    mppt,mppq,mppu=nmt.synfast_flat(int(mi.nx),int(mi.ny),mi.lx*DTOR,mi.ly*DTOR,
+                                    [cltt,clee,clbb,clte],pol=True)
+    if w_cont :
+        mppt+=alpha_cont_0*fgt 
+        mppq+=alpha_cont_2*fgq
+        mppu+=alpha_cont_2*fgu
+        ff0=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mppt],[[fgt]])
+        ff2=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mppq,mppu],[[fgq,fgu]])
+    else :
+        ff0=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mpt])
+        ff2=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mpq,mpu])
+    return mppt,mppq,mppu,ff0,ff2
+mpt,mpq,mpu,f0,f2=get_fields()
+
 if plotres :
     mi.view_map((mpt*mask).flatten(),title='$\\delta_g$',addColorbar=False)
     mi.view_map((mpq*mask).flatten(),title='$\\gamma_1$',addColorbar=False)
     mi.view_map((mpu*mask).flatten(),title='$\\gamma_2$',addColorbar=False)
+
+#Compute deprojection bias
+if w_cont :
+    clb00=nmt.deprojection_bias_flat(f0,f0,b,ell,[cltt])
+    clb02=nmt.deprojection_bias_flat(f0,f2,b,ell,[clte,0*clte])
+    clb22=nmt.deprojection_bias_flat(f2,f2,b,ell,[clee,0*clee,0*clbb,clbb])
+else :
+    clb00=None;
+    clb02=None;
+    clb22=None;
 
 #Use initial fields to generate coupling matrix
 w00=nmt.NmtWorkspaceFlat();
@@ -147,12 +197,10 @@ for i in np.arange(nsims) :
         print "%d-th sim"%i
 
     if not os.path.isfile(prefix+"_cl_%04d.txt"%i) :
-        mpt,mpq,mpu=nmt.synfast_flat(mi.nx,mi.ny,mi.lx*DTOR,mi.ly*DTOR,[cltt,clee,clbb,clte],pol=True)
-        f0=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mpt])
-        f2=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mpq,mpu])
-        cl00=w00.decouple_cell(nmt.compute_coupled_cell_flat(f0,f0,b))
-        cl02=w02.decouple_cell(nmt.compute_coupled_cell_flat(f0,f2,b))
-        cl22=w22.decouple_cell(nmt.compute_coupled_cell_flat(f2,f2,b))
+        mpt,mpq,mpu,f0,f2=get_fields()
+        cl00=w00.decouple_cell(nmt.compute_coupled_cell_flat(f0,f0,b),cl_bias=clb00)
+        cl02=w02.decouple_cell(nmt.compute_coupled_cell_flat(f0,f2,b),cl_bias=clb02)
+        cl22=w22.decouple_cell(nmt.compute_coupled_cell_flat(f2,f2,b),cl_bias=clb22)
         np.savetxt(prefix+"_cl_%04d.txt"%i,
                    np.transpose([b.get_effective_ells(),cl00[0],cl02[0],cl02[1],
                                  cl22[0],cl22[1],cl22[2],cl22[3]]))

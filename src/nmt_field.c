@@ -259,7 +259,7 @@ nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
       he_map_product(fl->nside,fl->maps[ii],fl->mask,fl->maps[ii]);
     he_map2alm(fl->nside,fl->lmax,1,2*fl->pol,fl->maps,fl->alms,HE_NITER_DEFAULT);
   }
-  
+
   return fl;
 }
 

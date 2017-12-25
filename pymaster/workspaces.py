@@ -209,8 +209,8 @@ def deprojection_bias_flat(f1,f2,b,ells,cls_guess,ell_cut_x=[1.,-1.],ell_cut_y=[
         raise KeyError("Proposal Cell doesn't match map resolution")
     cl1d=lib.comp_deproj_bias_flat(f1.fl,f2.fl,b.bin,
                                    ell_cut_x[0],ell_cut_x[1],ell_cut_y[0],ell_cut_y[1],
-                                   ells,cls_guess,f1.fl.nmaps*f2.fl.nmaps*b.bins.n_bands)
-    cl2d=np.reshape(cl1d,[f1.fl.nmaps*f2.fl.nmaps,b.bins.n_bands])
+                                   ells,cls_guess,f1.fl.nmaps*f2.fl.nmaps*b.bin.n_bands)
+    cl2d=np.reshape(cl1d,[f1.fl.nmaps*f2.fl.nmaps,b.bin.n_bands])
 
     return cl2d
 

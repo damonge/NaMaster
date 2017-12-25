@@ -336,7 +336,8 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
   return w;
 }
 
-void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_proposal,flouble **cl_bias)
+void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,
+				   flouble **cl_proposal,flouble **cl_bias)
 {
   int ii;
   flouble **cl_dum;

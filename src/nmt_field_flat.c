@@ -381,18 +381,6 @@ nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
     gsl_linalg_cholesky_invert(fl->matrix_M);
   }
 
-  fl->alms=my_malloc(fl->nmaps*sizeof(fcomplex *));
-  for(ii=0;ii<fl->nmaps;ii++)
-    fl->alms[ii]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
-
-  if(fl->pol && (fl->pure_e || fl->pure_b))
-    nmt_purify_flat(fl);
-  else {
-    for(ii=0;ii<fl->nmaps;ii++)
-      fs_map_product(fl->fs,fl->maps[ii],fl->mask,fl->maps[ii]);
-    fs_map2alm(fl->fs,1,2*fl->pol,fl->maps,fl->alms);
-  }
-
   if(fl->ntemp>0) {
     //Deproject
     flouble *prods=my_calloc(fl->ntemp,sizeof(flouble));
@@ -416,6 +404,18 @@ nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
       }
     }
     free(prods);
+  }
+
+  fl->alms=my_malloc(fl->nmaps*sizeof(fcomplex *));
+  for(ii=0;ii<fl->nmaps;ii++)
+    fl->alms[ii]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+
+  if(fl->pol && (fl->pure_e || fl->pure_b))
+    nmt_purify_flat(fl);
+  else {
+    for(ii=0;ii<fl->nmaps;ii++)
+      fs_map_product(fl->fs,fl->maps[ii],fl->mask,fl->maps[ii]);
+    fs_map2alm(fl->fs,1,2*fl->pol,fl->maps,fl->alms);
   }
 
   return fl;

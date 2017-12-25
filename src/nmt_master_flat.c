@@ -572,7 +572,8 @@ void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 	//DFT[v*DFT^-1[C^ab*DFT[w*g^j]]]
 	fs_map2alm(fl1->fs,1,2*fl1->pol,map_1_dum,alm_1_dum);
 	//Sum_m(DFT[v*DFT^-1[C^ab*DFT[w*g^j]]]*g^i*)/(2l+1)
-	fs_alm2cl(fl1->fs,bin,alm_1_dum,fl2->a_temp[iti],fl1->pol,fl2->pol,cl_dum,lmn_x,lmx_x,lmn_y,lmx_y);
+	fs_alm2cl(fl1->fs,bin,alm_1_dum,fl2->a_temp[iti],fl1->pol,fl2->pol,cl_dum,
+		  lmn_x,lmx_x,lmn_y,lmx_y);
 	for(im1=0;im1<nspec;im1++) {
 	  for(ip=0;ip<bin->n_bands;ip++)
 	    cl_bias[im1][ip]-=cl_dum[im1][ip]*nij;
@@ -607,7 +608,8 @@ void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 	//DFT[w*DFT^-1[C^abT*DFT[v*f^j]]]
 	fs_map2alm(fl2->fs,1,2*fl2->pol,map_2_dum,alm_2_dum);
 	//Sum_m(f^i*DFT[w*DFT^-1[C^abT*DFT[v*f^j]]]^*)/(2l+1)
-	fs_alm2cl(fl1->fs,bin,fl1->a_temp[iti],alm_2_dum,fl1->pol,fl2->pol,cl_dum,lmn_x,lmx_x,lmn_y,lmx_y);
+	fs_alm2cl(fl1->fs,bin,fl1->a_temp[iti],alm_2_dum,fl1->pol,fl2->pol,cl_dum,
+		  lmn_x,lmx_x,lmn_y,lmx_y);
 	for(im1=0;im1<nspec;im1++) {
 	  for(ip=0;ip<bin->n_bands;ip++)
 	    cl_bias[im1][ip]-=cl_dum[im1][ip]*mij;
@@ -646,7 +648,8 @@ void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
     for(iti=0;iti<fl1->ntemp;iti++) {
       for(itp=0;itp<fl2->ntemp;itp++) {
 	//Sum_m(f^i*g^p*)/(2l+1)
-	fs_alm2cl(fl1->fs,bin,fl1->a_temp[iti],fl2->a_temp[itp],fl1->pol,fl2->pol,cl_dum,lmn_x,lmx_x,lmn_y,lmx_y);
+	fs_alm2cl(fl1->fs,bin,fl1->a_temp[iti],fl2->a_temp[itp],fl1->pol,fl2->pol,cl_dum,
+		  lmn_x,lmx_x,lmn_y,lmx_y);
 	for(itj=0;itj<fl1->ntemp;itj++) {
 	  double mij=gsl_matrix_get(fl1->matrix_M,iti,itj);
 	  for(itq=0;itq<fl2->ntemp;itq++) {
