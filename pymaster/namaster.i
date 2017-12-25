@@ -427,7 +427,8 @@ void synfast_new_flat(int nx,int ny,double lx,double ly,int pol,int seed,
 			nell3,larr,beams,nell1,larr,cls,seed);
 
   for(icl=0;icl<nmaps;icl++) {
-    memcpy(&(dout[npix*icl]),maps[icl],npix*sizeof(double));
+    for(ii=0;ii<npix;ii++)
+      dout[npix*icl+ii]=maps[icl][ii];
     dftw_free(maps[icl]);
   }
   free(maps);

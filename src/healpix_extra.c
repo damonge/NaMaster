@@ -945,9 +945,19 @@ fcomplex **he_synalm(int nside,int nmaps,int lmax,flouble **cells,flouble **beam
   //Switch off error handler for Cholesky decomposition
   gsl_error_handler_t *geh=gsl_set_error_handler_off();
 
-#pragma omp parallel default(none)				\
-  shared(nside,nmaps,lmax,cells,beam,seed,alms,lmax_here)
+  int numthr=0;
+
+#pragma omp parallel default(none)					\
+  shared(nside,nmaps,lmax,cells,beam,seed,alms,lmax_here,numthr)
   {
+    //This is to avoid using the omp.h library
+    int ithr;
+#pragma omp critical
+    {
+      ithr=numthr;
+      numthr++;
+    }
+
     int ll;
     flouble *bms=my_malloc(nmaps*sizeof(flouble));
     gsl_vector *rv1  =gsl_vector_alloc(nmaps);
@@ -958,7 +968,7 @@ fcomplex **he_synalm(int nside,int nmaps,int lmax,flouble **cells,flouble **beam
     gsl_vector *eval =gsl_vector_alloc(nmaps);
     gsl_matrix *evec =gsl_matrix_alloc(nmaps,nmaps); 
     gsl_eigen_symmv_workspace *wsym=gsl_eigen_symmv_alloc(nmaps);
-    int ithr=omp_get_thread_num();
+    //int ithr=omp_get_thread_num();
     unsigned int seed_thr=(unsigned int)(seed+ithr);
     gsl_rng *rng=init_rng(seed_thr);
 
