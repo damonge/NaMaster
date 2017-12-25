@@ -223,18 +223,6 @@ nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
     gsl_linalg_cholesky_invert(fl->matrix_M);
   }
 
-  fl->alms=my_malloc(fl->nmaps*sizeof(fcomplex *));
-  for(ii=0;ii<fl->nmaps;ii++)
-    fl->alms[ii]=my_malloc(he_nalms(fl->lmax)*sizeof(fcomplex));
-
-  if(fl->pol && (fl->pure_e || fl->pure_b))
-    nmt_purify(fl);
-  else {
-    for(ii=0;ii<fl->nmaps;ii++)
-      he_map_product(fl->nside,fl->maps[ii],fl->mask,fl->maps[ii]);
-    he_map2alm(fl->nside,fl->lmax,1,2*fl->pol,fl->maps,fl->alms,HE_NITER_DEFAULT);
-  }
-
   if(fl->ntemp>0) {
     //Deproject
     flouble *prods=my_calloc(fl->ntemp,sizeof(flouble));
@@ -260,6 +248,18 @@ nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
     free(prods);
   }
 
+  fl->alms=my_malloc(fl->nmaps*sizeof(fcomplex *));
+  for(ii=0;ii<fl->nmaps;ii++)
+    fl->alms[ii]=my_malloc(he_nalms(fl->lmax)*sizeof(fcomplex));
+
+  if(fl->pol && (fl->pure_e || fl->pure_b))
+    nmt_purify(fl);
+  else {
+    for(ii=0;ii<fl->nmaps;ii++)
+      he_map_product(fl->nside,fl->maps[ii],fl->mask,fl->maps[ii]);
+    he_map2alm(fl->nside,fl->lmax,1,2*fl->pol,fl->maps,fl->alms,HE_NITER_DEFAULT);
+  }
+  
   return fl;
 }
 

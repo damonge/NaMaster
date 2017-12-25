@@ -41,7 +41,8 @@ if not os.path.isfile('cls_flat.txt') :
 
     np.savetxt("cls_flat.txt",np.transpose([ell,cltt,clee,clbb,clte]))
 ell,cltt,clee,clbb,clte=np.loadtxt("cls_flat.txt",unpack=True)
-ell=ell[:3*nside]; cltt=cltt[:3*nside]; clee=clee[:3*nside]; clbb=clbb[:3*nside]; clte=clte[:3*nside]; 
+ell=ell[:3*nside]; cltt=cltt[:3*nside]; clee=clee[:3*nside]; clbb=clbb[:3*nside]; clte=clte[:3*nside];
+cltt[0]=0; clee[0]=0; clbb[0]=0; clte[0]=0; 
 if plotres :
     plt.figure()
     plt.plot(ell,cltt,'r-',label='$\\delta_g-\\delta_g$')
@@ -51,6 +52,20 @@ if plotres :
     plt.xlabel('$\\ell$',fontsize=16)
     plt.ylabel('$C_\\ell$',fontsize=16)
     plt.legend(loc='lower left',frameon=False,fontsize=16,labelspacing=0.1)
+
+if w_cont :
+    tilt_fg=-2.0
+    l0_fg=100.
+    clttfg=1E-5*((ell+10.)/(l0_fg+10.))**tilt_fg
+    cleefg=1E-5*((ell+30.)/(l0_fg+30.))**tilt_fg
+    cltefg=0.9*np.sqrt(clttfg*cleefg)
+    clbbfg=cleefg
+    clttfg[0]=0; cleefg[0]=0; clbbfg[0]=0; cltefg[0]=0; 
+    if plotres :
+        plt.plot(ell,clttfg,'r--',label='${\\rm FG},\\,TT$')
+        plt.plot(ell,cltefg,'g--',label='${\\rm FG},\\,TE$')
+        plt.plot(ell,cleefg,'b--',label='${\\rm FG},\\,EE$')
+        plt.plot(ell,clbbfg,'y--',label='${\\rm FG},\\,BB$')
 
 #This generates the mask with some padding and some holes
 np.random.seed(1001)
@@ -66,7 +81,7 @@ if not os.path.isfile(fname_mask+'.fits') :
         ids=np.where((theta>theta0) & (theta<thetaf) &
                      (phi>phi0) & (phi<phif))[0]
         mask_raw=np.zeros(hp.nside2npix(nside)); mask_raw[ids]=1.
-        nholes=15
+        nholes=0 #15
         cths=cth0+(cthf-cth0)*np.random.rand(nholes)
         phis=phi0+(phif-phi0)*np.random.rand(nholes)
         ths=np.arccos(cths)
@@ -86,20 +101,50 @@ mask=hp.read_map(fname_mask+".fits")
 if plotres :
     hp.mollview(mask)
 
+if w_cont :
+    if not os.path.isfile(prefix+"_contaminants.fits") :
+        fgt,fgq,fgu=nmt.synfast_spherical(nside,[clttfg,cleefg,clbbfg,cltefg],pol=True)
+        hp.write_map(prefix+"_contaminants.fits",[fgt,fgq,fgu])
+    else :
+        fgt,fgq,fgu=hp.read_map(prefix+"_contaminants.fits",field=[0,1,2],verbose=False)
+
 #Binning scheme
 d_ell=int(1./fsky)
 b=nmt.NmtBin(nside,nlb=d_ell)
 
 #Generate some initial fields
 print " - Res: %.3lf arcmin. "%(np.sqrt(4*np.pi*(180*60/np.pi)**2/hp.nside2npix(nside)))
-mpt,mpq,mpu=nmt.synfast_spherical(nside,[cltt,clee,clbb,clte],pol=True)
-f0=nmt.NmtField(mask,[mpt])
-f2=nmt.NmtField(mask,[mpq,mpu])
+alpha_cont_0=0.1
+alpha_cont_2=0.1
+def get_fields() :
+    mppt,mppq,mppu=nmt.synfast_spherical(nside,[cltt,clee,clbb,clte],pol=True)
+    if w_cont :
+        mppt+=alpha_cont_0*fgt
+        mppq+=alpha_cont_2*fgq
+        mppu+=alpha_cont_2*fgu
+        ff0=nmt.NmtField(mask,[mppt],templates=[[fgt]])
+        ff2=nmt.NmtField(mask,[mppq,mppu],[[fgq,fgu]])
+    else :
+        ff0=nmt.NmtField(mask,[mppt])
+        ff2=nmt.NmtField(mask,[mppq,mppu])
+    return mppt,mppq,mppu,ff0,ff2
+mpt,mpq,mpu,f0,f2=get_fields()
+    
 if plotres :
     hp.mollview((mpt*mask).flatten(),title='$\\delta_g$')
     hp.mollview((mpq*mask).flatten(),title='$\\gamma_1$')
     hp.mollview((mpu*mask).flatten(),title='$\\gamma_2$')
 
+#Compute deprojection bias
+if w_cont :
+    clb00=nmt.deprojection_bias(f0,f0,[cltt])
+    clb02=nmt.deprojection_bias(f0,f2,[clte,0*clte])
+    clb22=nmt.deprojection_bias(f2,f2,[clee,0*clee,0*clbb,clbb])
+else :
+    clb00=None;
+    clb02=None;
+    clb22=None;
+    
 #Use initial fields to generate coupling matrix
 w00=nmt.NmtWorkspace();
 if not os.path.isfile(prefix+"_w00.dat") :
@@ -141,12 +186,10 @@ for i in np.arange(nsims) :
         print "%d-th sim"%i
 
     if not os.path.isfile(prefix+"_cl_%04d.txt"%i) :
-        mpt,mpq,mpu=nmt.synfast_spherical(nside,[cltt,clee,clbb,clte],pol=True)
-        f0=nmt.NmtField(mask,[mpt])
-        f2=nmt.NmtField(mask,[mpq,mpu])
-        cl00=w00.decouple_cell(nmt.compute_coupled_cell(f0,f0))
-        cl02=w02.decouple_cell(nmt.compute_coupled_cell(f0,f2))
-        cl22=w22.decouple_cell(nmt.compute_coupled_cell(f2,f2))
+        mpt,mpq,mpu,f0,f2=get_fields()
+        cl00=w00.decouple_cell(nmt.compute_coupled_cell(f0,f0),cl_bias=clb00)
+        cl02=w02.decouple_cell(nmt.compute_coupled_cell(f0,f2),cl_bias=clb02)
+        cl22=w22.decouple_cell(nmt.compute_coupled_cell(f2,f2),cl_bias=clb22)
         np.savetxt(prefix+"_cl_%04d.txt"%i,
                    np.transpose([b.get_effective_ells(),cl00[0],cl02[0],cl02[1],
                                  cl22[0],cl22[1],cl22[2],cl22[3]]))
