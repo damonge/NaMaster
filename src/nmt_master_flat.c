@@ -4,27 +4,29 @@ void nmt_workspace_flat_free(nmt_workspace_flat *w)
 {
   int ii;
   gsl_permutation_free(w->coupling_matrix_perm);
-  gsl_matrix_free(w->coupling_matrix_binned);
-  nmt_bins_flat_free(w->bin);
-  nmt_flatsky_info_free(w->fs);
-  for(ii=0;ii<w->ncls*w->nells;ii++)
+  gsl_matrix_free(w->coupling_matrix_binned_gsl);
+  for(ii=0;ii<w->ncls*w->bin->n_bands;ii++)
     free(w->coupling_matrix_unbinned[ii]);
   free(w->coupling_matrix_unbinned);
-  free(w->pcl_masks);
-  free(w->l_arr);
-  free(w->i_band);
+  for(ii=0;ii<w->ncls*w->bin->n_bands;ii++)
+    free(w->coupling_matrix_binned[ii]);
+  free(w->coupling_matrix_binned);
   free(w->n_cells);
+  nmt_bins_flat_free(w->bin);
+  nmt_flatsky_info_free(w->fs);
+#ifdef _ENABLE_FLAT_THEORY_ACCURATE
+  free(w->maskprod);
+#endif //_ENABLE_FLAT_THEORY_ACCURATE
   free(w);
 }
 
-static nmt_workspace_flat *nmt_workspace_flat_new(int nl_rebin,int ncls,nmt_flatsky_info *fs,
+static nmt_workspace_flat *nmt_workspace_flat_new(int ncls,nmt_flatsky_info *fs,
 						  nmt_binning_scheme_flat *bin,
 						  flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y)
 {
   int ii,ib=0;
   nmt_workspace_flat *w=my_malloc(sizeof(nmt_workspace_flat));
   w->ncls=ncls;
-  w->nl_rebin=nl_rebin;
 
   w->ellcut_x[0]=lmn_x;
   w->ellcut_x[1]=lmx_x;
@@ -36,33 +38,21 @@ static nmt_workspace_flat *nmt_workspace_flat_new(int nl_rebin,int ncls,nmt_flat
 
   w->fs=nmt_flatsky_info_alloc(fs->nx,fs->ny,fs->lx,fs->ly);
 
-  if(w->lmax>w->fs->ell_min[w->fs->n_ell-1]+w->fs->dell)
-    report_error(1,"You requested multipoles beyond the resolution of the input maps.\n");
+#ifdef _ENABLE_FLAT_THEORY_ACCURATE
+  w->maskprod=my_malloc(w->fs->npix*sizeof(flouble));
+#endif //_ENABLE_FLAT_THEORY_ACCURATE
 
-  w->nells=0;
-  for(ii=0;ii<w->fs->n_ell;ii++) {
-    if(w->fs->ell_min[ii]<w->lmax)
-      w->nells+=w->nl_rebin;
-    else
-      break;
-  }
+  w->n_cells=my_calloc(w->bin->n_bands,sizeof(int));
 
-  w->pcl_masks=my_malloc(w->nells*sizeof(flouble));
-  w->l_arr=my_malloc(w->nells*sizeof(flouble));
-  w->i_band=my_malloc(w->nells*sizeof(int));
-  w->n_cells=my_calloc(w->nells,sizeof(int));
-  for(ii=0;ii<w->nells;ii++) {
-    flouble l_here=ii*w->fs->dell/w->nl_rebin;
-    ib=nmt_bins_flat_search_fast(w->bin,l_here,ib);
-    w->l_arr[ii] =l_here;
-    w->i_band[ii]=ib;
-  }
+  w->coupling_matrix_unbinned=my_malloc(w->ncls*w->bin->n_bands*sizeof(flouble *));
+  for(ii=0;ii<w->ncls*w->bin->n_bands;ii++)
+    w->coupling_matrix_unbinned[ii]=my_calloc(w->ncls*w->fs->n_ell,sizeof(flouble));
 
-  w->coupling_matrix_unbinned=my_malloc(w->ncls*w->nells*sizeof(flouble *));
-  for(ii=0;ii<w->ncls*w->nells;ii++)
-    w->coupling_matrix_unbinned[ii]=my_calloc(w->ncls*w->nells,sizeof(flouble));
+  w->coupling_matrix_binned=my_malloc(w->ncls*w->bin->n_bands*sizeof(flouble *));
+  for(ii=0;ii<w->ncls*w->bin->n_bands;ii++)
+    w->coupling_matrix_binned[ii]=my_calloc(w->ncls*w->bin->n_bands,sizeof(flouble));
 
-  w->coupling_matrix_binned=gsl_matrix_alloc(w->ncls*w->bin->n_bands,w->ncls*w->bin->n_bands);
+  w->coupling_matrix_binned_gsl=gsl_matrix_alloc(w->ncls*w->bin->n_bands,w->ncls*w->bin->n_bands);
   w->coupling_matrix_perm=gsl_permutation_alloc(w->ncls*w->bin->n_bands);
 
   return w;
@@ -76,26 +66,14 @@ nmt_workspace_flat *nmt_workspace_flat_read(char *fname)
   FILE *fi=my_fopen(fname,"rb");
 
   my_fread(&(w->ncls),sizeof(int),1,fi);
-  my_fread(&(w->nl_rebin),sizeof(int),1,fi);
-  my_fread(&(w->nells),sizeof(int),1,fi);
 
   my_fread(w->ellcut_x,sizeof(flouble),2,fi);
   my_fread(w->ellcut_y,sizeof(flouble),2,fi);
 
-  w->pcl_masks=my_malloc(w->nells*sizeof(flouble));
-  my_fread(w->pcl_masks,sizeof(flouble),w->nells,fi);
-  w->l_arr=my_malloc(w->nells*sizeof(flouble));
-  my_fread(w->l_arr,sizeof(flouble),w->nells,fi);
-  w->i_band=my_malloc(w->nells*sizeof(flouble));
-  my_fread(w->i_band,sizeof(int),w->nells,fi);
-  w->n_cells=my_malloc(w->nells*sizeof(flouble));
-  my_fread(w->n_cells,sizeof(int),w->nells,fi);
-
-  w->coupling_matrix_unbinned=my_malloc(w->ncls*w->nells*sizeof(flouble *));
-  for(ii=0;ii<w->ncls*w->nells;ii++) {
-    w->coupling_matrix_unbinned[ii]=my_malloc(w->ncls*w->nells*sizeof(flouble));
-    my_fread(w->coupling_matrix_unbinned[ii],sizeof(flouble),w->ncls*w->nells,fi);
-  }
+  my_fread(&(w->pe1),sizeof(int),1,fi);
+  my_fread(&(w->pe2),sizeof(int),1,fi);
+  my_fread(&(w->pb1),sizeof(int),1,fi);
+  my_fread(&(w->pb2),sizeof(int),1,fi);
 
   my_fread(&nx,sizeof(int),1,fi);
   my_fread(&ny,sizeof(int),1,fi);
@@ -103,18 +81,38 @@ nmt_workspace_flat *nmt_workspace_flat_read(char *fname)
   my_fread(&ly,sizeof(flouble),1,fi);
   w->fs=nmt_flatsky_info_alloc(nx,ny,lx,ly);
 
+#ifdef _ENABLE_FLAT_THEORY_ACCURATE
+  w->maskprod=my_malloc(w->fs->npix*sizeof(flouble));
+  my_fread(w->maskprod,sizeof(flouble),w->fs->npix,fi);
+#endif //_ENABLE_FLAT_THEORY_ACCURATE
+
   w->bin=my_malloc(sizeof(nmt_binning_scheme_flat));
   my_fread(&(w->bin->n_bands),sizeof(int),1,fi);
   w->bin->ell_0_list=my_malloc(w->bin->n_bands*sizeof(flouble));
   w->bin->ell_f_list=my_malloc(w->bin->n_bands*sizeof(flouble));
   my_fread(w->bin->ell_0_list,sizeof(flouble),w->bin->n_bands,fi);
   my_fread(w->bin->ell_f_list,sizeof(flouble),w->bin->n_bands,fi);
+  w->lmax=w->bin->ell_f_list[w->bin->n_bands-1];
 
-  w->coupling_matrix_binned=gsl_matrix_alloc(w->ncls*w->bin->n_bands,w->ncls*w->bin->n_bands);
+  w->n_cells=my_malloc(w->bin->n_bands*sizeof(int));
+  my_fread(w->n_cells,sizeof(int),w->bin->n_bands,fi);
+
+  w->coupling_matrix_unbinned=my_malloc(w->ncls*w->bin->n_bands*sizeof(flouble *));
+  for(ii=0;ii<w->ncls*w->bin->n_bands;ii++) {
+    w->coupling_matrix_unbinned[ii]=my_malloc(w->ncls*w->fs->n_ell*sizeof(flouble));
+    my_fread(w->coupling_matrix_unbinned[ii],sizeof(flouble),w->ncls*w->fs->n_ell,fi);
+  }
+
+  w->coupling_matrix_binned=my_malloc(w->ncls*w->bin->n_bands*sizeof(flouble *));
+  for(ii=0;ii<w->ncls*w->bin->n_bands;ii++) {
+    w->coupling_matrix_binned[ii]=my_malloc(w->ncls*w->bin->n_bands*sizeof(flouble));
+    my_fread(w->coupling_matrix_binned[ii],sizeof(flouble),w->ncls*w->bin->n_bands,fi);
+  }
+
+  w->coupling_matrix_binned_gsl=gsl_matrix_alloc(w->ncls*w->bin->n_bands,w->ncls*w->bin->n_bands);
   w->coupling_matrix_perm=gsl_permutation_alloc(w->ncls*w->bin->n_bands);
-  gsl_matrix_fread(fi,w->coupling_matrix_binned);
+  gsl_matrix_fread(fi,w->coupling_matrix_binned_gsl);
   gsl_permutation_fread(fi,w->coupling_matrix_perm);
-  
   fclose(fi);
 
   return w;
@@ -126,142 +124,39 @@ void nmt_workspace_flat_write(nmt_workspace_flat *w,char *fname)
   FILE *fo=my_fopen(fname,"wb");
 
   my_fwrite(&(w->ncls),sizeof(int),1,fo);
-  my_fwrite(&(w->nl_rebin),sizeof(int),1,fo);
-  my_fwrite(&(w->nells),sizeof(int),1,fo);
-
   my_fwrite(w->ellcut_x,sizeof(flouble),2,fo);
   my_fwrite(w->ellcut_y,sizeof(flouble),2,fo);
 
-  my_fwrite(w->pcl_masks,sizeof(flouble),w->nells,fo);
-  my_fwrite(w->l_arr,sizeof(flouble),w->nells,fo);
-  my_fwrite(w->i_band,sizeof(int),w->nells,fo);
-  my_fwrite(w->n_cells,sizeof(int),w->nells,fo);
-
-  for(ii=0;ii<w->ncls*w->nells;ii++)
-    my_fwrite(w->coupling_matrix_unbinned[ii],sizeof(flouble),w->ncls*w->nells,fo);
+  my_fwrite(&(w->pe1),sizeof(int),1,fo);
+  my_fwrite(&(w->pe2),sizeof(int),1,fo);
+  my_fwrite(&(w->pb1),sizeof(int),1,fo);
+  my_fwrite(&(w->pb2),sizeof(int),1,fo);
 
   my_fwrite(&(w->fs->nx),sizeof(int),1,fo);
   my_fwrite(&(w->fs->ny),sizeof(int),1,fo);
   my_fwrite(&(w->fs->lx),sizeof(flouble),1,fo);
   my_fwrite(&(w->fs->ly),sizeof(flouble),1,fo);
 
+#ifdef _ENABLE_FLAT_THEORY_ACCURATE
+  my_fwrite(w->maskprod,sizeof(flouble),w->fs->npix,fo);
+#endif //_ENABLE_FLAT_THEORY_ACCURATE
+
   my_fwrite(&(w->bin->n_bands),sizeof(int),1,fo);
   my_fwrite(w->bin->ell_0_list,sizeof(flouble),w->bin->n_bands,fo);
   my_fwrite(w->bin->ell_f_list,sizeof(flouble),w->bin->n_bands,fo);
 
-  gsl_matrix_fwrite(fo,w->coupling_matrix_binned);
+  my_fwrite(w->n_cells,sizeof(int),w->bin->n_bands,fo);
+
+  for(ii=0;ii<w->ncls*w->bin->n_bands;ii++)
+    my_fwrite(w->coupling_matrix_unbinned[ii],sizeof(flouble),w->ncls*w->fs->n_ell,fo);
+
+  for(ii=0;ii<w->ncls*w->bin->n_bands;ii++)
+    my_fwrite(w->coupling_matrix_binned[ii],sizeof(flouble),w->ncls*w->bin->n_bands,fo);
+
+  gsl_matrix_fwrite(fo,w->coupling_matrix_binned_gsl);
   gsl_permutation_fwrite(fo,w->coupling_matrix_perm);
   
   fclose(fo);
-}
-
-static void bin_coupling_matrix(nmt_workspace_flat *w)
-{
-  int icl_a,icl_b,il2,il3,ib2,ib3,sig;
-  int *ncells_per_band=my_calloc(w->bin->n_bands,sizeof(int));
-  flouble **coupling_b=my_malloc(w->ncls*w->bin->n_bands*sizeof(flouble *));
-  for(ib2=0;ib2<w->ncls*w->bin->n_bands;ib2++)
-    coupling_b[ib2]=my_calloc(w->ncls*w->bin->n_bands,sizeof(flouble *));
-
-  for(il2=0;il2<w->nells;il2++) {
-    ib2=w->i_band[il2];
-    if(ib2>=0)
-      ncells_per_band[ib2]+=w->n_cells[il2];
-  }
-  
-  for(icl_a=0;icl_a<w->ncls;icl_a++) {
-    for(icl_b=0;icl_b<w->ncls;icl_b++) {
-      for(il2=0;il2<w->nells;il2++) {
-	ib2=w->i_band[il2];
-	if(ib2>=0) {
-	  for(il3=0;il3<w->nells;il3++) {
-	    ib3=w->i_band[il3];
-	    if(ib3>=0) {
-	      coupling_b[w->ncls*ib2+icl_a][w->ncls*ib3+icl_b]+=
-		w->n_cells[il2]*w->coupling_matrix_unbinned[w->ncls*il2+icl_a][w->ncls*il3+icl_b];
-	    }
-	  }
-	}
-      }
-      for(ib2=0;ib2<w->bin->n_bands;ib2++) {
-	flouble norm=0;
-	if(ncells_per_band[ib2]>0)
-	  norm=1./((double)(ncells_per_band[ib2]));
-	for(ib3=0;ib3<w->bin->n_bands;ib3++) {
-	  flouble c=coupling_b[w->ncls*ib2+icl_a][w->ncls*ib3+icl_b]*norm;
-	  gsl_matrix_set(w->coupling_matrix_binned,w->ncls*ib2+icl_a,w->ncls*ib3+icl_b,c);
-	}
-      }
-    }
-  }
-
-  /*
-  FILE *log;
-  int di;
-  log=fopen("log_b.log","w");
-  for(di=0;di<w->ncls*w->bin->n_bands;di++) {
-    int dj;
-    for(dj=0;dj<w->ncls*w->bin->n_bands;dj++)
-      fprintf(log,"%.3lf ",gsl_matrix_get(w->coupling_matrix_binned,di,dj));
-    fprintf(log,"\n");
-  }
-  fclose(log);
-
-  log=fopen("log_u.log","w");
-  for(di=0;di<w->ncls*w->nells;di++) {
-    int dj;
-    for(dj=0;dj<w->ncls*w->nells;dj++)
-      fprintf(log,"%.3lf ",w->coupling_matrix_unbinned[di][dj]);
-    fprintf(log,"\n");
-  }
-  fclose(log);
-  */
-
-  gsl_linalg_LU_decomp(w->coupling_matrix_binned,w->coupling_matrix_perm,&sig);
-
-  for(ib2=0;ib2<w->ncls*w->bin->n_bands;ib2++)
-    free(coupling_b[ib2]);
-  free(coupling_b);
-  free(ncells_per_band);
-}
-
-typedef struct {
-  flouble l,k;
-  flouble *carr;
-  flouble inv_dell;
-  flouble qmax;
-  int flag;
-} intg_par;
-
-#define INTG_FLAG_00 100
-#define INTG_FLAG_02 101
-#define INTG_FLAG_22 102
-static double integ_coupling(double th,void *params)
-{
-  intg_par *p=(intg_par *)params;
-  double cth=cos(th);
-  double q=sqrt(p->k*p->k+p->l*p->l-2*p->k*p->l*cth);
-  double cvw;
-
-  if(q<0) cvw=p->carr[0];
-  else if(q>=p->qmax) cvw=0;
-  else cvw=p->carr[(int)(q*p->inv_dell)];
-
-  if(p->flag==INTG_FLAG_00)
-    return cvw;
-  else {
-    flouble c2th=2*cth*cth-1;
-    if(p->flag==INTG_FLAG_02)
-      return cvw*c2th;
-    else if(p->flag==INTG_FLAG_22) {
-      flouble c4th=2*c2th*c2th-1;
-      return cvw*c4th;
-    }
-    else {
-      report_error(1,"Unknown flag %d\n",p->flag);
-      return 0;
-    }
-  }
 }
 
 static int check_flatsky_infos(nmt_flatsky_info *fs1,nmt_flatsky_info *fs2)
@@ -273,289 +168,26 @@ static int check_flatsky_infos(nmt_flatsky_info *fs1,nmt_flatsky_info *fs2)
   return 0;
 }
 
-static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_a(nmt_field_flat *fl1,nmt_field_flat *fl2,
-							      nmt_binning_scheme_flat *bin,int nl_rebin,
-							      flouble lmn_x,flouble lmx_x,
-							      flouble lmn_y,flouble lmx_y)
+nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
+						     nmt_binning_scheme_flat *bin,
+						     flouble lmn_x,flouble lmx_x,
+						     flouble lmn_y,flouble lmx_y)
 {
-  int i2;
-  flouble *beam_prod;
-  flouble *pcl_masks_raw=my_malloc(fl1->fs->n_ell*sizeof(flouble));
-  nmt_workspace_flat *w=nmt_workspace_flat_new(nl_rebin,fl1->nmaps*fl2->nmaps,fl1->fs,bin,
-					       lmn_x,lmx_x,lmn_y,lmx_y);
-  flouble dell_here=w->fs->dell/w->nl_rebin;
+  if(check_flatsky_infos(fl1->fs,fl2->fs))
+    report_error(1,"Can only correlate fields defined on the same pixels!\n");
 
-  fs_anafast(fl1->fs,&(fl1->mask),&(fl2->mask),0,0,&(pcl_masks_raw));
-
-  gsl_interp_accel *intacc=gsl_interp_accel_alloc();
-  beam_prod=my_malloc(w->nells*sizeof(flouble));
-  for(i2=0;i2<w->nells;i2++) {
-    int isub=i2/w->nl_rebin;
-    flouble l_here=w->l_arr[i2];
-    flouble b1=nmt_k_function_eval(fl1->beam,l_here,intacc);
-    flouble b2=nmt_k_function_eval(fl2->beam,l_here,intacc);
-    beam_prod[i2]=b1*b2;
-    w->n_cells[i2]=1;
-    w->pcl_masks[i2]=dell_here*pcl_masks_raw[isub]*l_here/(4*M_PI*M_PI);
-  }
-  gsl_interp_accel_free(intacc);
-  free(pcl_masks_raw);
-
-#pragma omp parallel default(none)		\
-  shared(w,beam_prod,dell_here,fl1,fl2)
-  {
-    int jj,ll1,ll2,ll3;
-    int pe1=fl1->pure_e,pe2=fl2->pure_e,pb1=fl1->pure_b,pb2=fl2->pure_b;
-    int pure_any=pe1 || pb1 || pe2 || pb2;
-
-#pragma omp for
-    for(ll1=0;ll1<w->nells;ll1++) {
-      flouble l1=w->l_arr[ll1];
-      for(ll2=0;ll2<w->nells;ll2++) {
-	flouble l2=w->l_arr[ll2];
-	for(ll3=0;ll3<w->nells;ll3++) {
-	  flouble wfac;
-	  flouble l3=w->l_arr[ll3];
-	  if(l3<=fabs(l1-l2))
-	    continue;
-	  else if(l3>=(l1+l2))
-	    break;
-	  flouble j123,fac_spin=1.,fac_spin2=1.,prod=(l1+l2+l3)*(l1+l2-l3)*(l1-l2+l3)*(-l1+l2+l3);
-	  if(prod<=0)
-	    report_error(1,"This shouldn't have happened\n");
-	  
-	  j123=4./sqrt(prod);
-	  if((w->ncls==2)||(w->ncls==4)) {
-	    if((l1==0) || (l2==0))
-	      fac_spin=0.;
-	    else {
-	      flouble l12=l1*l1,l22=l2*l2,l32=l3*l3;
-	      flouble l14=l12*l12,l24=l22*l22,l34=l32*l32;
-	      fac_spin=(l14+l24+l34-2*l12*l32-2*l22*l32)/(2*l12*l22);
-	      if(w->ncls==4)
-		fac_spin2=fac_spin*fac_spin;
-	    }
-	  }
-
-	  if(w->ncls==1) {
-	    wfac=w->pcl_masks[ll3]*j123;
-	    w->coupling_matrix_unbinned[1*ll1+0][1*ll2+0]+=wfac; //TT,TT
-	  }
-	  if(w->ncls==2) {
-	    double fac_pure[2];
-	    fac_pure[0]=w->pcl_masks[ll3]*j123*fac_spin;
-	    if(pure_any) {
-	      if(l1==0) fac_pure[1]=0;
-	      else fac_pure[1]=w->pcl_masks[ll3]*j123*(l2*l2)/(l1*l1);
-	    }
-	    else
-	      fac_pure[1]=fac_pure[0];
-	    w->coupling_matrix_unbinned[2*ll1+0][2*ll2+0]+=fac_pure[pe1+pe2]; //TE,TE
-	    w->coupling_matrix_unbinned[2*ll1+1][2*ll2+1]+=fac_pure[pb1+pb2]; //TB,TB
-	  }
-	  if(w->ncls==4) {
-	    double fac_pure_p[3],fac_pure_m[3];
-	    fac_pure_p[0]=w->pcl_masks[ll3]*j123*fac_spin2;
-	    fac_pure_m[0]=w->pcl_masks[ll3]*j123*(1-fac_spin2);
-	    if(pure_any) {
-	      if(l1==0) {
-		fac_pure_p[1]=0;
-		fac_pure_p[2]=0;
-	      }
-	      else {
-		fac_pure_p[1]=w->pcl_masks[ll3]*j123*fac_spin*(l2*l2)/(l1*l1);
-		fac_pure_p[2]=w->pcl_masks[ll3]*j123*(l2*l2*l2*l2)/(l1*l1*l1*l1);
-	      }
-	      fac_pure_m[1]=0;
-	      fac_pure_m[2]=0;
-	    }
-	    else {
-	      fac_pure_p[1]=fac_pure_p[0];
-	      fac_pure_p[2]=fac_pure_p[0];
-	      fac_pure_m[1]=fac_pure_m[0];
-	      fac_pure_m[2]=fac_pure_m[0];
-	    }
-	    w->coupling_matrix_unbinned[4*ll1+0][4*ll2+0]+=fac_pure_p[pe1+pe2]; //EE,EE
-	    w->coupling_matrix_unbinned[4*ll1+1][4*ll2+1]+=fac_pure_p[pe1+pb2]; //EB,EB
-	    w->coupling_matrix_unbinned[4*ll1+2][4*ll2+2]+=fac_pure_p[pb1+pe2]; //BE,BE
-	    w->coupling_matrix_unbinned[4*ll1+3][4*ll2+3]+=fac_pure_p[pb1+pb2]; //BB,BB
-	    w->coupling_matrix_unbinned[4*ll1+0][4*ll2+3]+=fac_pure_m[pe1+pe2]; //EE,BB
-	    w->coupling_matrix_unbinned[4*ll1+1][4*ll2+2]-=fac_pure_m[pe1+pe2]; //EB,BE
-	    w->coupling_matrix_unbinned[4*ll1+2][4*ll2+1]-=fac_pure_m[pe1+pe2]; //BE,EB
-	    w->coupling_matrix_unbinned[4*ll1+3][4*ll2+0]+=fac_pure_m[pe1+pe2]; //BB,EE
-	  }
-	}
-	for(jj=0;jj<w->ncls;jj++) {
-	  int kk;
-	  for(kk=0;kk<w->ncls;kk++)
-	    w->coupling_matrix_unbinned[w->ncls*ll1+jj][w->ncls*ll2+kk]*=l2*beam_prod[ll2]*dell_here*0.5;
-	}
-      }
-    } //end omp for
-  } //end omp parallel
-
-  bin_coupling_matrix(w);
-
-  free(beam_prod);
-
-  return w;
-}
-
-static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_b(nmt_field_flat *fl1,nmt_field_flat *fl2,
-							      nmt_binning_scheme_flat *bin,int nl_rebin,
-							      flouble lmn_x,flouble lmx_x,
-							      flouble lmn_y,flouble lmx_y)
-{
   int ii;
-  nmt_workspace_flat *w=nmt_workspace_flat_new(nl_rebin,fl1->nmaps*fl2->nmaps,fl1->fs,bin,
-					       lmn_x,lmx_x,lmn_y,lmx_y);
-
-  gsl_interp_accel *intacc=gsl_interp_accel_alloc();
-  flouble *beam_prod=my_malloc(w->nells*sizeof(flouble));
-  for(ii=0;ii<w->nells;ii++) {
-    flouble l_here=w->l_arr[ii];
-    flouble b1=nmt_k_function_eval(fl1->beam,l_here,intacc);
-    flouble b2=nmt_k_function_eval(fl2->beam,l_here,intacc);
-    beam_prod[ii]=b1*b2;
-    w->n_cells[ii]=1;
-  }
-  gsl_interp_accel_free(intacc);
-
-  flouble *pcl_masks_raw=my_malloc(fl1->fs->n_ell*sizeof(flouble));
-  fs_anafast(fl1->fs,&(fl1->mask),&(fl2->mask),0,0,&(pcl_masks_raw));
-
-  gsl_set_error_handler_off();
-
-#pragma omp parallel default(none)		\
-  shared(w,beam_prod,pcl_masks_raw,fl1,fl2)
-  {
-    int ll1;
-    gsl_function F;
-    intg_par p;
-    flouble dell_here=w->fs->dell/w->nl_rebin;
-    gsl_integration_workspace *wi=gsl_integration_workspace_alloc(1000);
-    int pe1=fl1->pure_e,pe2=fl2->pure_e,pb1=fl1->pure_b,pb2=fl2->pure_b;
-    int pure_any=pe1 || pb1 || pe2 || pb2;
-
-    p.qmax=w->fs->dell*w->fs->n_ell;
-    p.carr=pcl_masks_raw;
-    p.inv_dell=w->fs->i_dell;
-    F.function=&integ_coupling;
-    F.params=&p;
-
-#pragma omp for
-    for(ll1=0;ll1<w->nells;ll1++) {
-      int ll2;
-      flouble l1=w->l_arr[ll1];
-      p.l=l1;
-      for(ll2=0;ll2<w->nells;ll2++) {
-	flouble l2=w->l_arr[ll2];
-	p.k=l2;
-	if(w->ncls==1) {
-	  double integ,einteg;
-	  p.flag=INTG_FLAG_00;
-	  gsl_integration_qag(&F,0,M_PI,0,1E-4,1000,GSL_INTEG_GAUSS61,wi,&integ,&einteg);
-	  w->coupling_matrix_unbinned[1*ll1+0][1*ll2+0]=integ; //TT,TT
-	}
-	if(w->ncls==2) {
-	  double integ,einteg,fac_pure[2];
-	  p.flag=INTG_FLAG_02;
-	  gsl_integration_qag(&F,0,M_PI,0,1E-4,1000,GSL_INTEG_GAUSS61,wi,&integ,&einteg);
-	  fac_pure[0]=integ;
-	  if(pure_any) {
-	    if(l1==0)
-	      fac_pure[1]=0;
-	    else {
-	      p.flag=INTG_FLAG_00;
-	      gsl_integration_qag(&F,0,M_PI,0,1E-4,1000,GSL_INTEG_GAUSS61,wi,&integ,&einteg);
-	      fac_pure[1]=integ*(l2*l2)/(l1*l1);
-	    }
-	  }
-	  else
-	    fac_pure[1]=fac_pure[0];
-	  w->coupling_matrix_unbinned[2*ll1+0][2*ll2+0]=fac_pure[pe1+pe2]; //TE,TE
-	  w->coupling_matrix_unbinned[2*ll1+1][2*ll2+1]=fac_pure[pb1+pb2]; //TB,TB
-	}
-	if(w->ncls==4) {
-	  double integ_0,integ_4,integ_2,einteg,fac_pure_p[3],fac_pure_m[3];
-	  p.flag=INTG_FLAG_00;
-	  gsl_integration_qag(&F,0,M_PI,0,1E-4,1000,GSL_INTEG_GAUSS61,wi,&integ_0,&einteg);
-	  p.flag=INTG_FLAG_22;
-	  gsl_integration_qag(&F,0,M_PI,0,1E-4,1000,GSL_INTEG_GAUSS61,wi,&integ_4,&einteg);
-	  fac_pure_p[0]=0.5*(integ_0+integ_4);
-	  fac_pure_m[0]=0.5*(integ_0-integ_4);
-	  if(pure_any) {
-	    if(l1==0) {
-	      fac_pure_p[1]=0;
-	      fac_pure_p[2]=0;
-	    }
-	    else {
-	      p.flag=INTG_FLAG_02;
-	      gsl_integration_qag(&F,0,M_PI,0,1E-4,1000,GSL_INTEG_GAUSS61,wi,&integ_2,&einteg);
-	      fac_pure_p[1]=integ_2*(l2*l2)/(l1*l1);
-	      fac_pure_p[2]=integ_0*(l2*l2*l2*l2)/(l1*l1*l1*l1);
-	    }
-	    fac_pure_m[1]=0;
-	    fac_pure_m[2]=0;
-	  }
-	  else {
-	    fac_pure_p[1]=fac_pure_p[0];
-	    fac_pure_p[2]=fac_pure_p[0];
-	    fac_pure_m[1]=fac_pure_m[0];
-	    fac_pure_m[2]=fac_pure_m[0];
-	  }
-	  w->coupling_matrix_unbinned[4*ll1+0][4*ll2+0]= fac_pure_p[pe1+pe2]; //EE,EE
-	  w->coupling_matrix_unbinned[4*ll1+1][4*ll2+1]= fac_pure_p[pe1+pb2]; //EB,EB
-	  w->coupling_matrix_unbinned[4*ll1+2][4*ll2+2]= fac_pure_p[pb1+pe2]; //BE,BE
-	  w->coupling_matrix_unbinned[4*ll1+3][4*ll2+3]= fac_pure_p[pb1+pb2]; //BB,BB
-	  w->coupling_matrix_unbinned[4*ll1+0][4*ll2+3]= fac_pure_m[pe1+pe2]; //EE,BB
-	  w->coupling_matrix_unbinned[4*ll1+1][4*ll2+2]=-fac_pure_m[pe1+pb2]; //EB,BE
-	  w->coupling_matrix_unbinned[4*ll1+2][4*ll2+1]=-fac_pure_m[pb1+pe2]; //BE,EB
-	  w->coupling_matrix_unbinned[4*ll1+3][4*ll2+0]= fac_pure_m[pb1+pb2]; //BB,EE
-	}
-
-	int jj,kk;
-	flouble prefac=l2*beam_prod[ll2]*dell_here/(2*2*M_PI*M_PI);
-	for(jj=0;jj<w->ncls;jj++) {
-	  for(kk=0;kk<w->ncls;kk++)
-	    w->coupling_matrix_unbinned[w->ncls*ll1+jj][w->ncls*ll2+kk]*=prefac;
-	}
-      }
-    } //end omp for
-    gsl_integration_workspace_free(wi);
-  } //end omp parallel
-
-  bin_coupling_matrix(w);
-
-  free(beam_prod);
-  free(pcl_masks_raw);
-
-  return w;
-}
-
-static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl1,nmt_field_flat *fl2,
-							      nmt_binning_scheme_flat *bin,int nl_rebin,
-							      flouble lmn_x,flouble lmx_x,
-							      flouble lmn_y,flouble lmx_y)
-{
-  int ii;
-  nmt_workspace_flat *w=nmt_workspace_flat_new(1,fl1->nmaps*fl2->nmaps,fl1->fs,bin,
+  nmt_workspace_flat *w=nmt_workspace_flat_new(fl1->nmaps*fl2->nmaps,fl1->fs,bin,
 					       lmn_x,lmx_x,lmn_y,lmx_y);
   nmt_flatsky_info *fs=fl1->fs;
+  w->pe1=fl1->pure_e;
+  w->pe2=fl2->pure_e;
+  w->pb1=fl1->pure_b;
+  w->pb2=fl2->pure_b;
   
-  gsl_interp_accel *intacc=gsl_interp_accel_alloc();
-  flouble *beam_prod=my_malloc(w->nells*sizeof(flouble));
-  for(ii=0;ii<w->nells;ii++) {
-    flouble l_here=w->l_arr[ii];
-    flouble b1=nmt_k_function_eval(fl1->beam,l_here,intacc);
-    flouble b2=nmt_k_function_eval(fl2->beam,l_here,intacc);
-    beam_prod[ii]=b1*b2;
-  }
-  gsl_interp_accel_free(intacc);
-
   fcomplex *cmask1,*cmask2;
   flouble *maskprod,*cosarr,*sinarr,*kmodarr;
-  int *i_band;
+  int *i_band,*i_band_nocut,*i_ring;
   cmask1=dftw_malloc(fs->ny*(fs->nx/2+1)*sizeof(fcomplex));
   fs_map2alm(fl1->fs,1,0,&(fl1->mask),&cmask1);
   if(fl1==fl2)
@@ -564,12 +196,18 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
     cmask2=dftw_malloc(fs->ny*(fs->nx/2+1)*sizeof(fcomplex));
     fs_map2alm(fl2->fs,1,0,&(fl2->mask),&cmask2);
   }
-  maskprod=dftw_malloc(fl1->npix*sizeof(flouble));
-  i_band=my_malloc(fl1->npix*sizeof(int));		    
+  i_ring=my_malloc(w->fs->npix*sizeof(int));
+  i_band=my_malloc(w->fs->npix*sizeof(int));
+#ifdef _ENABLE_FLAT_THEORY_ACCURATE
+  maskprod=w->maskprod;
+#else //_ENABLE_FLAT_THEORY_ACCURATE
+  maskprod=my_malloc(w->fs->npix*sizeof(flouble));
+#endif //_ENABLE_FLAT_THEORY_ACCURATE
+  i_band_nocut=my_malloc(w->fs->npix*sizeof(int));
+  kmodarr=dftw_malloc(w->fs->npix*sizeof(flouble));
   if(w->ncls>1) {
-    kmodarr=dftw_malloc(fl1->npix*sizeof(flouble));
-    cosarr=dftw_malloc(fl1->npix*sizeof(flouble));
-    sinarr=dftw_malloc(fl1->npix*sizeof(flouble));
+    cosarr=dftw_malloc(w->fs->npix*sizeof(flouble));
+    sinarr=dftw_malloc(w->fs->npix*sizeof(flouble));
   }
 
   int *x_out_range,*y_out_range;
@@ -591,24 +229,25 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
   }
 
 #pragma omp parallel default(none)					\
-  shared(fs,maskprod,cmask1,cmask2,w,i_band,cosarr,sinarr,kmodarr)	\
-  shared(x_out_range,y_out_range)
+  shared(fs,cmask1,cmask2,w,i_ring,i_band,i_band_nocut)			\
+  shared(cosarr,sinarr,kmodarr,maskprod,x_out_range,y_out_range)
   {
     flouble dkx=2*M_PI/fs->lx;
     flouble dky=2*M_PI/fs->ly;
     int iy1,ix1;
-    int *n_cells_thr=my_calloc(w->nells,sizeof(int));
+    int *n_cells_thr=my_calloc(w->bin->n_bands,sizeof(int));
 
 #pragma omp for
     for(iy1=0;iy1<fs->ny;iy1++) {
       flouble ky;
+      int ik=0;
       if(2*iy1<=fs->ny)
 	ky=iy1*dky;
       else
 	ky=-(fs->ny-iy1)*dky;
       for(ix1=0;ix1<fs->nx;ix1++) {
 	flouble kx,kmod;
-	int ix_here,index_here,index,ik;
+	int ix_here,index_here,index;
 	index=ix1+fs->nx*iy1;
 	if(2*ix1<=fs->nx) {
 	  kx=ix1*dkx;
@@ -623,38 +262,43 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
 	maskprod[index]=(creal(cmask1[index_here])*creal(cmask2[index_here])+
 			 cimag(cmask1[index_here])*cimag(cmask2[index_here]));
 
+	kmod=sqrt(kx*kx+ky*ky);
+	kmodarr[index]=kmod;
+	ik=nmt_bins_flat_search_fast(w->bin,kmod,ik);
+	
 	if(y_out_range[iy1] || x_out_range[ix1])
 	  i_band[index]=-1;
 	else {
-	  kmod=sqrt(kx*kx+ky*ky);
-	  ik=(int)(kmod*fs->i_dell);
-	  if(ik<w->nells) {
+	  if(ik>=0) {
 	    i_band[index]=ik;
 	    n_cells_thr[ik]++;
 	  }
 	  else
 	    i_band[index]=-1;
-	  if(w->ncls>1) {
-	    flouble c,s;
-	    if(kmod>0) {
-	      c=kx/kmod;
-	      s=ky/kmod;
-	    }
-	    else {
-	      c=1.;
-	      s=0.;
-	    }
-	    cosarr[index]=c*c-s*s;
-	    sinarr[index]=2*s*c;
-	    kmodarr[index]=kmod;
-	  }	
+	}
+	i_band_nocut[index]=ik;
+	i_ring[index]=(int)(kmod*w->fs->i_dell);
+	if((i_ring[index]<0) || (i_ring[index]>=w->fs->n_ell))
+	  i_ring[index]=-1;
+	if(w->ncls>1) {
+	  flouble c,s;
+	  if(kmod>0) {
+	    c=kx/kmod;
+	    s=ky/kmod;
+	  }
+	  else {
+	    c=1.;
+	    s=0.;
+	  }
+	  cosarr[index]=c*c-s*s;
+	  sinarr[index]=2*s*c;
 	}
       }
     } //end omp for
 
 #pragma omp critical
     {
-      for(iy1=0;iy1<w->nells;iy1++)
+      for(iy1=0;iy1<w->bin->n_bands;iy1++)
 	w->n_cells[iy1]+=n_cells_thr[iy1];
     } //end omp critical
     free(n_cells_thr);
@@ -662,15 +306,20 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
   free(x_out_range);
   free(y_out_range);
 
-#pragma omp parallel default(none)				\
-  shared(fs,i_band,w,cosarr,sinarr,kmodarr,maskprod,fl1,fl2)
+#pragma omp parallel default(none)		\
+  shared(fs,i_ring,i_band,i_band_nocut,w)	\
+  shared(cosarr,sinarr,kmodarr,maskprod)
   {
     int iy1,ix1,ix2,iy2;
-    int pe1=fl1->pure_e,pe2=fl2->pure_e,pb1=fl1->pure_b,pb2=fl2->pure_b;
+    int pe1=w->pe1,pe2=w->pe2,pb1=w->pb1,pb2=w->pb2;
     int pure_any=pe1 || pb1 || pe2 || pb2;
-    flouble **coupling_matrix_thr=my_malloc(w->nells*w->ncls*sizeof(flouble *));
-    for(iy1=0;iy1<w->nells*w->ncls;iy1++)
-      coupling_matrix_thr[iy1]=my_calloc(w->nells*w->ncls,sizeof(flouble));
+    flouble **coup_unbinned_thr,**coup_binned_thr;
+    coup_unbinned_thr=my_malloc(w->bin->n_bands*w->ncls*sizeof(flouble *));
+    for(iy1=0;iy1<w->bin->n_bands*w->ncls;iy1++)
+      coup_unbinned_thr[iy1]=my_calloc(w->fs->n_ell*w->ncls,sizeof(flouble));
+    coup_binned_thr=my_malloc(w->bin->n_bands*w->ncls*sizeof(flouble *));
+    for(iy1=0;iy1<w->bin->n_bands*w->ncls;iy1++)
+      coup_binned_thr[iy1]=my_calloc(w->bin->n_bands*w->ncls,sizeof(flouble));
 
 #pragma omp for
     for(iy1=0;iy1<fs->ny;iy1++) {
@@ -685,65 +334,96 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
 	  for(iy2=0;iy2<fs->ny;iy2++) {
 	    for(ix2=0;ix2<fs->nx;ix2++) {
 	      int index2=ix2+fs->nx*iy2;
-	      int ik2=i_band[index2];
-	      if(ik2>=0) {
-		flouble cdiff=1,sdiff=0,kr=1,mp;
-		int index;
-		int iy=iy1-iy2;
-		int ix=ix1-ix2;
-		if(iy<0) iy+=fs->ny;
-		if(ix<0) ix+=fs->nx;
-		ik2*=w->ncls;
-		index=ix+fs->nx*iy;
-
-		if(w->ncls>1) {
-		  cdiff=cosarr[index1]*cosarr[index2]+sinarr[index1]*sinarr[index2];
-		  sdiff=sinarr[index1]*cosarr[index2]-cosarr[index1]*sinarr[index2];
-		  if((index1==0) && (index2==0))
-		    kr=1;
-		  else
-		    kr=kmodarr[index2]*inv_k1;
-		  kr*=kr;
+	      int ir2=i_ring[index2];
+	      int ik2=i_band_nocut[index2];
+	      flouble cdiff=1,sdiff=0,kr=1,mp;
+	      int index;
+	      int iy=iy1-iy2;
+	      int ix=ix1-ix2;
+	      if(iy<0) iy+=fs->ny;
+	      if(ix<0) ix+=fs->nx;
+	      ik2*=w->ncls;
+	      ir2*=w->ncls;
+	      index=ix+fs->nx*iy;
+	      
+	      if(w->ncls>1) {
+		cdiff=cosarr[index1]*cosarr[index2]+sinarr[index1]*sinarr[index2];
+		sdiff=sinarr[index1]*cosarr[index2]-cosarr[index1]*sinarr[index2];
+		if((index1==0) && (index2==0))
+		  kr=1;
+		else
+		  kr=kmodarr[index2]*inv_k1;
+		kr*=kr;
+	      }
+	      mp=maskprod[index];
+	      
+	      if(w->ncls==1) {
+		if(ir2>=0)
+		  coup_unbinned_thr[ik1+0][ir2+0]+=mp;
+		if(ik2>=0)
+		  coup_binned_thr[ik1+0][ik2+0]+=mp;
+	      }
+	      if(w->ncls==2) {
+		flouble fc[2],fs[2];
+		fc[0]=cdiff*mp;
+		fs[0]=sdiff*mp;
+		if(pure_any) {
+		  fc[1]=kr*mp; fs[1]=0;
 		}
-		mp=maskprod[index];
-
-		if(w->ncls==1) {
-		  coupling_matrix_thr[ik1+0][ik2+0]+=mp;
+		if(ir2>=0) {
+		  coup_unbinned_thr[ik1+0][ir2+0]+=fc[pe1+pe2]; //TE,TE
+		  coup_unbinned_thr[ik1+0][ir2+1]-=fs[pe1+pe2]; //TE,TB
+		  coup_unbinned_thr[ik1+1][ir2+0]+=fs[pb1+pb2]; //TB,TE
+		  coup_unbinned_thr[ik1+1][ir2+1]+=fc[pb1+pb2]; //TB,TB
 		}
-		if(w->ncls==2) {
-		  flouble fc[2],fs[2];
-		  fc[0]=cdiff*mp;
-		  fs[0]=sdiff*mp;
-		  if(pure_any) {
-		    fc[1]=kr*mp; fs[1]=0;
-		  }
-		  coupling_matrix_thr[ik1+0][ik2+0]+=fc[pe1+pe2]; //TE,TE
-		  coupling_matrix_thr[ik1+0][ik2+1]-=fs[pe1+pe2]; //TE,TB
-		  coupling_matrix_thr[ik1+1][ik2+0]+=fs[pb1+pb2]; //TB,TE
-		  coupling_matrix_thr[ik1+1][ik2+1]+=fc[pb1+pb2]; //TB,TB
+		if(ik2>=0) {
+		  coup_binned_thr[ik1+0][ik2+0]+=fc[pe1+pe2]; //TE,TE
+		  coup_binned_thr[ik1+0][ik2+1]-=fs[pe1+pe2]; //TE,TB
+		  coup_binned_thr[ik1+1][ik2+0]+=fs[pb1+pb2]; //TB,TE
+		  coup_binned_thr[ik1+1][ik2+1]+=fc[pb1+pb2]; //TB,TB
 		}
-		if(w->ncls==4) {
-		  flouble fc[2],fs[2];
-		  fc[0]=cdiff; fs[0]=sdiff;
-		  if(pure_any) {
-		    fc[1]=kr; fs[1]=0;
-		  }
-		  coupling_matrix_thr[ik1+0][ik2+0]+=fc[pe1]*fc[pe2]*mp; //EE,EE
-		  coupling_matrix_thr[ik1+0][ik2+1]-=fc[pe1]*fs[pe2]*mp; //EE,EB
-		  coupling_matrix_thr[ik1+0][ik2+2]-=fs[pe1]*fc[pe2]*mp; //EE,BE
-		  coupling_matrix_thr[ik1+0][ik2+3]+=fs[pe1]*fs[pe2]*mp; //EE,BB
-		  coupling_matrix_thr[ik1+1][ik2+0]+=fc[pe1]*fs[pb2]*mp; //EB,EE
-		  coupling_matrix_thr[ik1+1][ik2+1]+=fc[pe1]*fc[pb2]*mp; //EB,EB
-		  coupling_matrix_thr[ik1+1][ik2+2]-=fs[pe1]*fs[pb2]*mp; //EB,BE
-		  coupling_matrix_thr[ik1+1][ik2+3]-=fs[pe1]*fc[pb2]*mp; //EB,BB
-		  coupling_matrix_thr[ik1+2][ik2+0]+=fs[pb1]*fc[pe2]*mp; //BE,EE
-		  coupling_matrix_thr[ik1+2][ik2+1]-=fs[pb1]*fs[pe2]*mp; //BE,EB
-		  coupling_matrix_thr[ik1+2][ik2+2]+=fc[pb1]*fc[pe2]*mp; //BE,BE
-		  coupling_matrix_thr[ik1+2][ik2+3]-=fc[pb1]*fs[pe2]*mp; //BE,BB
-		  coupling_matrix_thr[ik1+3][ik2+0]+=fs[pb1]*fs[pb2]*mp; //BB,EE
-		  coupling_matrix_thr[ik1+3][ik2+1]+=fs[pb1]*fc[pb2]*mp; //BB,EB
-		  coupling_matrix_thr[ik1+3][ik2+2]+=fc[pb1]*fs[pb2]*mp; //BB,BE
-		  coupling_matrix_thr[ik1+3][ik2+3]+=fc[pb1]*fc[pb2]*mp; //BB,BB
+	      }
+	      if(w->ncls==4) {
+		flouble fc[2],fs[2];
+		fc[0]=cdiff; fs[0]=sdiff;
+		if(pure_any) {
+		  fc[1]=kr; fs[1]=0;
+		}
+		if(ir2>=0) {
+		  coup_unbinned_thr[ik1+0][ir2+0]+=fc[pe1]*fc[pe2]*mp; //EE,EE
+		  coup_unbinned_thr[ik1+0][ir2+1]-=fc[pe1]*fs[pe2]*mp; //EE,EB
+		  coup_unbinned_thr[ik1+0][ir2+2]-=fs[pe1]*fc[pe2]*mp; //EE,BE
+		  coup_unbinned_thr[ik1+0][ir2+3]+=fs[pe1]*fs[pe2]*mp; //EE,BB
+		  coup_unbinned_thr[ik1+1][ir2+0]+=fc[pe1]*fs[pb2]*mp; //EB,EE
+		  coup_unbinned_thr[ik1+1][ir2+1]+=fc[pe1]*fc[pb2]*mp; //EB,EB
+		  coup_unbinned_thr[ik1+1][ir2+2]-=fs[pe1]*fs[pb2]*mp; //EB,BE
+		  coup_unbinned_thr[ik1+1][ir2+3]-=fs[pe1]*fc[pb2]*mp; //EB,BB
+		  coup_unbinned_thr[ik1+2][ir2+0]+=fs[pb1]*fc[pe2]*mp; //BE,EE
+		  coup_unbinned_thr[ik1+2][ir2+1]-=fs[pb1]*fs[pe2]*mp; //BE,EB
+		  coup_unbinned_thr[ik1+2][ir2+2]+=fc[pb1]*fc[pe2]*mp; //BE,BE
+		  coup_unbinned_thr[ik1+2][ir2+3]-=fc[pb1]*fs[pe2]*mp; //BE,BB
+		  coup_unbinned_thr[ik1+3][ir2+0]+=fs[pb1]*fs[pb2]*mp; //BB,EE
+		  coup_unbinned_thr[ik1+3][ir2+1]+=fs[pb1]*fc[pb2]*mp; //BB,EB
+		  coup_unbinned_thr[ik1+3][ir2+2]+=fc[pb1]*fs[pb2]*mp; //BB,BE
+		  coup_unbinned_thr[ik1+3][ir2+3]+=fc[pb1]*fc[pb2]*mp; //BB,BB
+		}
+		if(ik2>=0) {
+		  coup_binned_thr[ik1+0][ik2+0]+=fc[pe1]*fc[pe2]*mp; //EE,EE
+		  coup_binned_thr[ik1+0][ik2+1]-=fc[pe1]*fs[pe2]*mp; //EE,EB
+		  coup_binned_thr[ik1+0][ik2+2]-=fs[pe1]*fc[pe2]*mp; //EE,BE
+		  coup_binned_thr[ik1+0][ik2+3]+=fs[pe1]*fs[pe2]*mp; //EE,BB
+		  coup_binned_thr[ik1+1][ik2+0]+=fc[pe1]*fs[pb2]*mp; //EB,EE
+		  coup_binned_thr[ik1+1][ik2+1]+=fc[pe1]*fc[pb2]*mp; //EB,EB
+		  coup_binned_thr[ik1+1][ik2+2]-=fs[pe1]*fs[pb2]*mp; //EB,BE
+		  coup_binned_thr[ik1+1][ik2+3]-=fs[pe1]*fc[pb2]*mp; //EB,BB
+		  coup_binned_thr[ik1+2][ik2+0]+=fs[pb1]*fc[pe2]*mp; //BE,EE
+		  coup_binned_thr[ik1+2][ik2+1]-=fs[pb1]*fs[pe2]*mp; //BE,EB
+		  coup_binned_thr[ik1+2][ik2+2]+=fc[pb1]*fc[pe2]*mp; //BE,BE
+		  coup_binned_thr[ik1+2][ik2+3]-=fc[pb1]*fs[pe2]*mp; //BE,BB
+		  coup_binned_thr[ik1+3][ik2+0]+=fs[pb1]*fs[pb2]*mp; //BB,EE
+		  coup_binned_thr[ik1+3][ik2+1]+=fs[pb1]*fc[pb2]*mp; //BB,EB
+		  coup_binned_thr[ik1+3][ik2+2]+=fc[pb1]*fs[pb2]*mp; //BB,BE
+		  coup_binned_thr[ik1+3][ik2+3]+=fc[pb1]*fc[pb2]*mp; //BB,BB
 		}
 	      }
 	    }
@@ -754,25 +434,30 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
 
 #pragma omp critical
     {
-      for(iy1=0;iy1<w->ncls*w->nells;iy1++) {
-	for(iy2=0;iy2<w->ncls*w->nells;iy2++)
-	  w->coupling_matrix_unbinned[iy1][iy2]+=coupling_matrix_thr[iy1][iy2];
+      for(iy1=0;iy1<w->ncls*w->bin->n_bands;iy1++) {
+	for(iy2=0;iy2<w->ncls*w->bin->n_bands;iy2++)
+	  w->coupling_matrix_binned[iy1][iy2]+=coup_binned_thr[iy1][iy2];
+	for(iy2=0;iy2<w->ncls*w->fs->n_ell;iy2++)
+	  w->coupling_matrix_unbinned[iy1][iy2]+=coup_unbinned_thr[iy1][iy2];
       }
     } //end omp critical
 
-    for(iy1=0;iy1<w->nells*w->ncls;iy1++)
-      free(coupling_matrix_thr[iy1]);
-    free(coupling_matrix_thr);
+    for(iy1=0;iy1<w->bin->n_bands*w->ncls;iy1++) {
+      free(coup_unbinned_thr[iy1]);
+      free(coup_binned_thr[iy1]);
+    }
+    free(coup_unbinned_thr);
+    free(coup_binned_thr);
   } //end omp parallel
 
 #pragma omp parallel default(none) \
-  shared(w,beam_prod,fs)
+  shared(w,fs)
   {
     int il1;
     flouble fac_norm=4*M_PI*M_PI/(fs->lx*fs->lx*fs->ly*fs->ly);
 
 #pragma omp for
-    for(il1=0;il1<w->nells;il1++) {
+    for(il1=0;il1<w->bin->n_bands;il1++) {
       int icl1;
       flouble norm;
       if(w->n_cells[il1]>0)
@@ -781,23 +466,43 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
 	norm=0;
       for(icl1=0;icl1<w->ncls;icl1++) {
 	int il2;
-	for(il2=0;il2<w->nells;il2++) {
+	for(il2=0;il2<w->fs->n_ell;il2++) {
 	  int icl2;
 	  for(icl2=0;icl2<w->ncls;icl2++)
-	    w->coupling_matrix_unbinned[w->ncls*il1+icl1][w->ncls*il2+icl2]*=beam_prod[il2]*norm;
+	    w->coupling_matrix_unbinned[w->ncls*il1+icl1][w->ncls*il2+icl2]*=norm;
+	}
+	for(il2=0;il2<w->bin->n_bands;il2++) {
+	  int icl2;
+	  for(icl2=0;icl2<w->ncls;icl2++)
+	    w->coupling_matrix_binned[w->ncls*il1+icl1][w->ncls*il2+icl2]*=norm;
 	}
       }
     } //end omp for
   } //end omp parallel
 
-  bin_coupling_matrix(w);
+  int icl_a,icl_b,ib2,ib3,sig;
+  for(icl_a=0;icl_a<w->ncls;icl_a++) {
+    for(icl_b=0;icl_b<w->ncls;icl_b++) {
+      for(ib2=0;ib2<w->bin->n_bands;ib2++) {
+	for(ib3=0;ib3<w->bin->n_bands;ib3++) {
+	  gsl_matrix_set(w->coupling_matrix_binned_gsl,w->ncls*ib2+icl_a,w->ncls*ib3+icl_b,
+			 w->coupling_matrix_binned[w->ncls*ib2+icl_a][w->ncls*ib3+icl_b]);
+	}
+      }
+    }
+  }
+  gsl_linalg_LU_decomp(w->coupling_matrix_binned_gsl,w->coupling_matrix_perm,&sig);
 
-  free(beam_prod);
   dftw_free(cmask1);
   if(fl1!=fl2)
     dftw_free(cmask2);
-  dftw_free(maskprod);
+  free(i_ring);
   free(i_band);
+  free(i_band_nocut);
+  dftw_free(kmodarr);
+#ifndef _ENABLE_FLAT_THEORY_ACCURATE
+  free(maskprod);
+#endif //_ENABLE_FLAT_THEORY_ACCURATE
   if(w->ncls>1) {
     dftw_free(cosarr);
     dftw_free(sinarr);
@@ -807,6 +512,7 @@ static nmt_workspace_flat *nmt_compute_coupling_matrix_flat_c(nmt_field_flat *fl
 }
 
 void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
+					nmt_binning_scheme_flat *bin,
 					flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y,
 					int nl_prop,flouble *l_prop,flouble **cl_proposal,
 					flouble **cl_bias)
@@ -818,9 +524,9 @@ void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
   flouble **cl_dum=my_malloc(nspec*sizeof(flouble *));
   nmt_k_function **cl_proposal_f=my_malloc(nspec*sizeof(nmt_k_function *));
   for(ii=0;ii<nspec;ii++) {
-    cl_dum[ii]=my_calloc(fl1->fs->n_ell,sizeof(flouble));
+    cl_dum[ii]=my_calloc(bin->n_bands,sizeof(flouble));
     cl_proposal_f[ii]=nmt_k_function_alloc(nl_prop,l_prop,cl_proposal[ii],cl_proposal[ii][0],0,0);
-    for(ip=0;ip<fl1->fs->n_ell;ip++)
+    for(ip=0;ip<bin->n_bands;ip++)
       cl_bias[ii][ip]=0;
   }
 
@@ -866,9 +572,10 @@ void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 	//DFT[v*DFT^-1[C^ab*DFT[w*g^j]]]
 	fs_map2alm(fl1->fs,1,2*fl1->pol,map_1_dum,alm_1_dum);
 	//Sum_m(DFT[v*DFT^-1[C^ab*DFT[w*g^j]]]*g^i*)/(2l+1)
-	fs_alm2cl(fl1->fs,alm_1_dum,fl2->a_temp[iti],fl1->pol,fl2->pol,cl_dum,lmn_x,lmx_x,lmn_y,lmx_y);
+	fs_alm2cl(fl1->fs,bin,alm_1_dum,fl2->a_temp[iti],fl1->pol,fl2->pol,cl_dum,
+		  lmn_x,lmx_x,lmn_y,lmx_y);
 	for(im1=0;im1<nspec;im1++) {
-	  for(ip=0;ip<fl1->fs->n_ell;ip++)
+	  for(ip=0;ip<bin->n_bands;ip++)
 	    cl_bias[im1][ip]-=cl_dum[im1][ip]*nij;
 	}
       }
@@ -901,9 +608,10 @@ void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 	//DFT[w*DFT^-1[C^abT*DFT[v*f^j]]]
 	fs_map2alm(fl2->fs,1,2*fl2->pol,map_2_dum,alm_2_dum);
 	//Sum_m(f^i*DFT[w*DFT^-1[C^abT*DFT[v*f^j]]]^*)/(2l+1)
-	fs_alm2cl(fl1->fs,fl1->a_temp[iti],alm_2_dum,fl1->pol,fl2->pol,cl_dum,lmn_x,lmx_x,lmn_y,lmx_y);
+	fs_alm2cl(fl1->fs,bin,fl1->a_temp[iti],alm_2_dum,fl1->pol,fl2->pol,cl_dum,
+		  lmn_x,lmx_x,lmn_y,lmx_y);
 	for(im1=0;im1<nspec;im1++) {
-	  for(ip=0;ip<fl1->fs->n_ell;ip++)
+	  for(ip=0;ip<bin->n_bands;ip++)
 	    cl_bias[im1][ip]-=cl_dum[im1][ip]*mij;
 	}
       }
@@ -940,13 +648,14 @@ void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
     for(iti=0;iti<fl1->ntemp;iti++) {
       for(itp=0;itp<fl2->ntemp;itp++) {
 	//Sum_m(f^i*g^p*)/(2l+1)
-	fs_alm2cl(fl1->fs,fl1->a_temp[iti],fl2->a_temp[itp],fl1->pol,fl2->pol,cl_dum,lmn_x,lmx_x,lmn_y,lmx_y);
+	fs_alm2cl(fl1->fs,bin,fl1->a_temp[iti],fl2->a_temp[itp],fl1->pol,fl2->pol,cl_dum,
+		  lmn_x,lmx_x,lmn_y,lmx_y);
 	for(itj=0;itj<fl1->ntemp;itj++) {
 	  double mij=gsl_matrix_get(fl1->matrix_M,iti,itj);
 	  for(itq=0;itq<fl2->ntemp;itq++) {
 	    double npq=gsl_matrix_get(fl2->matrix_M,itp,itq);
 	    for(im1=0;im1<nspec;im1++) {
-	      for(ip=0;ip<fl1->fs->n_ell;ip++)
+	      for(ip=0;ip<bin->n_bands;ip++)
 		cl_bias[im1][ip]+=cl_dum[im1][ip]*mat_prod[itj*fl2->ntemp+itq]*mij*npq;
 	    }
 	  }
@@ -979,45 +688,387 @@ void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
   return;
 }
 
-void nmt_couple_cl_l_flat(nmt_workspace_flat *w,int nl,flouble *larr,flouble **cl_in,flouble **cl_out)
+#ifdef _ENABLE_FLAT_THEORY_ACCURATE
+void nmt_couple_cl_l_flat_accurate(nmt_workspace_flat *w,int nl,flouble *larr,flouble **cl_in,flouble **cl_out)
+{
+  //Zero input array
+  int ii;
+  for(ii=0;ii<w->ncls;ii++) {
+    int jj;
+    for(jj=0;jj<w->bin->n_bands;jj++)
+      cl_out[ii][jj]=0;
+  }
+
+  //Precompute angles, mode lengths and band indices
+  flouble *cosarr,*sinarr,*kmodarr;
+  int *i_band=my_malloc(w->fs->npix*sizeof(int));
+  flouble *clmaps=my_malloc(w->ncls*w->fs->npix*sizeof(flouble));
+  nmt_k_function **fcl=my_malloc(w->ncls*sizeof(nmt_k_function *));
+  for(ii=0;ii<w->ncls;ii++)
+    fcl[ii]=nmt_k_function_alloc(nl,larr,cl_in[ii],cl_in[ii][0],0.,0);
+  if(w->ncls>1) {
+    kmodarr=dftw_malloc(w->fs->npix*sizeof(flouble));
+    cosarr=dftw_malloc(w->fs->npix*sizeof(flouble));
+    sinarr=dftw_malloc(w->fs->npix*sizeof(flouble));
+  }
+
+  int *x_out_range,*y_out_range;
+  x_out_range=my_calloc(w->fs->nx,sizeof(int));
+  y_out_range=my_calloc(w->fs->ny,sizeof(int));
+  for(ii=0;ii<w->fs->nx;ii++) {
+    flouble k;
+    if(2*ii<=w->fs->nx) k=ii*2*M_PI/w->fs->lx;
+    else k=-(w->fs->nx-ii)*2*M_PI/w->fs->lx;
+    if((k<=w->ellcut_x[1]) && (k>=w->ellcut_x[0]))
+      x_out_range[ii]=1;
+  }
+  for(ii=0;ii<w->fs->ny;ii++) {
+    flouble k;
+    if(2*ii<=w->fs->ny) k=ii*2*M_PI/w->fs->ly;
+    else k=-(w->fs->ny-ii)*2*M_PI/w->fs->ly;
+    if((k<=w->ellcut_y[1]) && (k>=w->ellcut_y[0]))
+      y_out_range[ii]=1;
+  }
+
+#pragma omp parallel default(none)		\
+  shared(w,i_band,cosarr,sinarr,kmodarr)	\
+  shared(x_out_range,y_out_range,fcl,clmaps)
+  {
+    flouble dkx=2*M_PI/w->fs->lx;
+    flouble dky=2*M_PI/w->fs->ly;
+    int iy1,ix1;
+    gsl_interp_accel *intacc=gsl_interp_accel_alloc();
+
+#pragma omp for
+    for(iy1=0;iy1<w->fs->ny;iy1++) {
+      flouble ky;
+      int ik=0;
+      if(2*iy1<=w->fs->ny)
+	ky=iy1*dky;
+      else
+	ky=-(w->fs->ny-iy1)*dky;
+      for(ix1=0;ix1<w->fs->nx;ix1++) {
+	flouble kx,kmod;
+	int ix_here,index,ic;
+	index=ix1+w->fs->nx*iy1;
+	if(2*ix1<=w->fs->nx) {
+	  kx=ix1*dkx;
+	  ix_here=ix1;
+	}
+	else {
+	  kx=-(w->fs->nx-ix1)*dkx;
+	  ix_here=w->fs->nx-ix1;
+	}
+
+	kmod=sqrt(kx*kx+ky*ky);
+	for(ic=0;ic<w->ncls;ic++)
+	  clmaps[ic+index*w->ncls]=nmt_k_function_eval(fcl[ic],kmod,intacc);
+
+	if(y_out_range[iy1] || x_out_range[ix1])
+	  i_band[index]=-1;
+	else {
+	  int ic;
+	  ik=nmt_bins_flat_search_fast(w->bin,kmod,ik);
+	  if(ik>=0)
+	    i_band[index]=ik;
+	  else
+	    i_band[index]=-1;
+	  if(w->ncls>1) {
+	    flouble c,s;
+	    if(kmod>0) {
+	      c=kx/kmod;
+	      s=ky/kmod;
+	    }
+	    else {
+	      c=1.;
+	      s=0.;
+	    }
+	    kmodarr[index]=kmod;
+	    cosarr[index]=c*c-s*s;
+	    sinarr[index]=2*s*c;
+	  }	
+	}
+      }
+    } //end omp for
+    gsl_interp_accel_free(intacc);
+  } //end omp parallel
+  free(x_out_range);
+  free(y_out_range);
+  for(ii=0;ii<w->ncls;ii++)
+    nmt_k_function_free(fcl[ii]);
+  free(fcl);
+
+#pragma omp parallel default(none)			\
+  shared(i_band,w,cosarr,sinarr,kmodarr,clmaps,cl_out)
+  {
+    int iy1,ix1,ix2,iy2;
+    int pe1=w->pe1,pe2=w->pe2,pb1=w->pb1,pb2=w->pb2;
+    int pure_any=pe1 || pb1 || pe2 || pb2;
+    flouble **cl_out_thr=my_malloc(w->ncls*sizeof(flouble *));
+    for(iy1=0;iy1<w->ncls;iy1++)
+      cl_out_thr[iy1]=my_calloc(w->bin->n_bands,sizeof(flouble));
+
+#pragma omp for
+    for(iy1=0;iy1<w->fs->ny;iy1++) {
+      for(ix1=0;ix1<w->fs->nx;ix1++) {
+	int index1=ix1+w->fs->nx*iy1;
+	int ik1=i_band[index1];
+	if(ik1>=0) {
+	  flouble inv_k1=0;
+	  if((index1>0) && (w->ncls>1))
+	    inv_k1=1./kmodarr[index1];
+	  for(iy2=0;iy2<w->fs->ny;iy2++) {
+	    for(ix2=0;ix2<w->fs->nx;ix2++) {
+	      int index;
+	      flouble mp,cdiff=1,sdiff=0,kr=1;
+	      int index2=ix2+w->fs->nx*iy2;
+	      flouble *cls_in=&(clmaps[w->ncls*index2]);
+	      int iy=iy1-iy2;
+	      int ix=ix1-ix2;
+	      if(iy<0) iy+=w->fs->ny;
+	      if(ix<0) ix+=w->fs->nx;
+	      index=ix+w->fs->nx*iy;
+
+	      if(w->ncls>1) {
+		cdiff=cosarr[index1]*cosarr[index2]+sinarr[index1]*sinarr[index2];
+		sdiff=sinarr[index1]*cosarr[index2]-cosarr[index1]*sinarr[index2];
+		if((index1==0) && (index2==0))
+		  kr=1;
+		else
+		  kr=kmodarr[index2]*inv_k1;
+		kr*=kr;
+	      }
+	      mp=w->maskprod[index];
+
+	      if(w->ncls==1) {
+		cl_out_thr[0][ik1]+=mp*cls_in[0];
+	      }
+	      if(w->ncls==2) {
+		flouble fc[2],fs[2];
+		fc[0]=cdiff*mp;
+		fs[0]=sdiff*mp;
+		if(pure_any) {
+		  fc[1]=kr*mp; fs[1]=0;
+		}
+		cl_out_thr[0][ik1]+=fc[pe1+pe2]*cls_in[0]; //TE,TE
+		cl_out_thr[0][ik1]-=fs[pe1+pe2]*cls_in[1]; //TE,TB
+		cl_out_thr[1][ik1]+=fs[pb1+pb2]*cls_in[0]; //TB,TE
+		cl_out_thr[1][ik1]+=fc[pb1+pb2]*cls_in[1]; //TB,TB
+	      }
+	      if(w->ncls==4) {
+		flouble fc[2],fs[2];
+		fc[0]=cdiff; fs[0]=sdiff;
+		if(pure_any) {
+		  fc[1]=kr; fs[1]=0;
+		}
+		cl_out_thr[0][ik1]+=fc[pe1]*fc[pe2]*mp*cls_in[0]; //EE,EE
+		cl_out_thr[0][ik1]-=fc[pe1]*fs[pe2]*mp*cls_in[1]; //EE,EB
+		cl_out_thr[0][ik1]-=fs[pe1]*fc[pe2]*mp*cls_in[2]; //EE,BE
+		cl_out_thr[0][ik1]+=fs[pe1]*fs[pe2]*mp*cls_in[3]; //EE,BB
+		cl_out_thr[1][ik1]+=fc[pe1]*fs[pb2]*mp*cls_in[0]; //EB,EE
+		cl_out_thr[1][ik1]+=fc[pe1]*fc[pb2]*mp*cls_in[1]; //EB,EB
+		cl_out_thr[1][ik1]-=fs[pe1]*fs[pb2]*mp*cls_in[2]; //EB,BE
+		cl_out_thr[1][ik1]-=fs[pe1]*fc[pb2]*mp*cls_in[3]; //EB,BB
+		cl_out_thr[2][ik1]+=fs[pb1]*fc[pe2]*mp*cls_in[0]; //BE,EE
+		cl_out_thr[2][ik1]-=fs[pb1]*fs[pe2]*mp*cls_in[1]; //BE,EB
+		cl_out_thr[2][ik1]+=fc[pb1]*fc[pe2]*mp*cls_in[2]; //BE,BE
+		cl_out_thr[2][ik1]-=fc[pb1]*fs[pe2]*mp*cls_in[3]; //BE,BB
+		cl_out_thr[3][ik1]+=fs[pb1]*fs[pb2]*mp*cls_in[0]; //BB,EE
+		cl_out_thr[3][ik1]+=fs[pb1]*fc[pb2]*mp*cls_in[1]; //BB,EB
+		cl_out_thr[3][ik1]+=fc[pb1]*fs[pb2]*mp*cls_in[2]; //BB,BE
+		cl_out_thr[3][ik1]+=fc[pb1]*fc[pb2]*mp*cls_in[3]; //BB,BB
+	      }
+	    }
+	  }
+	}
+      }
+    } //end omp for
+#pragma omp critical
+    {
+      for(iy1=0;iy1<w->ncls;iy1++) {
+	for(iy2=0;iy2<w->bin->n_bands;iy2++)
+	  cl_out[iy1][iy2]+=cl_out_thr[iy1][iy2];
+      }
+    } //end omp critical
+
+    for(iy1=0;iy1<w->ncls;iy1++)
+      free(cl_out_thr[iy1]);
+    free(cl_out_thr);
+  } //end omp parallel
+
+  int il1;
+  flouble fac_norm=4*M_PI*M_PI/(w->fs->lx*w->fs->lx*w->fs->ly*w->fs->ly);
+  for(il1=0;il1<w->bin->n_bands;il1++) {
+    int icl1;
+    flouble norm;
+    if(w->n_cells[il1]>0)
+      norm=fac_norm/w->n_cells[il1];
+    else
+      norm=0;
+    for(icl1=0;icl1<w->ncls;icl1++)
+      cl_out[icl1][il1]*=norm;
+  }
+
+  free(i_band);
+  free(clmaps);
+  if(w->ncls>1) {
+    dftw_free(kmodarr);
+    dftw_free(cosarr);
+    dftw_free(sinarr);
+  }
+}
+#endif //_ENABLE_FLAT_THEORY_ACCURATE
+
+void nmt_couple_cl_l_flat_fast(nmt_workspace_flat *w,int nl,flouble *larr,flouble **cl_in,flouble **cl_out)
+{
+  int ii;
+  flouble *cl_in_rings=my_calloc(w->ncls*w->fs->n_ell,sizeof(flouble));
+  int *n_cells=my_calloc(w->fs->n_ell,sizeof(int));
+  nmt_k_function **fcl=my_malloc(w->ncls*sizeof(nmt_k_function *));
+
+  for(ii=0;ii<w->ncls;ii++)
+    fcl[ii]=nmt_k_function_alloc(nl,larr,cl_in[ii],cl_in[ii][0],0.,0);
+
+  //Interpolate input power spectrum onto grid and bin into rings
+#pragma omp parallel default(none)		\
+  shared(w,fcl,cl_in_rings,n_cells)
+  {
+    int iy1,ix1;
+    flouble dkx=2*M_PI/w->fs->lx;
+    flouble dky=2*M_PI/w->fs->ly;
+    flouble *cl_in_rings_thr=my_calloc(w->ncls*w->fs->n_ell,sizeof(flouble));
+    int *n_cells_thr=my_calloc(w->fs->n_ell,sizeof(int));
+    gsl_interp_accel *intacc=gsl_interp_accel_alloc();
+
+#pragma omp for
+    for(iy1=0;iy1<w->fs->ny;iy1++) {
+      flouble ky;
+      if(2*iy1<=w->fs->ny)
+	ky=iy1*dky;
+      else
+	ky=-(w->fs->ny-iy1)*dky;
+      for(ix1=0;ix1<w->fs->nx;ix1++) {
+	flouble kx,kmod;
+	int ir;
+	if(2*ix1<=w->fs->nx)
+	  kx=ix1*dkx;
+	else
+	  kx=-(w->fs->nx-ix1)*dkx;
+	kmod=sqrt(kx*kx+ky*ky);
+	ir=(int)(kmod*w->fs->i_dell);
+	if(ir<w->fs->n_ell) {
+	  int ic,ind0=ir*w->ncls;
+	  n_cells_thr[ir]++;
+	  for(ic=0;ic<w->ncls;ic++)
+	    cl_in_rings_thr[ind0+ic]+=nmt_k_function_eval(fcl[ic],kmod,intacc);
+	}
+      }
+    } //end omp for
+
+#pragma omp critical
+    {
+      for(iy1=0;iy1<w->fs->n_ell;iy1++)
+	n_cells[iy1]+=n_cells_thr[iy1];
+      for(iy1=0;iy1<w->fs->n_ell*w->ncls;iy1++)
+	cl_in_rings[iy1]+=cl_in_rings_thr[iy1];
+    } //end omp critical
+    
+    free(cl_in_rings_thr);
+    free(n_cells_thr);
+    gsl_interp_accel_free(intacc);
+  } //end omp parallel
+
+  for(ii=0;ii<w->fs->n_ell;ii++) {
+    int ic;
+    for(ic=0;ic<w->ncls;ic++) {
+      if(n_cells[ii]>0) 
+	cl_in_rings[ii*w->ncls+ic]/=n_cells[ii];
+    }
+  }
+
+  //Convolve with mode-coupling matrix
+  for(ii=0;ii<w->ncls;ii++) {
+    int i1;
+    for(i1=0;i1<w->bin->n_bands;i1++) {
+      int ind2,ind1=i1*w->ncls+ii;
+      cl_out[ii][i1]=0;
+      for(ind2=0;ind2<w->ncls*w->fs->n_ell;ind2++)
+	cl_out[ii][i1]+=w->coupling_matrix_unbinned[ind1][ind2]*cl_in_rings[ind2];
+    }
+  }
+
+  //Free up
+  free(cl_in_rings);
+  free(n_cells);
+  for(ii=0;ii<w->ncls;ii++)
+    nmt_k_function_free(fcl[ii]);
+  free(fcl);
+}
+
+void nmt_couple_cl_l_flat_quick(nmt_workspace_flat *w,int nl,flouble *larr,flouble **cl_in,flouble **cl_out)
 {
   int ii;
   flouble **cell_in=my_malloc(w->ncls*sizeof(flouble *));
   gsl_interp_accel *intacc=gsl_interp_accel_alloc();
   for(ii=0;ii<w->ncls;ii++) {
-    int il;
     nmt_k_function *fcl=nmt_k_function_alloc(nl,larr,cl_in[ii],cl_in[ii][0],0.,0);
-    cell_in[ii]=my_malloc(w->nells*sizeof(flouble));
-    for(il=0;il<w->nells;il++)
-      cell_in[ii][il]=nmt_k_function_eval(fcl,w->l_arr[il],intacc);
+    cell_in[ii]=my_calloc(w->bin->n_bands,sizeof(flouble));
+
+    int iy;
+    flouble dkx=2*M_PI/w->fs->lx;
+    flouble dky=2*M_PI/w->fs->ly;
+    for(iy=0;iy<w->fs->ny;iy++) {
+      flouble ky;
+      int ik=0;
+      if(2*iy<=w->fs->ny)
+	ky=iy*dky;
+      else
+	ky=-(w->fs->ny-iy)*dky;
+      if((ky>w->ellcut_y[1]) || (ky<w->ellcut_y[0])) {
+	int ix;
+	for(ix=0;ix<w->fs->nx;ix++) {
+	  flouble kx;
+	  if(2*ix<=w->fs->nx)
+	    kx=ix*dkx;
+	  else
+	    kx=-(w->fs->nx-ix)*dkx;
+	  if((kx>w->ellcut_x[1]) || (kx<w->ellcut_x[0])) {
+	    double kmod=sqrt(kx*kx+ky*ky);
+	    ik=nmt_bins_flat_search_fast(w->bin,kmod,ik);
+	    if(ik>=0)
+	      cell_in[ii][ik]+=nmt_k_function_eval(fcl,kmod,intacc);
+	  }
+	}
+      }
+    }
+
+    for(iy=0;iy<w->bin->n_bands;iy++) {
+      if(w->n_cells[iy]>0)
+	cell_in[ii][iy]/=w->n_cells[iy];
+      else
+	cell_in[ii][iy]=0;
+    }
     nmt_k_function_free(fcl);
   }
   gsl_interp_accel_free(intacc);
 
   int icl1;
   for(icl1=0;icl1<w->ncls;icl1++) {
-    for(ii=0;ii<w->fs->n_ell;ii++) {
-      int ir;
-      flouble clo=0;
-      for(ir=0;ir<w->nl_rebin;ir++) {
-	int icl2;
-	int i1=ii*w->nl_rebin+ir;
-	if(i1<w->nells) {
-	  int ind1=i1*w->ncls+icl1;
-	  for(icl2=0;icl2<w->ncls;icl2++) {
-	    int i2;
-	    for(i2=0;i2<w->nells;i2++) {
-	      int ind2=i2*w->ncls+icl2;
-	      flouble cli=cell_in[icl2][i2];
-	      clo+=w->coupling_matrix_unbinned[ind1][ind2]*cli;
-	    }
-	  }
+    int i1;
+    for(i1=0;i1<w->bin->n_bands;i1++) {
+      int icl2;
+      int ind1=i1*w->ncls+icl1;
+      cl_out[icl1][i1]=0;
+      for(icl2=0;icl2<w->ncls;icl2++) {
+	int i2;
+	for(i2=0;i2<w->bin->n_bands;i2++) {
+	  int ind2=i2*w->ncls+icl2;
+	  cl_out[icl1][i1]+=w->coupling_matrix_binned[ind1][ind2]*cell_in[icl2][i2];
 	}
       }
-      cl_out[icl1][ii]=clo/w->nl_rebin;
     }
   }
-
+  
   for(ii=0;ii<w->ncls;ii++)
     free(cell_in[ii]);
   free(cell_in);
@@ -1032,33 +1083,13 @@ void nmt_decouple_cl_l_flat(nmt_workspace_flat *w,flouble **cl_in,flouble **cl_n
 
   //Bin coupled power spectrum
   for(icl=0;icl<w->ncls;icl++) {
-    int il;
-    flouble *sum=my_calloc(w->bin->n_bands,sizeof(flouble));
-    int *n_per_band=my_calloc(w->bin->n_bands,sizeof(int));
-    for(il=0;il<w->fs->n_ell;il++) {
-      int ir;
-      flouble dcl=cl_in[icl][il]-cl_noise_in[icl][il]-cl_bias[icl][il];
-      for(ir=0;ir<w->nl_rebin;ir++) {
-	int index=il*w->nl_rebin+ir;
-	if(index<w->nells) {
-	  int ind=w->i_band[il*w->nl_rebin+ir];
-	  if(ind>=0) {
-	    sum[ind]+=dcl;
-	    n_per_band[ind]++;
-	  }
-	}
-      }
+    for(ib2=0;ib2<w->bin->n_bands;ib2++) {
+      gsl_vector_set(dl_map_bad_b,w->ncls*ib2+icl,
+		     cl_in[icl][ib2]-cl_noise_in[icl][ib2]-cl_bias[icl][ib2]);
     }
-    for(il=0;il<w->bin->n_bands;il++) {
-      if(n_per_band[il]>0)
-	sum[il]/=n_per_band[il];
-      gsl_vector_set(dl_map_bad_b,w->ncls*il+icl,sum[il]);
-    }
-    free(sum);
-    free(n_per_band);
   }
-
-  gsl_linalg_LU_solve(w->coupling_matrix_binned,w->coupling_matrix_perm,dl_map_bad_b,dl_map_good_b);
+  
+  gsl_linalg_LU_solve(w->coupling_matrix_binned_gsl,w->coupling_matrix_perm,dl_map_bad_b,dl_map_good_b);
   for(icl=0;icl<w->ncls;icl++) {
     for(ib2=0;ib2<w->bin->n_bands;ib2++)
       cl_out[icl][ib2]=gsl_vector_get(dl_map_good_b,w->ncls*ib2+icl);
@@ -1068,62 +1099,39 @@ void nmt_decouple_cl_l_flat(nmt_workspace_flat *w,flouble **cl_in,flouble **cl_n
   gsl_vector_free(dl_map_good_b);
 }
 
-void nmt_compute_coupled_cell_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,flouble *larr,flouble **cl_out,
+void nmt_compute_coupled_cell_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
+				   nmt_binning_scheme_flat *bin,flouble **cl_out,
 				   flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y)
-{
-  int i;
-  fs_alm2cl(fl1->fs,fl1->alms,fl2->alms,fl1->pol,fl2->pol,cl_out,lmn_x,lmx_x,lmn_y,lmx_y);
-  for(i=0;i<fl1->fs->n_ell;i++)
-    larr[i]=fl1->fs->ell_min[i]+(i+0.5)*fl1->fs->dell;
-}
-
-#define NMT_COUPLING_FLAT_LINT 201
-#define NMT_COUPLING_FLAT_ANG  202
-#define NMT_COUPLING_FLAT_FULL 203
-nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
-						     nmt_binning_scheme_flat *bin,int nl_rebin,int method_flag,
-						     flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y)
 {
   if(check_flatsky_infos(fl1->fs,fl2->fs))
     report_error(1,"Can only correlate fields defined on the same pixels!\n");
-
-  if(method_flag==NMT_COUPLING_FLAT_LINT)
-    return nmt_compute_coupling_matrix_flat_a(fl1,fl2,bin,nl_rebin,lmn_x,lmx_x,lmn_y,lmx_y);
-  else if(method_flag==NMT_COUPLING_FLAT_ANG)
-    return nmt_compute_coupling_matrix_flat_b(fl1,fl2,bin,nl_rebin,lmn_x,lmx_x,lmn_y,lmx_y);
-  else if(method_flag==NMT_COUPLING_FLAT_FULL)
-    return nmt_compute_coupling_matrix_flat_c(fl1,fl2,bin,nl_rebin,lmn_x,lmx_x,lmn_y,lmx_y);
-  else {
-    report_error(1,"Unknown method %d\n",method_flag);
-    return NULL;
-  }
+  fs_alm2cl(fl1->fs,bin,fl1->alms,fl2->alms,fl1->pol,fl2->pol,cl_out,lmn_x,lmx_x,lmn_y,lmx_y);
 }
 
 nmt_workspace_flat *nmt_compute_power_spectra_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
-						   nmt_binning_scheme_flat *bin,int nl_rebin,int method_flag,
+						   nmt_binning_scheme_flat *bin,
 						   flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y,
 						   nmt_workspace_flat *w0,flouble **cl_noise,
 						   int nl_prop,flouble *l_prop,flouble **cl_prop,
 						   flouble **cl_out)
 {
   int ii;
-  flouble **cl_bias,**cl_data,*larr;
+  flouble **cl_bias,**cl_data;
   nmt_workspace_flat *w;
 
   if(w0==NULL)
-    w=nmt_compute_coupling_matrix_flat(fl1,fl2,bin,nl_rebin,method_flag,lmn_x,lmx_x,lmn_y,lmx_y);
+    w=nmt_compute_coupling_matrix_flat(fl1,fl2,bin,lmn_x,lmx_x,lmn_y,lmx_y);
   else
     w=w0;
 
-  larr=my_malloc(w->fs->n_ell*sizeof(flouble));
   cl_bias=my_malloc(w->ncls*sizeof(flouble *));
   cl_data=my_malloc(w->ncls*sizeof(flouble *));
   for(ii=0;ii<w->ncls;ii++) {
-    cl_bias[ii]=my_calloc(w->fs->n_ell,sizeof(flouble));
-    cl_data[ii]=my_calloc(w->fs->n_ell,sizeof(flouble));
+    cl_bias[ii]=my_calloc(w->bin->n_bands,sizeof(flouble));
+    cl_data[ii]=my_calloc(w->bin->n_bands,sizeof(flouble));
   }
-  nmt_compute_coupled_cell_flat(fl1,fl2,larr,cl_data,lmn_x,lmx_x,lmn_y,lmx_y);
-  nmt_compute_deprojection_bias_flat(fl1,fl2,lmn_x,lmx_x,lmn_y,lmx_y,
+  nmt_compute_coupled_cell_flat(fl1,fl2,bin,cl_data,lmn_x,lmx_x,lmn_y,lmx_y);
+  nmt_compute_deprojection_bias_flat(fl1,fl2,bin,lmn_x,lmx_x,lmn_y,lmx_y,
 				     nl_prop,l_prop,cl_prop,cl_bias);
   nmt_decouple_cl_l_flat(w,cl_data,cl_noise,cl_bias,cl_out);
   for(ii=0;ii<w->ncls;ii++) {

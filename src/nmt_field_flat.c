@@ -50,17 +50,17 @@ nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
   flouble kmax_x=dkx*(nx/2);
   flouble kmax_y=dky*(ny/2);
   double dk=NMT_MIN(dkx,dky);
-  double kmax=NMT_MAX(kmax_y,kmax_x);
+  double kmax=sqrt(kmax_y*kmax_y+kmax_x*kmax_x);
   fs->dell=N_DELL*dk;
   fs->i_dell=1./fs->dell;
   fs->n_ell=0;
   while((fs->n_ell+1)*fs->dell<=kmax)
     fs->n_ell++;
   fs->ell_min=my_malloc(fs->n_ell*sizeof(flouble));
-  fs->n_cells=my_calloc(fs->n_ell,sizeof(int));
+  //  fs->n_cells=my_calloc(fs->n_ell,sizeof(int));
   for(ii=0;ii<fs->n_ell;ii++)
     fs->ell_min[ii]=ii*fs->dell;
-
+  /*
 #pragma omp parallel default(none) \
   shared(fs,dkx,dky)
   {
@@ -85,14 +85,14 @@ nmt_flatsky_info *nmt_flatsky_info_alloc(int nx,int ny,flouble lx,flouble ly)
       }
     } //end omp for
   } //end omp parallel
-
+  */
   return fs;
 }
 
 void nmt_flatsky_info_free(nmt_flatsky_info *fs)
 {
   free(fs->ell_min);
-  free(fs->n_cells);
+  //  free(fs->n_cells);
   free(fs);
 }
 
@@ -381,18 +381,6 @@ nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
     gsl_linalg_cholesky_invert(fl->matrix_M);
   }
 
-  fl->alms=my_malloc(fl->nmaps*sizeof(fcomplex *));
-  for(ii=0;ii<fl->nmaps;ii++)
-    fl->alms[ii]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
-
-  if(fl->pol && (fl->pure_e || fl->pure_b))
-    nmt_purify_flat(fl);
-  else {
-    for(ii=0;ii<fl->nmaps;ii++)
-      fs_map_product(fl->fs,fl->maps[ii],fl->mask,fl->maps[ii]);
-    fs_map2alm(fl->fs,1,2*fl->pol,fl->maps,fl->alms);
-  }
-
   if(fl->ntemp>0) {
     //Deproject
     flouble *prods=my_calloc(fl->ntemp,sizeof(flouble));
@@ -416,6 +404,18 @@ nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
       }
     }
     free(prods);
+  }
+
+  fl->alms=my_malloc(fl->nmaps*sizeof(fcomplex *));
+  for(ii=0;ii<fl->nmaps;ii++)
+    fl->alms[ii]=dftw_malloc(fl->fs->ny*(fl->fs->nx/2+1)*sizeof(fcomplex));
+
+  if(fl->pol && (fl->pure_e || fl->pure_b))
+    nmt_purify_flat(fl);
+  else {
+    for(ii=0;ii<fl->nmaps;ii++)
+      fs_map_product(fl->fs,fl->maps[ii],fl->mask,fl->maps[ii]);
+    fs_map2alm(fl->fs,1,2*fl->pol,fl->maps,fl->alms);
   }
 
   return fl;

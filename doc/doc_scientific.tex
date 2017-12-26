@@ -422,20 +422,20 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
 
 \section{Flat-sky}
   \subsection{Fourier transforms}
-    In the flat sky we will write the directional vector $\nv$ as ${\bf x}$. Let ${\bf a}({\bf x})$ be a spin-$s_a$ quantity. Under the approximation $\sin\theta\sim1$, $\Delta\theta\rightarrow \Delta x$, $\Delta\varphi\rightarrow\Delta y$, the differential operator $\eth$ now takes the form:
+    In the flat sky we will write the directional vector $\nv$ as ${\bf x}$. Let ${\bf a}({\bf x})$ be a spin-$s_a$ quantity. Under the approximation $\sin\theta\sim1$, $\Delta\theta\rightarrow -\Delta x$, $\Delta\varphi\rightarrow\Delta y$, the differential operator $\eth$ now takes the form:
     \begin{equation}
-      \eth=-(\partial_x+i\partial_y),\hspace{12pt}\bar{\eth}=-(\partial_x-i\partial_y),
+      \eth= (\partial_x-i\partial_y),\hspace{12pt}\bar{\eth}= (\partial_x+i\partial_y),
     \end{equation}
     and acts on a plane wave $e^{i{\bf k}{\bf x}}$ as:
     \begin{equation}
-      \eth^s e^{i{\bf k}{\bf x}}=(-ik)^se^{i\,s\varphi_k}e^{i{\bf k}{\bf x}},\hspace{12pt}
-      \bar{\eth}e^{i{\bf k}{\bf x}}=(-ik)^se^{-i\,s\varphi_k}e^{i{\bf k}{\bf x}}
+      \eth^s e^{i{\bf k}{\bf x}}=(ik)^se^{-i\,s\varphi_k}e^{i{\bf k}{\bf x}},\hspace{12pt}
+      \bar{\eth}e^{i{\bf k}{\bf x}}=(ik)^se^{i\,s\varphi_k}e^{i{\bf k}{\bf x}}
     \end{equation}
 
     Let us define the basis functions:
     \begin{equation}
-      \,_s{\cal Y}_{\bf k}({\bf x})\equiv k^{-s}\eth^se^{i{\bf k}{\bf x}}=(-i)^se^{is\varphi_k}e^{i{\bf k}{\bf x}},\hspace{12pt}\,
-      _{-s}{\cal Y}_{\bf k}({\bf x})\equiv (-k)^{-s}\bar{\eth}^se^{i{\bf k}{\bf x}}=i^se^{-is\varphi_k}e^{i{\bf k}{\bf x}},
+      \,_s{\cal Y}_{\bf k}({\bf x})\equiv k^{-s}\eth^se^{i{\bf k}{\bf x}}=i^s\,e^{-is\varphi_k}e^{i{\bf k}{\bf x}},\hspace{12pt}\,
+      _{-s}{\cal Y}_{\bf k}({\bf x})\equiv (-k)^{-s}\bar{\eth}^se^{i{\bf k}{\bf x}}=(-i)^se^{is\varphi_k}e^{i{\bf k}{\bf x}},
     \end{equation}
     and the spin-$s$ Fourier coefficients:
     \begin{align}
@@ -447,8 +447,9 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
     The $E$ and $B$-mode coefficients are then defined as:
     \begin{align}
       _sE_{\bf l}\equiv-\frac{1}{2}\left[_sa_{\bf l}+(-1)^s\,_{-s}a_{\bf l}\right],\hspace{12pt}
-      i\,_sB_{\bf l}\equiv-\frac{1}{2}\left[_sa_{\bf l}-(-1)^s\,_{-s}a_{\bf l}\right]
+      i\,_sB_{\bf l}\equiv-\frac{1}{2}\left[_sa_{\bf l}-(-1)^s\,_{-s}a_{\bf l}\right].
     \end{align}
+    Note the preceding $(-)$ sign. For scalar fields ($s\equiv0$) the $E$ and $B$ modes are defined omitting that sign.
     
     Let us now write $a$ as a vector such that in real space ${\bf a}({\bf x})\equiv({\rm Re}(a),{\rm Im}(a))$, and in Fourier space ${\bf a}_{\bf l}\equiv(\,_sE_{\bf l},\,_sB_{\bf l})$. We can rewrite the equations above in vectorial form:
     \begin{equation}
@@ -467,12 +468,12 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
                  \eth^s+\bar{\eth}^s & i(\eth^s-\bar{\eth}^s) \\
               -i(\eth^s-\bar{\eth}^s) &  \eth^s+\bar{\eth}^s
             \end{array}\right)e^{i{\bf l}{\bf x}}\\
-      &=-(-i)^s
+      &=-i^s
       \left(\begin{array}{cc}
-                 \cos(s\varphi_l) & \sin(s\varphi_l) \\
-                -\sin(s\varphi_l) & \cos(s\varphi_l)
+               \cos(s\varphi_l) & \sin(s\varphi_l) \\
+              -\sin(s\varphi_l) & \cos(s\varphi_l)
             \end{array}\right)e^{i{\bf l}{\bf x}}\\
-      &=-(-i)^s{\sf R}(s\varphi_l)e^{i{\bf l}{\bf x}},
+      &=-i^s{\sf R}^\dag(s\varphi_l)e^{i{\bf l}{\bf x}},
     \end{align}
     where ${\sf R}(\varphi)$ is a rotation matrix.
     
@@ -481,7 +482,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
       \left(\begin{array}{c}
        Q({\bf x}) \\ U({\bf x})
       \end{array}\right)
-      &=-(-i)^s
+      &=-i^s
       \int\frac{d{\bf l}^2}{2\pi}
       \left(\begin{array}{cc}
               \cos(s\varphi_l) & \sin(s\varphi_l) \\
@@ -493,7 +494,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
       \left(\begin{array}{c}
        _sE_{\bf l} \\ _sB_{\bf l}
       \end{array}\right)
-      &=-i^s
+      &=-(-i)^s
       \left(\begin{array}{cc}
               \cos(s\varphi_l) & -\sin(s\varphi_l) \\
               \sin(s\varphi_l) &  \cos(s\varphi_l) \\
@@ -514,7 +515,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
     The Fourier coefficients of the masked field are:
     \begin{align}
       {\bf a}^v_{\bf l}&=\int\int\frac{d{\bf k}^2d{\bf q}^2}{2\pi}\left[\int\frac{d{\bf x}^2}{(2\pi)^2}\,_{s_a}{\sf E}^\dag_{\bf l}({\bf x})\,_{s_a}{\sf E}_{\bf k}({\bf x})\,_0E_{\bf q}({\bf x})\right]{\bf a}_{\bf k}\,v_{\bf q}\\
-                       &=\int\frac{d{\bf k}^2}{2\pi}{\sf R}^\dag\left(s_a(\varphi_\ell-\varphi_k)\right)\,{\bf a}_{\bf k}v_{{\bf l}-{\bf k}},
+                       &=\int\frac{d{\bf k}^2}{2\pi}{\sf R}\left(s_a(\varphi_\ell-\varphi_k)\right)\,{\bf a}_{\bf k}v_{{\bf l}-{\bf k}},
     \end{align}
     which, for instance, in the case of a spin-$2$ field, read:
     \begin{equation}\label{eq:pseudo_flat_eb}
@@ -526,7 +527,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
      \left(
      \begin{array}{cc}
        \cos2\Delta\varphi & -\sin2\Delta\varphi \\
-       \sin2\Delta\varphi & \cos2\Delta\varphi
+       \sin2\Delta\varphi &  \cos2\Delta\varphi
      \end{array}\right)\,\left(
      \begin{array}{c}
       E_{\bf k} \\ B_{\bf k}
@@ -534,17 +535,17 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
     \end{equation}
     where $\Delta\varphi\equiv\varphi_\ell-\varphi_k$. Then, the covariance of the Fourier coefficients of two masked fields is:
     \begin{align}
-      \left\langle\tilde{\bf a}_{\bf l}\,\tilde{\bf b}^\dag_{\bf l}\right\rangle
-      &=\int\int\frac{d{\bf k}^2d{\bf q}^2}{(2\pi)^2}{\sf R}^\dag(s_a(\varphi_\ell-\varphi_k))\left\langle{\bf a}_{\bf k}{\bf b}^\dag_{\bf q}\right\rangle{\sf R}(s_b(\varphi_\ell-\varphi_q))v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf q}}\\
-      &=\int\frac{d{\bf k}^2}{(2\pi)^2}{\sf R}^\dag(s_a\Delta\varphi){\sf C}^{ab}_k{\sf R}(s_b\Delta\varphi)v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}.
+      \left\langle{\bf a}^v_{\bf l}\,{\bf b}^{w\dag}_{\bf l}\right\rangle
+      &=\int\int\frac{d{\bf k}^2d{\bf q}^2}{(2\pi)^2}{\sf R}(s_a(\varphi_\ell-\varphi_k))\left\langle{\bf a}_{\bf k}{\bf b}^\dag_{\bf q}\right\rangle{\sf R}^\dag(s_b(\varphi_\ell-\varphi_q))v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf q}}\\
+      &=\int\frac{d{\bf k}^2}{(2\pi)^2}{\sf R}(s_a\Delta\varphi){\sf C}^{ab}_k{\sf R}^\dag(s_b\Delta\varphi)v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}.
     \end{align}
     
     The pseudo-$C_\ell$ is defined as the nomalized angular average of ${\bf a}_{\bf l}{\bf b}^\dag_{\bf l}$:
     \begin{align}
       \tilde{\sf C}^{ab}_\ell
-      &\equiv\frac{(2\pi)^2}{S}\int\frac{d\varphi_\ell}{2\pi}\left\langle\tilde{\bf a}_{\bf l}\,\tilde{\bf b}^\dag_{\bf l}\right\rangle\\
+      &\equiv\frac{(2\pi)^2}{S}\int\frac{d\varphi_\ell}{2\pi}\left\langle{\bf a}^v_{\bf l}\,{\bf b}^{w\dag}_{\bf l}\right\rangle\\
       &=\int\frac{kdk\,qdq}{(2\pi)^2}\left[\frac{(2\pi)^2}{S}\int\frac{d\varphi_q}{2\pi}v_{{\bf q}}w^*_{{\bf q}}
-      \int d\varphi_\ell d\varphi_k{\sf R}^\dag(s_a\Delta\varphi){\sf C}^{ab}_k{\sf R}(s_b\Delta\varphi)\delta({\bf q}-{\bf l}+{\bf k})\right],
+      \int d\varphi_\ell d\varphi_k{\sf R}(s_a\Delta\varphi){\sf C}^{ab}_k{\sf R}^\dag(s_b\Delta\varphi)\delta({\bf q}-{\bf l}+{\bf k})\right],
     \end{align}
     where $S$ is the observed sky area (in sterad), and where we have eliminated the dependence on ${\bf l}-{\bf k}$ by introducing an additional integral over $d{\bf q}^2\delta({\bf q}-{\bf l}+{\bf k})$.
     
@@ -573,7 +574,7 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
     
     This yields the following relation analogous to Eq. \ref{eq:cell_coupled}:
     \begin{equation}
-      \,_v\tilde{\sf C}^{ab}_\ell=\int_0^{\infty} dk {\sf M}^{s_as_b}_{\ell k}\cdot\,_v\hat{\sf C}^{ab}_k,
+      \,_v\tilde{\sf C}^{ab}_\ell=\int_0^{\infty} dk\, {\sf M}^{s_as_b}_{\ell k}\cdot\,_v\hat{\sf C}^{ab}_k,
     \end{equation}
     where:
     \begin{align}
@@ -651,32 +652,32 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
 
     Using the properties above one can prove that the Fourier coefficients of a masked field are:
     \begin{equation}
-      {\bf a}^v_{\bf l}\equiv\left(v({\bf x}){\bf a}({\bf x})\right)_{\bf l}=\sum_{\bf k}\frac{\Delta{\bf k}^2}{2\pi}{\sf R}^\dag(s_a(\varphi_{\bf l}-\varphi_{\bf k})){\bf a}_{\bf k}v_{{\bf l}-{\bf k}},
+      {\bf a}^v_{\bf l}\equiv\left(v({\bf x}){\bf a}({\bf x})\right)_{\bf l}=\sum_{\bf k}\frac{\Delta{\bf k}^2}{2\pi}{\sf R}(s_a(\varphi_{\bf l}-\varphi_{\bf k})){\bf a}_{\bf k}v_{{\bf l}-{\bf k}},
     \end{equation}
     and we can easily find the following relation for the covariance of two masked fields at the same wavenumber:
     \begin{equation}
-      \left\langle{\bf a}^v_{\bf l}{\bf b}^{w\dag}_{\bf l}\right\rangle=\sum_{\bf k}\frac{\Delta{\bf k}^2}{(2\pi)^2}{\sf R}^\dag(s_a\Delta\varphi){\sf C}^{ab}_{\bf k}{\sf R}^\dag(s_b\Delta\varphi)v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
+      \left\langle{\bf a}^v_{\bf l}{\bf b}^{w\dag}_{\bf l}\right\rangle=\sum_{\bf k}\frac{\Delta{\bf k}^2}{(2\pi)^2}{\sf R}(s_a\Delta\varphi){\sf C}^{ab}_{\bf k}{\sf R}^\dag(s_b\Delta\varphi)\,v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
     \end{equation}
     
     At this stage it is natural to connect directly with the final bandpowers (since there is no natural minimal binning as in the case of the full-sky multipoles). In this case we will define a bandpower ${\sf B}_b$, indexed by an integer $b$ as the average of the covariance above over a set of ${\bf l}$ values $S_b$:
     \begin{equation}
       \,_v{\sf B}^{ab}_b\equiv\frac{\Delta{\bf k}^2}{N_b}\sum_{{\bf l}\in S_b}{\bf a}^v_{\bf l}{\bf b}^{w\dag}_{\bf l},
     \end{equation}
-    where $N_b$ is the number of Fourier-space pixels covered by $S_b$. The mode-coupling matrix for the bandpowers is therefore given by:
+    where $N_b$ is the number of Fourier-space pixels covered by $S_b$. The bandpowers are related to the true power spectrum through:
     \begin{equation}
-      \mathcal{M}^{s_as_b}_{bb'}=\sum_{{\bf l}\in S_b}N_b^{-1}\sum_{{\bf k}\in S_{b'}}{\sf M}^{s_as_b}_{{\bf l}\,{\bf k}},
-    \end{equation}
-    where:
+      \langle\,_v{\sf B}^{ab}_b\rangle=\sum_{{\bf l}\in S_b}N_b^{-1}\sum_{\bf k}{\sf M}^{s_a\,s_b}_{{\bf l}{\bf k}}\cdot\,_v\hat{\sf C}^{ab}_{\bf k},
+    \end{equation}    
+    where the un-binned mode-coupling matrix is:
     \begin{align}
-      & M^{00}_{{\bf l}\,{\bf k}}\equiv\frac{2\pi^2}{L_x^2L_y^2}v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}},\\
-      & {\sf M}^{02}_{{\bf l}\,{\bf k}}\equiv\frac{2\pi^2}{L_x^2L_y^2}v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
+      & M^{00}_{{\bf l}\,{\bf k}}\equiv\frac{(2\pi)^2}{L_x^2L_y^2}v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}},\\
+      & {\sf M}^{02}_{{\bf l}\,{\bf k}}\equiv\frac{(2\pi)^2}{L_x^2L_y^2}v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
       \left(
       \begin{array}{cc}
         \cos2\Delta\varphi & -\sin2\Delta\varphi \\
-        \sin2\Delta\varphi & \cos2\Delta\varphi
+        \sin2\Delta\varphi &  \cos2\Delta\varphi
       \end{array}
       \right)\\
-      & {\sf M}^{02}_{{\bf l}\,{\bf k}}\equiv\frac{2\pi^2}{L_x^2L_y^2}v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
+      & {\sf M}^{22}_{{\bf l}\,{\bf k}}\equiv\frac{(2\pi)^2}{L_x^2L_y^2}v_{{\bf l}-{\bf k}}w^*_{{\bf l}-{\bf k}}
       \left(
       \begin{array}{cccc}
         \cos^22\Delta\varphi & -\cos2\Delta\varphi\sin2\Delta\varphi & -\cos2\Delta\varphi\sin2\Delta\varphi & \sin^22\Delta\varphi\\
@@ -686,7 +687,14 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
       \end{array}
       \right)
     \end{align}
-
+    The mode-coupling matrix for the bandpowers is therefore given by:
+    \begin{equation}
+      \mathcal{M}^{s_as_b}_{bb'}=\sum_{{\bf l}\in S_b}N_b^{-1}\sum_{{\bf k}\in S_{b'}}{\sf M}^{s_as_b}_{{\bf l}\,{\bf k}},
+    \end{equation}
+    
+    
+    
+    
   \subsection{Contaminant cleaning}
     Using the same notation as in Section \ref{sec:contaminant}, the contaminant-cleaned version of ${\bf a}$ is (c.f. Eqs. \ref{eq:deproject_real} \ref{eq:deproject_harmonic}):
     \begin{equation}

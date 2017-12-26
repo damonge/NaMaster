@@ -61,11 +61,15 @@ flouble fs_map_dot(nmt_flatsky_info *fs,flouble *mp1,flouble *mp2)
 
 static void qu2eb(nmt_flatsky_info *fs,int spin,fcomplex **alm)
 {
-#pragma omp parallel default(none) \
-  shared(fs,spin,alm)
+  int sig_overall=-1;
+  if(spin==0)
+    sig_overall=1;
+
+#pragma omp parallel default(none)		\
+  shared(fs,spin,alm,sig_overall)
   {
     int iy;
-    fcomplex sig=-cpow(I,spin);
+    fcomplex sig=sig_overall*cpow(I,spin);
     flouble dkx=2*M_PI/fs->lx;
     flouble dky=2*M_PI/fs->ly;
 
@@ -114,11 +118,15 @@ static void qu2eb(nmt_flatsky_info *fs,int spin,fcomplex **alm)
 
 static void eb2qu(nmt_flatsky_info *fs,int spin,fcomplex **alm)
 {
-#pragma omp parallel default(none) \
-  shared(fs,spin,alm)
+  int sig_overall=-1;
+  if(spin==0)
+    sig_overall=1;
+
+#pragma omp parallel default(none)		\
+  shared(fs,spin,alm,sig_overall)
   { 
     int iy;
-    fcomplex sig=-cpow(-I,spin);
+    fcomplex sig=sig_overall*cpow(-I,spin);
     flouble dkx=2*M_PI/fs->lx;
     flouble dky=2*M_PI/fs->ly;
 
@@ -328,11 +336,12 @@ void fs_alter_alm(nmt_flatsky_info *fs,double fwhm_amin,fcomplex *alm_in,fcomple
   if(window==NULL) nmt_k_function_free(beam);
 }
 
-void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls,
+void fs_alm2cl(nmt_flatsky_info *fs,nmt_binning_scheme_flat *bin,
+	       fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls,
 	       flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y)
 {
   int i1,nmaps_1=1,nmaps_2=1;
-  int *n_cells=my_malloc(fs->n_ell*sizeof(int));
+  int *n_cells=my_malloc(bin->n_bands*sizeof(int));
   if(pol_1) nmaps_1=2;
   if(pol_2) nmaps_2=2;
 
@@ -344,13 +353,13 @@ void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_
       fcomplex *alm2=alms_2[i2];
       int index_cl=i2+nmaps_2*i1;
       flouble norm_factor=4*M_PI*M_PI/(fs->lx*fs->ly);
-      for(il=0;il<fs->n_ell;il++) {
+      for(il=0;il<bin->n_bands;il++) {
 	cls[index_cl][il]=0;
 	n_cells[il]=0;
       }
 
 #pragma omp parallel default(none)		\
-  shared(fs,alm1,alm2,index_cl,cls)		\
+  shared(fs,bin,alm1,alm2,index_cl,cls)		\
   shared(lmn_x,lmx_x,lmn_y,lmx_y,n_cells)
       {
 	int iy;
@@ -361,12 +370,13 @@ void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_
 	for(iy=0;iy<fs->ny;iy++) {
 	  int ix;
 	  flouble ky;
+	  int ik=0;
 	  if(2*iy<=fs->ny) ky=iy*dky;
 	  else ky=-(fs->ny-iy)*dky;
 	  if((ky>=lmn_y) && (ky<=lmx_y))
 	    continue;
 	  for(ix=0;ix<fs->nx;ix++) {
-	    int ik,ix_here;
+	    int ix_here;
 	    long index;
 	    flouble kmod,kx;
 	    if(2*ix<=fs->nx) {
@@ -382,8 +392,8 @@ void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_
 
 	    index=ix_here+(fs->nx/2+1)*iy;
 	    kmod=sqrt(kx*kx+ky*ky);
-	    ik=(int)(kmod*fs->i_dell);
-	    if(ik<fs->n_ell) {
+	    ik=nmt_bins_flat_search_fast(bin,kmod,ik);
+	    if(ik>=0) {
 #pragma omp atomic
 	      cls[index_cl][ik]+=(creal(alm1[index])*creal(alm2[index])+cimag(alm1[index])*cimag(alm2[index]));
 #pragma omp atomic
@@ -393,7 +403,7 @@ void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_
 	} //end omp for
       } //end omp parallel
 
-      for(il=0;il<fs->n_ell;il++) {
+      for(il=0;il<bin->n_bands;il++) {
 	if(n_cells[il]<=0)
 	  cls[index_cl][il]=0;
 	else
@@ -404,7 +414,8 @@ void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_
   free(n_cells);
 }
 
-void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls)
+void fs_anafast(nmt_flatsky_info *fs,nmt_binning_scheme_flat *bin,
+		flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls)
 {
   int i1;
   fcomplex **alms_1,**alms_2;
@@ -426,7 +437,7 @@ void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,int pol_1
     fs_map2alm(fs,1,2*pol_2,maps_2,alms_2);
   }
 
-  fs_alm2cl(fs,alms_1,alms_2,pol_1,pol_2,cls,1.,-1.,1.,-1.);
+  fs_alm2cl(fs,bin,alms_1,alms_2,pol_1,pol_2,cls,1.,-1.,1.,-1.);
 
   for(i1=0;i1<nmaps_1;i1++)
     dftw_free(alms_1[i1]);
@@ -450,9 +461,19 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,
   //Switch off error handler for Cholesky decomposition
   gsl_error_handler_t *geh=gsl_set_error_handler_off();
 
+  int numthr=0;
+
 #pragma omp parallel default(none)			\
-  shared(nx,ny,lx,ly,nmaps,cells,beam,seed,alms)
+  shared(nx,ny,lx,ly,nmaps,cells,beam,seed,alms,numthr)
   {
+    //This is to avoid using the omp.h library
+    int ithr;
+#pragma omp critical
+    {
+      ithr=numthr;
+      numthr++;
+    }
+
     int iy;
     double dkx=2*M_PI/lx,dky=2*M_PI/ly;
     double inv_dkvol=1./(dkx*dky);
@@ -464,7 +485,7 @@ fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,
     gsl_vector *eval =gsl_vector_alloc(nmaps);
     gsl_matrix *evec =gsl_matrix_alloc(nmaps,nmaps); 
     gsl_eigen_symmv_workspace *wsym=gsl_eigen_symmv_alloc(nmaps);
-    int ithr=omp_get_thread_num();
+    //int ithr=omp_get_thread_num();
     unsigned int seed_thr=(unsigned int)(seed+ithr);
     gsl_rng *rng=init_rng(seed_thr);
     gsl_interp_accel *intacc_cells=gsl_interp_accel_alloc();

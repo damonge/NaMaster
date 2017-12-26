@@ -29,20 +29,28 @@ class NmtField(object) :
 
         if((len(maps)!=1) and (len(maps)!=2)) :
             raise KeyError("Must supply 1 or 2 maps per field")
-        if(templates!=None) :
+
+        if isinstance(templates,(list,tuple,np.ndarray)) :
             if((len(templates[0])!=1) and (len(templates[0])!=2)) :
                 raise KeyError("Must supply 1 or 2 maps per field")
-        if(beam==None) :
-            beam_use=np.ones(3*nside)
         else :
+            if(templates is not None) :
+                raise KeyError("Input templates can only be an array or None\n")
+
+        if isinstance(beam,(list,tuple,np.ndarray)) :
             if(len(beam)!=3*nside) :
                 raise KeyError("Input beam must have 3*nside elements")
             beam_use=beam
-
-        if(templates==None) :
-            self.fl=lib.field_alloc_new_notemp(mask,maps,beam_use,pure_e,pure_b)
         else :
+            if(beam is None) :
+                beam_use=np.ones(3*nside)
+            else :
+                raise KeyError("Input beam can only be an array or None\n")
+
+        if isinstance(templates,(list,tuple,np.ndarray)) :
             self.fl=lib.field_alloc_new(mask,maps,templates,beam_use,pure_e,pure_b)
+        else :
+            self.fl=lib.field_alloc_new_notemp(mask,maps,beam_use,pure_e,pure_b)
 
     def __del__(self) :
         lib.field_free(self.fl)
@@ -116,7 +124,7 @@ class NmtFieldFlat(object) :
         mps=np.array(mps)
 
         #Flatten templates
-        if templates!=None :
+        if isinstance(templates,(list,tuple,np.ndarray)) :
             tmps=[]
             for t in templates :
                 tmp=[]
@@ -126,20 +134,26 @@ class NmtFieldFlat(object) :
                     tmp.append((m.astype(np.float64)).flatten())
                 tmps.append(tmp)
             tmps=np.array(tmps)
+        else :
+            if(templates is not None) :
+                raise KeyError("Input templates can only be an array or None\n")
 
         #Form beam
-        if(beam==None) :
-            lmax=int(np.fmax(self.nx*np.pi/lx,self.ny*np.pi/ly))
-            beam_use=np.array([np.arange(lmax+1),np.ones(lmax+1)])
-        else :
+        if isinstance(beam,(list,tuple,np.ndarray)) :
             beam_use=beam
             lmax=len(beam_use)-1
+        else :
+            if(beam is None) :
+                lmax=int(np.fmax(self.nx*np.pi/lx,self.ny*np.pi/ly))
+                beam_use=np.array([np.arange(lmax+1),np.ones(lmax+1)])
+            else :
+                raise KeyError("Input beam can only be an array or None\n")
 
         #Generate field
-        if(templates==None) :
-            self.fl=lib.field_alloc_new_notemp_flat(self.nx,self.ny,lx,ly,msk,mps,beam_use,pure_e,pure_b)
-        else :
+        if isinstance(templates,(list,tuple,np.ndarray)) :
             self.fl=lib.field_alloc_new_flat(self.nx,self.ny,lx,ly,msk,mps,tmps,beam_use,pure_e,pure_b)
+        else :
+            self.fl=lib.field_alloc_new_notemp_flat(self.nx,self.ny,lx,ly,msk,mps,beam_use,pure_e,pure_b)
 
     def __del__(self) :
         lib.field_flat_free(self.fl)
@@ -170,13 +184,3 @@ class NmtFieldFlat(object) :
         tmps=temp.reshape([self.fl.ntemp,self.fl.nmaps,self.ny,self.nx])
 
         return tmps
-
-    def get_ell_sampling(self) :
-        """
-        Returns the multipoles at which the coupling matrix has been computed
-
-        :return: list of multipoles
-        """
-        ells=lib.get_ell_sampling_flat_field(self.fl,self.fl.fs.n_ell)
-
-        return ells

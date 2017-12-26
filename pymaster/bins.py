@@ -9,19 +9,27 @@ class NmtBin(object) :
     :param array-like ells: array of integers corresponding to different multipoles
     :param array-like bpws: array of integers that assign the multipoles in ells to different bandpowers
     :param array-like weights: array of floats corresponding to the weights associated to each multipole in ells. The sum of weights within each bandpower is normalized to 1.
-    :param int nlb: integer value corresponding to a constant bandpower width. I.e. the bandpowers will be defined as consecutive sets of nlb multipoles from l=2 to l=3*nside-1 with equal weights. If this argument is provided, the values of ells, bpws and weights are ignored.
+    :param int nlb: integer value corresponding to a constant bandpower width. I.e. the bandpowers will be defined as consecutive sets of nlb multipoles from l=2 to l=lmax (see below) with equal weights. If this argument is provided, the values of ells, bpws and weights are ignored.
+    :param int lmax: integer value corresponding to the maximum multiple used by these bandpowers. If None, it will be set to 3*nside-1. In any case the actual maximum multipole will be chosen as the minimum of lmax, 3*nside-1 and the maximum element of ells.
     """
-    def __init__(self,nside,bpws=None,ells=None,weights=None,nlb=None) :
-        if((bpws==None) and (ells==None) and (weights==None) and (nlb==None)) :
+    def __init__(self,nside,bpws=None,ells=None,weights=None,nlb=None,lmax=None) :
+        if((bpws is None) and (ells is None) and (weights is None) and (nlb is None)) :
             raise KeyError("Must supply bandpower arrays or constant bandpower width")
 
-        if(nlb==None) :
-            if((bpws==None) and (ells==None) and (weights==None)) :
-                raise KeyError("Must provide bpws, ells and weights")
-            self.bin=lib.bins_create_py(bpws,ells,weights,3*nside-1)
+        if(lmax is None) :
+            lmax_in=3*nside-1
         else :
-            self.bin=lib.bins_constant(nlb,3*nside-1)
-        self.lmax=3*nside-1
+            lmax_in=lmax
+
+        if(nlb is None) :
+            if((bpws is None) and (ells is None) and (weights is None)) :
+                raise KeyError("Must provide bpws, ells and weights")
+            ell_max=min(3*nside-1,np.amax(ells),lmax_in)
+            self.bin=lib.bins_create_py(bpws,ells,weights,ell_max)
+        else :
+            ell_max=min(3*nside-1,lmax_in)
+            self.bin=lib.bins_constant(nlb,ell_max)
+        self.lmax=ell_max
 
     def __del__(self) :
         lib.bins_free(self.bin)
@@ -75,7 +83,7 @@ class NmtBin(object) :
         :param array-like cls_in: 2D array of power spectra
         :return: array of bandpowers
         """
-        if(len(cls_in[0])!=self.lmax+1) :
+        if(len(cls_in[0])>self.lmax+1) :
             raise KeyError("Input Cl has wrong size")
         cl1d=lib.bin_cl(self.bin,cls_in,len(cls_in)*self.bin.n_bands)
         clout=np.reshape(cl1d,[len(cls_in),self.bin.n_bands])

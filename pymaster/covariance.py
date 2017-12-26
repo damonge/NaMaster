@@ -9,7 +9,7 @@ class NmtCovarianceWorkspace(object) :
         self.wsp=None
     
     def __del__(self) :
-        if(self.wsp!=None) :
+        if(self.wsp is not None) :
             lib.covar_workspace_free(self.wsp)
 
     def read_from(self,fname) :
@@ -18,7 +18,7 @@ class NmtCovarianceWorkspace(object) :
 
         :param str fname: input file name
         """
-        if self.wsp!=None :
+        if self.wsp is not None :
             lib.covar_workspace_free(self.wsp)
         self.wsp=lib.covar_workspace_read(fname);
 
@@ -33,7 +33,7 @@ class NmtCovarianceWorkspace(object) :
             raise ValueError("Everything should have the same resolution!")
         if((wa.wsp.ncls!=1) or (wb.wsp.ncls!=1)) :
             raise ValueError("Gaussian covariances only supported for spin-0 fields")
-        if self.wsp!=None :
+        if self.wsp is not None :
             lib.covar_workspace_free(self.wsp)
         self.wsp=lib.covar_workspace_init(wa.wsp,wb.wsp)
 
@@ -43,7 +43,7 @@ class NmtCovarianceWorkspace(object) :
 
         :param str fname: output file name
         """
-        if self.wsp==None :
+        if self.wsp is None :
             raise KeyError("Must initialize workspace before writing")
         lib.covar_workspace_write(self.wsp,fname)
 

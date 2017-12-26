@@ -40,9 +40,11 @@ nmt_k_function *fs_generate_beam_window(double fwhm_amin);
 void fs_zero_alm(nmt_flatsky_info *fs,fcomplex *alm);
 void fs_alter_alm(nmt_flatsky_info *fs,double fwhm_amin,fcomplex *alm_in,fcomplex *alm_out,
 		  nmt_k_function *window,int add_to_out);
-void fs_alm2cl(nmt_flatsky_info *fs,fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls,
+void fs_alm2cl(nmt_flatsky_info *fs,nmt_binning_scheme_flat *bin,
+	       fcomplex **alms_1,fcomplex **alms_2,int pol_1,int pol_2,flouble **cls,
 	       flouble lmn_x,flouble lmx_x,flouble lmn_y,flouble lmx_y);
-void fs_anafast(nmt_flatsky_info *fs,flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls);
+void fs_anafast(nmt_flatsky_info *fs,nmt_binning_scheme_flat *bin,
+		flouble **maps_1,flouble **maps_2,int pol_1,int pol_2,flouble **cls);
 fcomplex **fs_synalm(int nx,int ny,flouble lx,flouble ly,int nmaps,
 		     nmt_k_function **cells,nmt_k_function **beam,int seed);
 

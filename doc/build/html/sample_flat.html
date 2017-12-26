@@ -13,6 +13,8 @@
 
   
   
+  
+  
 
   
 
@@ -34,6 +36,7 @@
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="pymaster 0.1 documentation" href="index.html"/>
+        <link rel="next" title="Example 8: Computing covariance matrices" href="sample_covariance.html"/>
         <link rel="prev" title="Example 6: Pure E and B" href="sample_pureb.html"/> 
 
   
@@ -43,6 +46,7 @@
 
 <body class="wy-body-for-nav" role="document">
 
+   
   <div class="wy-grid-for-nav">
 
     
@@ -83,7 +87,10 @@
           
             
             
-                <p class="caption"><span class="caption-text">Contents:</span></p>
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="pymaster.html">Python API documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sample_simple.html">Example 1: simple pseudo-Cl computation</a></li>
@@ -93,6 +100,7 @@
 <li class="toctree-l1"><a class="reference internal" href="sample_workspaces.html">Example 5: Using workspaces</a></li>
 <li class="toctree-l1"><a class="reference internal" href="sample_pureb.html">Example 6: Pure E and B</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Example 7: Flat-sky fields</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sample_covariance.html">Example 8: Computing covariance matrices</a></li>
 </ul>
 
             
@@ -105,8 +113,10 @@
 
       
       <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">pymaster</a>
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pymaster</a>
+        
       </nav>
 
 
@@ -115,23 +125,40 @@
         <div class="rst-content">
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Example 7: Flat-sky fields</li>
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Example 7: Flat-sky fields</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
+            
             <a href="_sources/sample_flat.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -140,7 +167,7 @@
   <div class="section" id="example-7-flat-sky-fields">
 <h1>Example 7: Flat-sky fields<a class="headerlink" href="#example-7-flat-sky-fields" title="Permalink to this headline">¶</a></h1>
 <p>This sample script showcases the flat-sky version of pymaster.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">healpy</span> <span class="kn">as</span> <span class="nn">hp</span>
 <span class="kn">import</span> <span class="nn">pymaster</span> <span class="kn">as</span> <span class="nn">nmt</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
@@ -197,11 +224,6 @@
 <span class="c1">#(see the documentation for more details)</span>
 <span class="n">f0</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">NmtFieldFlat</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span><span class="n">Ly</span><span class="p">,</span><span class="n">mask</span><span class="p">,[</span><span class="n">mpt</span><span class="p">])</span>
 <span class="n">f2</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">NmtFieldFlat</span><span class="p">(</span><span class="n">Lx</span><span class="p">,</span><span class="n">Ly</span><span class="p">,</span><span class="n">mask</span><span class="p">,[</span><span class="n">mpq</span><span class="p">,</span><span class="n">mpu</span><span class="p">],</span><span class="n">purify_b</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="c1">#If you compute the power spectrum of two fields (without caring for mode coupling),</span>
-<span class="c1">#pymaster will return it with at a hard-coded resolution in ell-space determined</span>
-<span class="c1">#by the size and number of pixels of the patch.</span>
-<span class="c1">#You can get the list of ells at which this is done by calling the following function:</span>
-<span class="n">ells_coupled</span><span class="o">=</span><span class="n">f0</span><span class="o">.</span><span class="n">get_ell_sampling</span><span class="p">()</span>
 
 <span class="c1">#Bins:</span>
 <span class="c1">#For flat-sky fields, bandpowers are simply defined as intervals in ell, and</span>
@@ -229,9 +251,9 @@
 <span class="c1">#power spectra and then decoupling them by inverting the mode-coupling matrix.</span>
 <span class="c1">#This is done in two steps below, but pymaster provides convenience routines to do this</span>
 <span class="c1">#through a single function call</span>
-<span class="n">cl00_coupled</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">compute_coupled_cell_flat</span><span class="p">(</span><span class="n">f0</span><span class="p">,</span><span class="n">f0</span><span class="p">);</span> <span class="n">cl00_uncoupled</span><span class="o">=</span><span class="n">w00</span><span class="o">.</span><span class="n">decouple_cell</span><span class="p">(</span><span class="n">cl00_coupled</span><span class="p">)</span>
-<span class="n">cl02_coupled</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">compute_coupled_cell_flat</span><span class="p">(</span><span class="n">f0</span><span class="p">,</span><span class="n">f2</span><span class="p">);</span> <span class="n">cl02_uncoupled</span><span class="o">=</span><span class="n">w02</span><span class="o">.</span><span class="n">decouple_cell</span><span class="p">(</span><span class="n">cl02_coupled</span><span class="p">)</span>
-<span class="n">cl22_coupled</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">compute_coupled_cell_flat</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span><span class="n">f2</span><span class="p">);</span> <span class="n">cl22_uncoupled</span><span class="o">=</span><span class="n">w22</span><span class="o">.</span><span class="n">decouple_cell</span><span class="p">(</span><span class="n">cl22_coupled</span><span class="p">)</span>
+<span class="n">cl00_coupled</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">compute_coupled_cell_flat</span><span class="p">(</span><span class="n">f0</span><span class="p">,</span><span class="n">f0</span><span class="p">,</span><span class="n">b</span><span class="p">);</span> <span class="n">cl00_uncoupled</span><span class="o">=</span><span class="n">w00</span><span class="o">.</span><span class="n">decouple_cell</span><span class="p">(</span><span class="n">cl00_coupled</span><span class="p">)</span>
+<span class="n">cl02_coupled</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">compute_coupled_cell_flat</span><span class="p">(</span><span class="n">f0</span><span class="p">,</span><span class="n">f2</span><span class="p">,</span><span class="n">b</span><span class="p">);</span> <span class="n">cl02_uncoupled</span><span class="o">=</span><span class="n">w02</span><span class="o">.</span><span class="n">decouple_cell</span><span class="p">(</span><span class="n">cl02_coupled</span><span class="p">)</span>
+<span class="n">cl22_coupled</span><span class="o">=</span><span class="n">nmt</span><span class="o">.</span><span class="n">compute_coupled_cell_flat</span><span class="p">(</span><span class="n">f2</span><span class="p">,</span><span class="n">f2</span><span class="p">,</span><span class="n">b</span><span class="p">);</span> <span class="n">cl22_uncoupled</span><span class="o">=</span><span class="n">w22</span><span class="o">.</span><span class="n">decouple_cell</span><span class="p">(</span><span class="n">cl22_coupled</span><span class="p">)</span>
 
 <span class="c1">#Let&#39;s look at the results!</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -239,11 +261,8 @@
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">cl_ee</span><span class="p">,</span><span class="s1">&#39;g-&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Input EE&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">cl_bb</span><span class="p">,</span><span class="s1">&#39;b-&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Input BB&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ells_uncoupled</span><span class="p">,</span><span class="n">cl00_uncoupled</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;r--&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Uncoupled&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ells_coupled</span><span class="p">,</span><span class="n">cl00_coupled</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;r-.&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Coupled&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ells_uncoupled</span><span class="p">,</span><span class="n">cl22_uncoupled</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;g--&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ells_coupled</span><span class="p">,</span><span class="n">cl22_coupled</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="s1">&#39;g-.&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ells_uncoupled</span><span class="p">,</span><span class="n">cl22_uncoupled</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="s1">&#39;b--&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ells_coupled</span><span class="p">,</span><span class="n">cl22_coupled</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="s1">&#39;b-.&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">loglog</span><span class="p">();</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -252,13 +271,18 @@
 
 
            </div>
+           <div class="articleComments">
+            
+           </div>
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
+        <a href="sample_covariance.html" class="btn btn-neutral float-right" title="Example 8: Computing covariance matrices" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-        <a href="sample_pureb.html" class="btn btn-neutral" title="Example 6: Pure E and B" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+        <a href="sample_pureb.html" class="btn btn-neutral" title="Example 6: Pure E and B" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -292,13 +316,14 @@
             VERSION:'0.1',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
         };
     </script>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 
