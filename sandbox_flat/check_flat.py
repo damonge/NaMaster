@@ -137,8 +137,8 @@ def get_fields() :
         ff0=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mppt],[[fgt]])
         ff2=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mppq,mppu],[[fgq,fgu]])
     else :
-        ff0=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mpt])
-        ff2=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mpq,mpu])
+        ff0=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mppt])
+        ff2=nmt.NmtFieldFlat(mi.lx*DTOR,mi.ly*DTOR,mask,[mppq,mppu])
     return mppt,mppq,mppu,ff0,ff2
 mpt,mpq,mpu,f0,f2=get_fields()
 
