@@ -18,6 +18,8 @@ nsims  =  int(sys.argv[4])
 plotres=  int(sys.argv[5])
 aposize=float(sys.argv[6])
 
+alpha_cont_0=0.1
+alpha_cont_2=0.1
 predir="tests_sph"
 os.system("mkdir -p "+predir)
 prefix=predir+"/run_ns%d_mask%d_cont%d_apo%.2lf"%(nside,w_mask,w_cont,aposize)
@@ -57,15 +59,15 @@ if w_cont :
     tilt_fg=-2.0
     l0_fg=100.
     clttfg=1E-5*((ell+10.)/(l0_fg+10.))**tilt_fg
-    cleefg=1E-5*((ell+30.)/(l0_fg+30.))**tilt_fg
+    cleefg=5E-7*((ell+30.)/(l0_fg+30.))**tilt_fg
     cltefg=0.9*np.sqrt(clttfg*cleefg)
-    clbbfg=cleefg
+    clbbfg=0.5*cleefg
     clttfg[0]=0; cleefg[0]=0; clbbfg[0]=0; cltefg[0]=0; 
     if plotres :
-        plt.plot(ell,clttfg,'r--',label='${\\rm FG},\\,TT$')
-        plt.plot(ell,cltefg,'g--',label='${\\rm FG},\\,TE$')
-        plt.plot(ell,cleefg,'b--',label='${\\rm FG},\\,EE$')
-        plt.plot(ell,clbbfg,'y--',label='${\\rm FG},\\,BB$')
+        plt.plot(ell,alpha_cont_0*alpha_cont_0*clttfg,'r--',label='${\\rm FG},\\,TT$')
+        plt.plot(ell,alpha_cont_0*alpha_cont_2*cltefg,'g--',label='${\\rm FG},\\,TE$')
+        plt.plot(ell,alpha_cont_2*alpha_cont_2*cleefg,'b--',label='${\\rm FG},\\,EE$')
+        plt.plot(ell,alpha_cont_2*alpha_cont_2*clbbfg,'y--',label='${\\rm FG},\\,BB$')
 
 #This generates the mask with some padding and some holes
 np.random.seed(1001)
@@ -114,8 +116,6 @@ b=nmt.NmtBin(nside,nlb=d_ell)
 
 #Generate some initial fields
 print " - Res: %.3lf arcmin. "%(np.sqrt(4*np.pi*(180*60/np.pi)**2/hp.nside2npix(nside)))
-alpha_cont_0=0.1
-alpha_cont_2=0.1
 def get_fields() :
     mppt,mppq,mppu=nmt.synfast_spherical(nside,[cltt,clee,clbb,clte],pol=True)
     if w_cont :
