@@ -17,6 +17,7 @@
 
 %apply (int* ARGOUT_ARRAY1, int DIM1) {(int* iout, int niout)};
 %apply (double* ARGOUT_ARRAY1, int DIM1) {(double* dout, int ndout)};
+%apply (double* ARGOUT_ARRAY1, long DIM1) {(double* ldout, long nldout)};
 %apply (int DIM1,double *IN_ARRAY1) {(int npix_1,double *mask),
                                      (int nell11,double *c11),
                                      (int nell12,double *c12),
@@ -312,11 +313,11 @@ nmt_field_flat *field_alloc_new_notemp_flat(int nx,int ny,double lx,double ly,
 			      -1,-1,-1,NULL,ncl1,nell1,cls1,pure_e,pure_b);
 }
 
-void get_map(nmt_field *fl,int imap,double *dout,int ndout)
+void get_map(nmt_field *fl,int imap,double *ldout,long nldout)
 {
   assert(imap<fl->nmaps);
-  assert(ndout==fl->npix);
-  memcpy(dout,fl->maps[imap],fl->npix*sizeof(double));
+  assert(nldout==fl->npix);
+  memcpy(ldout,fl->maps[imap],fl->npix*sizeof(double));
 }
 
 void get_map_flat(nmt_field_flat *fl,int imap,double *dout,int ndout)
@@ -326,12 +327,12 @@ void get_map_flat(nmt_field_flat *fl,int imap,double *dout,int ndout)
   memcpy(dout,fl->maps[imap],fl->npix*sizeof(double));
 }
 
-void get_temp(nmt_field *fl,int itemp,int imap,double *dout,int ndout)
+void get_temp(nmt_field *fl,int itemp,int imap,double *ldout,long nldout)
 {
   assert(itemp<fl->ntemp);
   assert(imap<fl->nmaps);
-  assert(ndout==fl->npix);
-  memcpy(dout,fl->temp[itemp][imap],fl->npix*sizeof(double));
+  assert(nldout==fl->npix);
+  memcpy(ldout,fl->temp[itemp][imap],fl->npix*sizeof(double));
 }
 
 void get_temp_flat(nmt_field_flat *fl,int itemp,int imap,double *dout,int ndout)
@@ -343,15 +344,15 @@ void get_temp_flat(nmt_field_flat *fl,int itemp,int imap,double *dout,int ndout)
 }
 
 void apomask(int npix_1,double *mask,
-	     double *dout,int ndout,double aposize,char *apotype)
+	     double *ldout,long nldout,double aposize,char *apotype)
 {
   long nside=1;
-  assert(ndout==npix_1);
+  assert(nldout==npix_1);
 
   while(npix_1!=12*nside*nside)
     nside*=2;
 
-  nmt_apodize_mask(nside,mask,dout,aposize,apotype);
+  nmt_apodize_mask(nside,mask,ldout,aposize,apotype);
 }
 
 void apomask_flat(int nx,int ny,double lx,double ly,
@@ -366,7 +367,7 @@ void apomask_flat(int nx,int ny,double lx,double ly,
 void synfast_new(int nside,int pol,int seed,
 		 int ncl1,int nell1,double *cls1,
 		 int nell3,double *weights,
-		 double* dout,int ndout)
+		 double* ldout,long nldout)
 {
   int icl,nfields=1,nmaps=1;
   long npix=12*nside*nside;
@@ -388,7 +389,7 @@ void synfast_new(int nside,int pol,int seed,
   maps=nmt_synfast_sph(nside,nfields,spin_arr,nell3-1,cls,beams,seed);
 
   for(icl=0;icl<nmaps;icl++) {
-    memcpy(&(dout[npix*icl]),maps[icl],npix*sizeof(double));
+    memcpy(&(ldout[npix*icl]),maps[icl],npix*sizeof(double));
     free(maps[icl]);
   }
   free(maps);

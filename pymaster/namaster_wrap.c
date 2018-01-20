@@ -3610,11 +3610,11 @@ nmt_field_flat *field_alloc_new_notemp_flat(int nx,int ny,double lx,double ly,
 			      -1,-1,-1,NULL,ncl1,nell1,cls1,pure_e,pure_b);
 }
 
-void get_map(nmt_field *fl,int imap,double *dout,int ndout)
+void get_map(nmt_field *fl,int imap,double *ldout,long nldout)
 {
   assert(imap<fl->nmaps);
-  assert(ndout==fl->npix);
-  memcpy(dout,fl->maps[imap],fl->npix*sizeof(double));
+  assert(nldout==fl->npix);
+  memcpy(ldout,fl->maps[imap],fl->npix*sizeof(double));
 }
 
 void get_map_flat(nmt_field_flat *fl,int imap,double *dout,int ndout)
@@ -3624,12 +3624,12 @@ void get_map_flat(nmt_field_flat *fl,int imap,double *dout,int ndout)
   memcpy(dout,fl->maps[imap],fl->npix*sizeof(double));
 }
 
-void get_temp(nmt_field *fl,int itemp,int imap,double *dout,int ndout)
+void get_temp(nmt_field *fl,int itemp,int imap,double *ldout,long nldout)
 {
   assert(itemp<fl->ntemp);
   assert(imap<fl->nmaps);
-  assert(ndout==fl->npix);
-  memcpy(dout,fl->temp[itemp][imap],fl->npix*sizeof(double));
+  assert(nldout==fl->npix);
+  memcpy(ldout,fl->temp[itemp][imap],fl->npix*sizeof(double));
 }
 
 void get_temp_flat(nmt_field_flat *fl,int itemp,int imap,double *dout,int ndout)
@@ -3641,15 +3641,15 @@ void get_temp_flat(nmt_field_flat *fl,int itemp,int imap,double *dout,int ndout)
 }
 
 void apomask(int npix_1,double *mask,
-	     double *dout,int ndout,double aposize,char *apotype)
+	     double *ldout,long nldout,double aposize,char *apotype)
 {
   long nside=1;
-  assert(ndout==npix_1);
+  assert(nldout==npix_1);
 
   while(npix_1!=12*nside*nside)
     nside*=2;
 
-  nmt_apodize_mask(nside,mask,dout,aposize,apotype);
+  nmt_apodize_mask(nside,mask,ldout,aposize,apotype);
 }
 
 void apomask_flat(int nx,int ny,double lx,double ly,
@@ -3664,7 +3664,7 @@ void apomask_flat(int nx,int ny,double lx,double ly,
 void synfast_new(int nside,int pol,int seed,
 		 int ncl1,int nell1,double *cls1,
 		 int nell3,double *weights,
-		 double* dout,int ndout)
+		 double* ldout,long nldout)
 {
   int icl,nfields=1,nmaps=1;
   long npix=12*nside*nside;
@@ -3686,7 +3686,7 @@ void synfast_new(int nside,int pol,int seed,
   maps=nmt_synfast_sph(nside,nfields,spin_arr,nell3-1,cls,beams,seed);
 
   for(icl=0;icl<nmaps;icl++) {
-    memcpy(&(dout[npix*icl]),maps[icl],npix*sizeof(double));
+    memcpy(&(ldout[npix*icl]),maps[icl],npix*sizeof(double));
     free(maps[icl]);
   }
   free(maps);
@@ -4424,7 +4424,7 @@ void comp_pspec_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
   {
     int i;
     int success = 1;
-    int len;
+    size_t len;
     char desired_dims[255] = "[";
     char s[255];
     char actual_dims[255] = "[";
@@ -14982,7 +14982,7 @@ SWIGINTERN PyObject *_wrap_get_map(PyObject *SWIGUNUSEDPARM(self), PyObject *arg
   nmt_field *arg1 = (nmt_field *) 0 ;
   int arg2 ;
   double *arg3 = (double *) 0 ;
-  int arg4 ;
+  long arg4 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
@@ -15013,7 +15013,7 @@ SWIGINTERN PyObject *_wrap_get_map(PyObject *SWIGUNUSEDPARM(self), PyObject *arg
         typestring);
       SWIG_fail;
     }
-    arg4 = (int) PyInt_AsLong(obj2);
+    arg4 = (long) PyInt_AsLong(obj2);
     dims[0] = (npy_intp) arg4;
     array3 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
     if (!array3) SWIG_fail;
@@ -15097,7 +15097,7 @@ SWIGINTERN PyObject *_wrap_get_temp(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
   int arg2 ;
   int arg3 ;
   double *arg4 = (double *) 0 ;
-  int arg5 ;
+  long arg5 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
   int val2 ;
@@ -15136,7 +15136,7 @@ SWIGINTERN PyObject *_wrap_get_temp(PyObject *SWIGUNUSEDPARM(self), PyObject *ar
         typestring);
       SWIG_fail;
     }
-    arg5 = (int) PyInt_AsLong(obj3);
+    arg5 = (long) PyInt_AsLong(obj3);
     dims[0] = (npy_intp) arg5;
     array4 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
     if (!array4) SWIG_fail;
@@ -15228,7 +15228,7 @@ SWIGINTERN PyObject *_wrap_apomask(PyObject *SWIGUNUSEDPARM(self), PyObject *arg
   int arg1 ;
   double *arg2 = (double *) 0 ;
   double *arg3 = (double *) 0 ;
-  int arg4 ;
+  long arg4 ;
   double arg5 ;
   char *arg6 = (char *) 0 ;
   PyArrayObject *array1 = NULL ;
@@ -15267,7 +15267,7 @@ SWIGINTERN PyObject *_wrap_apomask(PyObject *SWIGUNUSEDPARM(self), PyObject *arg
         typestring);
       SWIG_fail;
     }
-    arg4 = (int) PyInt_AsLong(obj1);
+    arg4 = (long) PyInt_AsLong(obj1);
     dims[0] = (npy_intp) arg4;
     array3 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
     if (!array3) SWIG_fail;
@@ -15448,7 +15448,7 @@ SWIGINTERN PyObject *_wrap_synfast_new(PyObject *SWIGUNUSEDPARM(self), PyObject 
   int arg7 ;
   double *arg8 = (double *) 0 ;
   double *arg9 = (double *) 0 ;
-  int arg10 ;
+  long arg10 ;
   int val1 ;
   int ecode1 = 0 ;
   int val2 ;
@@ -15518,7 +15518,7 @@ SWIGINTERN PyObject *_wrap_synfast_new(PyObject *SWIGUNUSEDPARM(self), PyObject 
         typestring);
       SWIG_fail;
     }
-    arg10 = (int) PyInt_AsLong(obj5);
+    arg10 = (long) PyInt_AsLong(obj5);
     dims[0] = (npy_intp) arg10;
     array9 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
     if (!array9) SWIG_fail;

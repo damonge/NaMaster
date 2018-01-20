@@ -901,32 +901,32 @@ def field_alloc_new_notemp_flat(nx, ny, lx, ly, npix_1, nmap_2, ncl1, pure_e, pu
     return _nmtlib.field_alloc_new_notemp_flat(nx, ny, lx, ly, npix_1, nmap_2, ncl1, pure_e, pure_b)
 field_alloc_new_notemp_flat = _nmtlib.field_alloc_new_notemp_flat
 
-def get_map(fl, imap, dout):
-    return _nmtlib.get_map(fl, imap, dout)
+def get_map(fl, imap, ldout):
+    return _nmtlib.get_map(fl, imap, ldout)
 get_map = _nmtlib.get_map
 
 def get_map_flat(fl, imap, dout):
     return _nmtlib.get_map_flat(fl, imap, dout)
 get_map_flat = _nmtlib.get_map_flat
 
-def get_temp(fl, itemp, imap, dout):
-    return _nmtlib.get_temp(fl, itemp, imap, dout)
+def get_temp(fl, itemp, imap, ldout):
+    return _nmtlib.get_temp(fl, itemp, imap, ldout)
 get_temp = _nmtlib.get_temp
 
 def get_temp_flat(fl, itemp, imap, dout):
     return _nmtlib.get_temp_flat(fl, itemp, imap, dout)
 get_temp_flat = _nmtlib.get_temp_flat
 
-def apomask(npix_1, dout, aposize, apotype):
-    return _nmtlib.apomask(npix_1, dout, aposize, apotype)
+def apomask(npix_1, ldout, aposize, apotype):
+    return _nmtlib.apomask(npix_1, ldout, aposize, apotype)
 apomask = _nmtlib.apomask
 
 def apomask_flat(nx, ny, lx, ly, npix_1, dout, aposize, apotype):
     return _nmtlib.apomask_flat(nx, ny, lx, ly, npix_1, dout, aposize, apotype)
 apomask_flat = _nmtlib.apomask_flat
 
-def synfast_new(nside, pol, seed, ncl1, nell3, dout):
-    return _nmtlib.synfast_new(nside, pol, seed, ncl1, nell3, dout)
+def synfast_new(nside, pol, seed, ncl1, nell3, ldout):
+    return _nmtlib.synfast_new(nside, pol, seed, ncl1, nell3, ldout)
 synfast_new = _nmtlib.synfast_new
 
 def synfast_new_flat(nx, ny, lx, ly, pol, seed, ncl1, nell3, dout):
