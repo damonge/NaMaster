@@ -35,7 +35,7 @@ if not os.path.isfile('cls_flat.txt') :
     cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=2.1e-9, n_s=0.96)
     clust=ccl.ClTracerNumberCounts(cosmo,False,False,z=z,n=pz,bias=bz)
     lens=ccl.ClTracerLensing(cosmo,False,z=z,n=pz)
-    ell=np.arange(20000)
+    ell=np.arange(40000)
     cltt=ccl.angular_cl(cosmo,clust,clust,ell)
     clte=ccl.angular_cl(cosmo,clust,lens,ell)
     clee=ccl.angular_cl(cosmo,lens,lens,ell)
