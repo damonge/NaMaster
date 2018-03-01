@@ -112,7 +112,7 @@ CTEST(nmt,field_t) {
   double *mask=malloc(12*NSIDE_TESTS*NSIDE_TESTS*sizeof(double));
   for(i=0;i<12*NSIDE_TESTS*NSIDE_TESTS;i++)
     mask[i]=1.;
-  nmt_field *fld=nmt_field_alloc_sph(NSIDE_TESTS,mask,0,map,0,NULL,NULL,0,0);
+  nmt_field *fld=nmt_field_alloc_sph(NSIDE_TESTS,mask,0,map,0,NULL,NULL,0,0,3);
   ASSERT_EQUAL(fld->nside,NSIDE_TESTS);
   ASSERT_EQUAL(fld->npix,12*NSIDE_TESTS*NSIDE_TESTS);
   nmt_field_free(fld);
@@ -124,7 +124,7 @@ CTEST(nmt,field_t) {
 }
 
 CTEST(nmt,field_r) {
-  nmt_field *fld=nmt_field_read("test/mask.fits","test/maps.fits","none","none",0,0,0);
+  nmt_field *fld=nmt_field_read("test/mask.fits","test/maps.fits","none","none",0,0,0,3);
   ASSERT_EQUAL(fld->nside,256);
   nmt_field_free(fld);
 }
@@ -154,7 +154,7 @@ CTEST(nmt,cell_00) {
   long nside,ipix;
   double *mpt=he_read_healpix_map("test/maps.fits",&nside,0);
   double *msk=he_read_healpix_map("test/mask.fits",&nside,0);
-  nmt_field *f0=nmt_field_alloc_sph(nside,msk,0,&mpt,0,NULL,NULL,0,0);
+  nmt_field *f0=nmt_field_alloc_sph(nside,msk,0,&mpt,0,NULL,NULL,0,0,3);
   nmt_binning_scheme *bin=nmt_bins_constant(20,3*nside-1);
   nmt_workspace *w00=nmt_compute_coupling_matrix(f0,f0,bin);
   double **cell=malloc(1*sizeof(double *));
@@ -188,8 +188,8 @@ CTEST(nmt,cell_02) {
   double **mpp=malloc(2*sizeof(double *));
   mpp[0]=mpq; mpp[1]=mpu;
 
-  nmt_field *f0=nmt_field_alloc_sph(nside,msk,0,&mpt,0,NULL,NULL,0,0);
-  nmt_field *f2=nmt_field_alloc_sph(nside,msk,1,mpp,0,NULL,NULL,0,0);
+  nmt_field *f0=nmt_field_alloc_sph(nside,msk,0,&mpt,0,NULL,NULL,0,0,3);
+  nmt_field *f2=nmt_field_alloc_sph(nside,msk,1,mpp,0,NULL,NULL,0,0,3);
   nmt_binning_scheme *bin=nmt_bins_constant(20,3*nside-1);
 
   nmt_workspace *w02=nmt_compute_coupling_matrix(f0,f2,bin);
@@ -235,7 +235,7 @@ CTEST(nmt,cell_22) {
   double **mpp=malloc(2*sizeof(double *));
   mpp[0]=mpq; mpp[1]=mpu;
 
-  nmt_field *f2=nmt_field_alloc_sph(nside,msk,1,mpp,0,NULL,NULL,0,0);
+  nmt_field *f2=nmt_field_alloc_sph(nside,msk,1,mpp,0,NULL,NULL,0,0,3);
   nmt_binning_scheme *bin=nmt_bins_constant(20,3*nside-1);
 
   nmt_workspace *w22=nmt_compute_coupling_matrix(f2,f2,bin);

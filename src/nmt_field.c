@@ -33,7 +33,7 @@ void nmt_field_free(nmt_field *fl)
   free(fl);
 }
 
-static void nmt_purify(nmt_field *fl)
+static void nmt_purify(nmt_field *fl,int n_iter_mask)
 {
   long ip;
   int imap,mm,ll;
@@ -61,7 +61,7 @@ static void nmt_purify(nmt_field *fl)
     purify[1]=1;
 
   //Compute mask SHT (store in walm)
-  he_map2alm(fl->nside,fl->lmax,1,0,&(fl->mask),walm  ,10);
+  he_map2alm(fl->nside,fl->lmax,1,0,&(fl->mask),walm  ,n_iter_mask);
 
   //Product with spin-0 mask
   for(imap=0;imap<fl->nmaps;imap++) {
@@ -154,7 +154,8 @@ static void nmt_purify(nmt_field *fl)
 }
 
 nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
-			       int ntemp,flouble ***temp,flouble *beam,int pure_e,int pure_b)
+			       int ntemp,flouble ***temp,flouble *beam,
+			       int pure_e,int pure_b,int n_iter_mask_purify)
 {
   int ii,itemp,itemp2,imap;
   nmt_field *fl=my_malloc(sizeof(nmt_field));
@@ -253,7 +254,7 @@ nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
     fl->alms[ii]=my_malloc(he_nalms(fl->lmax)*sizeof(fcomplex));
 
   if(fl->pol && (fl->pure_e || fl->pure_b))
-    nmt_purify(fl);
+    nmt_purify(fl,n_iter_mask_purify);
   else {
     for(ii=0;ii<fl->nmaps;ii++)
       he_map_product(fl->nside,fl->maps[ii],fl->mask,fl->maps[ii]);
@@ -309,7 +310,7 @@ flouble **nmt_synfast_sph(int nside,int nfields,int *spin_arr,int lmax,
 }
 
 nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,
-			  int pol,int pure_e,int pure_b)
+			  int pol,int pure_e,int pure_b,int n_iter_mask_purify)
 {
   long nside,nside_dum;
   nmt_field *fl;
@@ -373,7 +374,7 @@ nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,cha
     temp=NULL;
   }
 
-  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,temp,beam,pure_e,pure_b);
+  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,temp,beam,pure_e,pure_b,n_iter_mask_purify);
 
   if(beam!=NULL)
     free(beam);

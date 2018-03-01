@@ -176,7 +176,8 @@ void unbin_cl_flat(nmt_binning_scheme_flat *bins,
 nmt_field *field_alloc_new(int npix_1,double *mask,
 			   int nmap_2,int npix_2,double *mps,
 			   int ntmp_3,int nmap_3,int npix_3,double *tmp,
-			   int nell3,double *weights,int pure_e,int pure_b)
+			   int nell3,double *weights,
+			   int pure_e,int pure_b,int n_iter_mask_purify)
 {
   int ii,jj;
   long nside=1;
@@ -210,7 +211,7 @@ nmt_field *field_alloc_new(int npix_1,double *mask,
   for(ii=0;ii<nmap_2;ii++)
     maps[ii]=mps+npix_2*ii;
 
-  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,temp,weights,pure_e,pure_b);
+  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,temp,weights,pure_e,pure_b,n_iter_mask_purify);
 
   if(tmp!=NULL) {
     for(ii=0;ii<ntmp_3;ii++)
@@ -224,7 +225,8 @@ nmt_field *field_alloc_new(int npix_1,double *mask,
 
 nmt_field *field_alloc_new_notemp(int npix_1,double *mask,
 				  int nmap_2,int npix_2,double *mps,
-				  int nell3,double *weights,int pure_e,int pure_b)
+				  int nell3,double *weights,
+				  int pure_e,int pure_b,int n_iter_mask_purify)
 {
   int ii;
   long nside=1;
@@ -245,7 +247,7 @@ nmt_field *field_alloc_new_notemp(int npix_1,double *mask,
   for(ii=0;ii<nmap_2;ii++)
     maps[ii]=mps+npix_2*ii;
 
-  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,NULL,weights,pure_e,pure_b);
+  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,NULL,weights,pure_e,pure_b,n_iter_mask_purify);
 
   free(maps);
 

@@ -11,9 +11,10 @@ class NmtField(object) :
     :param beam: spherical harmonic transform of the instrumental beam (assumed to be rotationally symmetric - i.e. no m dependence). If None, no beam will be corrected for. Otherwise, this array should have 3*nside elements, corresponding to multipoles from 0 to 3*nside-1.
     :param purify_e: use pure E-modes?
     :param purify_b: use pure B-modes?
+    :param n_iter_mask_purify: number of iterations used to compute an accurate SHT of the mask when using E/B purification
 
     """
-    def __init__(self,mask,maps,templates=None,beam=None,purify_e=False,purify_b=False) :
+    def __init__(self,mask,maps,templates=None,beam=None,purify_e=False,purify_b=False,n_iter_mask_purify=3) :
         pure_e=0
         if(purify_e) :
             pure_e=1
@@ -48,9 +49,9 @@ class NmtField(object) :
                 raise KeyError("Input beam can only be an array or None\n")
 
         if isinstance(templates,(list,tuple,np.ndarray)) :
-            self.fl=lib.field_alloc_new(mask,maps,templates,beam_use,pure_e,pure_b)
+            self.fl=lib.field_alloc_new(mask,maps,templates,beam_use,pure_e,pure_b,n_iter_mask_purify)
         else :
-            self.fl=lib.field_alloc_new_notemp(mask,maps,beam_use,pure_e,pure_b)
+            self.fl=lib.field_alloc_new_notemp(mask,maps,beam_use,pure_e,pure_b,n_iter_mask_purify)
 
     def __del__(self) :
         lib.field_free(self.fl)

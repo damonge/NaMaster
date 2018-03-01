@@ -140,9 +140,10 @@ typedef struct {
 } nmt_field;
 void nmt_field_free(nmt_field *fl);
 nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
-			       int ntemp,flouble ***temp,flouble *beam,int pure_e,int pure_b);
+			       int ntemp,flouble ***temp,flouble *beam,
+			       int pure_e,int pure_b,int n_iter_mask_purify);
 nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,
-			  int pol,int pure_e,int pure_b);
+			  int pol,int pure_e,int pure_b,int n_iter_mask_purify);
 flouble **nmt_synfast_sph(int nside,int nfields,int *spin_arr,int lmax,
 			  flouble **cells,flouble **beam_fields,int seed);
 
