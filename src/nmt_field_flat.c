@@ -332,6 +332,8 @@ nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
     if(pure_b)
       fl->pure_b=1;
   }
+  if((fl->pol && (fl->pure_e || fl->pure_b)) && fl->ntemp>0)
+    report_error(1,"Simultaneous purification and deprojection not yet supported\n");
 
   if(beam==NULL)
     fl->beam=nmt_k_function_alloc(-1,NULL,NULL,1.,1.,1);
@@ -347,6 +349,8 @@ nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
     fl->maps[ii]=dftw_malloc(fl->npix*sizeof(flouble));
     for(ip=0;ip<fl->npix;ip++)
       fl->maps[ii][ip]=maps[ii][ip];
+    if(!(fl->pol && (fl->pure_e || fl->pure_b))) //If no purification, multiply by mask
+      fs_map_product(fl->fs,fl->maps[ii],fl->mask,fl->maps);
   }
 
   if(fl->ntemp>0) {
@@ -412,11 +416,8 @@ nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
 
   if(fl->pol && (fl->pure_e || fl->pure_b))
     nmt_purify_flat(fl);
-  else {
-    for(ii=0;ii<fl->nmaps;ii++)
-      fs_map_product(fl->fs,fl->maps[ii],fl->mask,fl->maps[ii]);
-    fs_map2alm(fl->fs,1,2*fl->pol,fl->maps,fl->alms);
-  }
+  else
+    fs_map2alm(fl->fs,1,2*fl->pol,fl->maps,fl->alms); //If purified, SHT already computed
 
   return fl;
 }

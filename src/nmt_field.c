@@ -175,6 +175,8 @@ nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
     if(pure_b)
       fl->pure_b=1;
   }
+  if((fl->pol && (fl->pure_e || fl->pure_b)) && fl->ntemp>0)
+    report_error(1,"Simultaneous purification and deprojection not yet supported\n");
 
   fl->beam=my_malloc(3*fl->nside*sizeof(flouble));
   if(beam==NULL) {
@@ -191,6 +193,8 @@ nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
   for(ii=0;ii<fl->nmaps;ii++) {
     fl->maps[ii]=my_malloc(fl->npix*sizeof(flouble));
     memcpy(fl->maps[ii],maps[ii],fl->npix*sizeof(flouble));
+    if(!(fl->pol && (fl->pure_e || fl->pure_b))) //If no purification, multiply by mask
+      he_map_product(fl->nside,fl->maps[ii],fl->mask,fl->maps[ii]);
   }
 
   if(fl->ntemp>0) {
@@ -255,11 +259,8 @@ nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
 
   if(fl->pol && (fl->pure_e || fl->pure_b))
     nmt_purify(fl,n_iter_mask_purify);
-  else {
-    for(ii=0;ii<fl->nmaps;ii++)
-      he_map_product(fl->nside,fl->maps[ii],fl->mask,fl->maps[ii]);
-    he_map2alm(fl->nside,fl->lmax,1,2*fl->pol,fl->maps,fl->alms,HE_NITER_DEFAULT);
-  }
+  else
+    he_map2alm(fl->nside,fl->lmax,1,2*fl->pol,fl->maps,fl->alms,HE_NITER_DEFAULT); //If purified, SHT already computed
 
   return fl;
 }

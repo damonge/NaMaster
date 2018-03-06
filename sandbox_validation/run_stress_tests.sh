@@ -32,9 +32,42 @@ do
     do
 	for cont in 0 1
 	do
+	    if [ ${cont} -eq 0 ] #Run pure B
+	    then
+		for aposize in 1. 2. 5. 10. 20.
+		do
+		    for pureB in 0 1
+		    do
+			command="${exc} check_sph_pure.py ${nside} ${cont} ${nsims} 0 ${aposize} C1 0 ${pureB}"
+			if [ ${run_in_nodes} -eq 1 ]
+			then
+			    runfile=tests_sph/run_batch_ns${nside}_mask${msk}_apo${aposize}_cont${cont}_pure${pureB}.sh
+			    cat > ${runfile} <<EOF
+#!/bin/bash -l
+#SBATCH --partition ${which_partition}
+##SBATCH --qos premium
+#SBATCH --nodes 1
+#SBATCH --time=${timelim_hou}:${timelim_min}:${timelim_sec}
+#SBATCH --job-name=sph_${nside}_${aposize}_${cont}_${pureB}
+#SBATCH --account=m1727
+#SBATCH -C haswell
+module load python/2.7-anaconda
+srun -n 1 ${command}
+EOF
+			    
+			    cat ${runfile}
+			    #sbatch ${runfile}
+			else
+			    echo ${command}
+			    #${command}
+			fi
+			echo " "
+		    done
+		done
+	    fi
 	    for aposize in 1.
 	    do
-		command="python check_sph.py ${nside} ${msk} ${cont} ${nsims} 0 ${aposize}"
+		command="${exc} check_sph.py ${nside} ${msk} ${cont} ${nsims} 0 ${aposize}"
 		if [ ${run_in_nodes} -eq 1 ]
 		then
 		    runfile=tests_sph/run_batch_ns${nside}_mask${msk}_apo${aposize}_cont${cont}_nopure.sh
@@ -48,15 +81,14 @@ do
 #SBATCH --account=m1727
 #SBATCH -C haswell
 module load python/2.7-anaconda
-#module load h5py-parallel
 srun -n 1 ${command}
 EOF
 		
 		    cat ${runfile}
-		    sbatch ${runfile}
+		    #sbatch ${runfile}
 		else
 		    echo ${command}
-		    ${command}
+		    #${command}
 		fi
 		echo " "
 	    done
@@ -85,7 +117,6 @@ do
 #SBATCH --account=m1727
 #SBATCH -C haswell
 module load python/2.7-anaconda
-#module load h5py-parallel
 srun -n 1 python ${command}
 EOF
 		
