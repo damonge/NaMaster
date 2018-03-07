@@ -350,7 +350,7 @@ nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
     for(ip=0;ip<fl->npix;ip++)
       fl->maps[ii][ip]=maps[ii][ip];
     if(!(fl->pol && (fl->pure_e || fl->pure_b))) //If no purification, multiply by mask
-      fs_map_product(fl->fs,fl->maps[ii],fl->mask,fl->maps);
+      fs_map_product(fl->fs,fl->maps[ii],fl->mask,fl->maps[ii]);
   }
 
   if(fl->ntemp>0) {
