@@ -11,7 +11,7 @@ nside=256
 
 #### Read input maps
 #a) Read and apodize mask
-mask=nmt.mask_apodization(hp.read_map("mask.fits",verbose=False),1.,apotype="Smooth")
+mask=nmt.mask_apodization(hp.read_map("mask.fits",verbose=False),1.,apotype="C1")
 #b) Read maps
 mp_t,mp_q,mp_u=hp.read_map("maps.fits",field=[0,1,2],verbose=False)
 #c) Read contaminants maps
