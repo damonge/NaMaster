@@ -5,7 +5,7 @@ The following steps should be followed to install NaMaster at NERSC:
 ## 1 Install libsharp
 libsharp is a C library for spherical harmonic transforms. Follow these steps to install it before moving on to NaMaster:
 1. Download libsharp from [its github repository](https://github.com/dagss/libsharp) and unzip the file.
-2. From the libsharp folder run `autoreconf-i`, which will generate a `configure` file.
+2. From the libsharp folder run `autoreconf -i`, which will generate a `configure` file.
 3. Run `./configure --enable-pic` and `make`
 4. Create three directories: `bin`, `lib` and `include` in your home directory (unless they're already there). E.g. `mkdir $HOME/bin` etc.
 5. Move the contents of `auto/bin`, `auto/lib` and `auto/include` to the corresponding folders you just created in your home directory.
