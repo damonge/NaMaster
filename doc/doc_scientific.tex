@@ -371,6 +371,24 @@ Note that here we will use a vector notation, such that for a complex spin-$s_a$
   \end{equation}
   where $b^{ab}_\ell$ is the product of the harmonic transform of the beams for maps $a$ and $b$.
     
+\subsection{Computing $\langle\tilde{C}^N_l\rangle$}
+Consider the case where the window function is just a flat top-hat multiplied by the inverse variance of the noise:
+\begin{equation}
+  W(\nv)\equiv\Theta(\nv)\frac{\bar{\sigma}_N^2}{\sigma_N^2(\nv)},
+\end{equation}
+where $\sigma_N^2(\nv)$ is the variance per sterad at each point and $\bar{\sigma}^2_N$ is its sky-averaged value.
+
+For uncorrelated noise, we can write $N(\nv)$ as
+\begin{equation}
+ N(\nv)=u(\nv)\,\sigma_N(\nv)
+\end{equation}
+where $u(\nv)$ is a white GRF with power spectrum $C^u_l=1$. In this case, the noise pseudo-$C_l$ can be estimated theoretically:
+\begin{equation}
+ \langle\tilde{C}_l^N\rangle=\frac{1}{4\pi}\int d\Omega\,\sigma_N^2(\nv)W^2(\nv)=
+ \frac{\bar{\sigma}_N^2}{4\pi}\int d\Omega\, \Theta(\nv)\frac{\bar{\sigma}_N^2}{\sigma_N^2(\nv)}=
+ f_{\rm sky}\,\bar{\sigma}_N^2\overline{\left(\frac{\bar{\sigma}_N^2}{\sigma^2_N}\right)}
+\end{equation}
+
 \subsection{Binning into bandpowers}
   Given the loss of information implicit in masking the originally full-sky field, it is in general not possible to invert Eq. \ref{eq:cell_coupled} directly. De usual approach to doing so is by binning the pseudo-$C_\ell$ into bandpowers. A bandpower $b$ is defined by a set of $N_b$ multipoles $\vec{\ell}_b\equiv(\ell_b^1,...,\ell_b^{N_k})$ and a set of weights $\vec{w}_b\equiv(w_b^1,...,w_b^{N_b})$ normalized such that $\sum_{i=1}^{N_b}w_b^i=1$. The $b-$th bandpower for the coupled pseudo-$C_\ell$ is then defined as:
   \begin{equation}
