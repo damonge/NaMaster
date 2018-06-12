@@ -319,3 +319,39 @@ int drc3jj(int il2,int il3,int im2, int im3,int *l1min_out,
   
   return 2;
 }
+
+void moore_penrose_pinv(gsl_matrix *M,double threshold)
+{
+  if(M->size1!=M->size2)
+    report_error(1,"Matrix must be square\n");
+  
+  gsl_eigen_symmv_workspace *w=gsl_eigen_symmv_alloc(M->size1);
+  gsl_vector *eval=gsl_vector_alloc(M->size1); 
+  gsl_matrix *evec=gsl_matrix_alloc(M->size1,M->size2);
+  gsl_matrix *Mc=gsl_matrix_alloc(M->size1,M->size2);
+  gsl_matrix_memcpy(Mc,M);
+
+  //Compute eigenvectors and eigenvalues
+  gsl_eigen_symmv(Mc,eval,evec,w);
+
+  //Compute inverse eigenvalues (non-singular)
+  int ii;
+  double eval_max=gsl_vector_max(eval);
+  gsl_matrix_set_zero(M);
+  for(ii=0;ii<M->size1;ii++) {
+    double v=gsl_vector_get(eval,ii);
+    if(v<threshold*eval_max)
+      gsl_matrix_set(M,ii,ii,0);
+    else
+      gsl_matrix_set(M,ii,ii,1./v);
+  }
+
+  //Put it back together
+  gsl_blas_dgemm(CblasNoTrans,CblasTrans,1,M,evec,0,Mc); // Lambda * E^T
+  gsl_blas_dgemm(CblasNoTrans,CblasNoTrans,1,evec,Mc,0,M); // E * Lambda * E^T
+  
+  gsl_vector_free(eval);
+  gsl_matrix_free(evec);
+  gsl_matrix_free(Mc);
+  gsl_eigen_symmv_free(w);
+}

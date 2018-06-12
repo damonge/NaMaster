@@ -114,7 +114,7 @@ void nmt_field_flat_free(nmt_field_flat *fl);
 nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
 				     flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp,
 				     int nl_beam,flouble *l_beam,flouble *beam,
-				     int pure_e,int pure_b);
+				     int pure_e,int pure_b,double tol_pinv);
 flouble **nmt_synfast_flat(int nx,int ny,flouble lx,flouble ly,int nfields,int *spin_arr,
 			   int nl_beam,flouble *l_beam,flouble **beam_fields,
 			   int nl_cell,flouble *l_cell,flouble **cell_fields,
@@ -141,9 +141,9 @@ typedef struct {
 void nmt_field_free(nmt_field *fl);
 nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
 			       int ntemp,flouble ***temp,flouble *beam,
-			       int pure_e,int pure_b,int n_iter_mask_purify);
+			       int pure_e,int pure_b,int n_iter_mask_purify,double tol_pinv);
 nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,
-			  int pol,int pure_e,int pure_b,int n_iter_mask_purify);
+			  int pol,int pure_e,int pure_b,int n_iter_mask_purify,double tol_pinv);
 flouble **nmt_synfast_sph(int nside,int nfields,int *spin_arr,int lmax,
 			  flouble **cells,flouble **beam_fields,int seed);
 

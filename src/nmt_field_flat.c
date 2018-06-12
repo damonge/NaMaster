@@ -312,7 +312,7 @@ static void nmt_purify_flat(nmt_field_flat *fl)
 nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
 				     flouble *mask,int pol,flouble **maps,int ntemp,flouble ***temp,
 				     int nl_beam,flouble *l_beam,flouble *beam,
-				     int pure_e,int pure_b)
+				     int pure_e,int pure_b,double tol_pinv)
 {
   long ip;
   int ii,itemp,itemp2,imap;
@@ -381,8 +381,7 @@ nmt_field_flat *nmt_field_flat_alloc(int nx,int ny,flouble lx,flouble ly,
 	  gsl_matrix_set(fl->matrix_M,itemp2,itemp,matrix_element);
       }
     }
-    gsl_linalg_cholesky_decomp(fl->matrix_M); //TODO: this won't necessarily be invertible
-    gsl_linalg_cholesky_invert(fl->matrix_M);
+    moore_penrose_pinv(fl->matrix_M,tol_pinv);
   }
 
   if(fl->ntemp>0) {

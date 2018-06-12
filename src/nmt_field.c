@@ -155,7 +155,7 @@ static void nmt_purify(nmt_field *fl,int n_iter_mask)
 
 nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
 			       int ntemp,flouble ***temp,flouble *beam,
-			       int pure_e,int pure_b,int n_iter_mask_purify)
+			       int pure_e,int pure_b,int n_iter_mask_purify,double tol_pinv)
 {
   int ii,itemp,itemp2,imap;
   nmt_field *fl=my_malloc(sizeof(nmt_field));
@@ -224,8 +224,7 @@ nmt_field *nmt_field_alloc_sph(long nside,flouble *mask,int pol,flouble **maps,
 	  gsl_matrix_set(fl->matrix_M,itemp2,itemp,matrix_element);
       }
     }
-    gsl_linalg_cholesky_decomp(fl->matrix_M); //TODO: this won't necessarily be invertible
-    gsl_linalg_cholesky_invert(fl->matrix_M);
+    moore_penrose_pinv(fl->matrix_M,tol_pinv);
   }
 
   if(fl->ntemp>0) {
@@ -311,7 +310,7 @@ flouble **nmt_synfast_sph(int nside,int nfields,int *spin_arr,int lmax,
 }
 
 nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,char *fname_beam,
-			  int pol,int pure_e,int pure_b,int n_iter_mask_purify)
+			  int pol,int pure_e,int pure_b,int n_iter_mask_purify,double tol_pinv)
 {
   long nside,nside_dum;
   nmt_field *fl;
@@ -375,7 +374,7 @@ nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,cha
     temp=NULL;
   }
 
-  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,temp,beam,pure_e,pure_b,n_iter_mask_purify);
+  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,temp,beam,pure_e,pure_b,n_iter_mask_purify,tol_pinv);
 
   if(beam!=NULL)
     free(beam);

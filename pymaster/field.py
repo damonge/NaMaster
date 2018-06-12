@@ -12,9 +12,11 @@ class NmtField(object) :
     :param purify_e: use pure E-modes?
     :param purify_b: use pure B-modes?
     :param n_iter_mask_purify: number of iterations used to compute an accurate SHT of the mask when using E/B purification
+    :param tol_pinv: when computing the pseudo-inverse of the contaminant covariance matrix, all eigenvalues below tol_pinv * max_eval will be treated as singular values, where max_eval is the largest eigenvalue. Only relevant if passing contaminant templates that are likely to be highly correlated.
 
     """
-    def __init__(self,mask,maps,templates=None,beam=None,purify_e=False,purify_b=False,n_iter_mask_purify=3) :
+    def __init__(self,mask,maps,templates=None,beam=None,purify_e=False,purify_b=False,
+                 n_iter_mask_purify=3,tol_pinv=1E-10) :
         pure_e=0
         if(purify_e) :
             pure_e=1
@@ -49,7 +51,8 @@ class NmtField(object) :
                 raise KeyError("Input beam can only be an array or None\n")
 
         if isinstance(templates,(list,tuple,np.ndarray)) :
-            self.fl=lib.field_alloc_new(mask,maps,templates,beam_use,pure_e,pure_b,n_iter_mask_purify)
+            self.fl=lib.field_alloc_new(mask,maps,templates,beam_use,pure_e,pure_b,
+                                        n_iter_mask_purify,tol_pinv)
         else :
             self.fl=lib.field_alloc_new_notemp(mask,maps,beam_use,pure_e,pure_b,n_iter_mask_purify)
 
@@ -95,9 +98,10 @@ class NmtFieldFlat(object) :
     :param beam: 2D array (2,nl) defining the FT of the instrumental beam (assumed to be rotationally symmetric). beam[0] should contain the values of l for which de beam is defined, with beam[1] containing the beam values. If None, no beam will be corrected for.
     :param purify_e: use pure E-modes?
     :param purify_b: use pure B-modes?
+    :param tol_pinv: when computing the pseudo-inverse of the contaminant covariance matrix, all eigenvalues below tol_pinv * max_eval will be treated as singular values, where max_eval is the largest eigenvalue. Only relevant if passing contaminant templates that are likely to be highly correlated.
 
     """
-    def __init__(self,lx,ly,mask,maps,templates=None,beam=None,purify_e=False,purify_b=False) :
+    def __init__(self,lx,ly,mask,maps,templates=None,beam=None,purify_e=False,purify_b=False,tol_pinv=1E-10) :
         pure_e=0
         if(purify_e) :
             pure_e=1
@@ -152,7 +156,7 @@ class NmtFieldFlat(object) :
 
         #Generate field
         if isinstance(templates,(list,tuple,np.ndarray)) :
-            self.fl=lib.field_alloc_new_flat(self.nx,self.ny,lx,ly,msk,mps,tmps,beam_use,pure_e,pure_b)
+            self.fl=lib.field_alloc_new_flat(self.nx,self.ny,lx,ly,msk,mps,tmps,beam_use,pure_e,pure_b,tol_pinv)
         else :
             self.fl=lib.field_alloc_new_notemp_flat(self.nx,self.ny,lx,ly,msk,mps,beam_use,pure_e,pure_b)
 

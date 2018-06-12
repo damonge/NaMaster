@@ -177,7 +177,7 @@ nmt_field *field_alloc_new(int npix_1,double *mask,
 			   int nmap_2,int npix_2,double *mps,
 			   int ntmp_3,int nmap_3,int npix_3,double *tmp,
 			   int nell3,double *weights,
-			   int pure_e,int pure_b,int n_iter_mask_purify)
+			   int pure_e,int pure_b,int n_iter_mask_purify,double tol_pinv)
 {
   int ii,jj;
   long nside=1;
@@ -211,7 +211,8 @@ nmt_field *field_alloc_new(int npix_1,double *mask,
   for(ii=0;ii<nmap_2;ii++)
     maps[ii]=mps+npix_2*ii;
 
-  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,temp,weights,pure_e,pure_b,n_iter_mask_purify);
+  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,temp,weights,pure_e,pure_b,
+			 n_iter_mask_purify,tol_pinv);
 
   if(tmp!=NULL) {
     for(ii=0;ii<ntmp_3;ii++)
@@ -247,7 +248,7 @@ nmt_field *field_alloc_new_notemp(int npix_1,double *mask,
   for(ii=0;ii<nmap_2;ii++)
     maps[ii]=mps+npix_2*ii;
 
-  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,NULL,weights,pure_e,pure_b,n_iter_mask_purify);
+  fl=nmt_field_alloc_sph(nside,mask,pol,maps,ntemp,NULL,weights,pure_e,pure_b,n_iter_mask_purify,0.);
 
   free(maps);
 
@@ -259,7 +260,7 @@ nmt_field_flat *field_alloc_new_flat(int nx,int ny,double lx,double ly,
 				     int nmap_2,int npix_2,double *mps,
 				     int ntmp_3,int nmap_3,int npix_3,double *tmp,
 				     int ncl1,int nell1,double *cls1,
-				     int pure_e,int pure_b)
+				     int pure_e,int pure_b,double tol_pinv)
 {
   int ii,jj;
   int pol=0,ntemp=0;
@@ -293,7 +294,7 @@ nmt_field_flat *field_alloc_new_flat(int nx,int ny,double lx,double ly,
   double *beam=&(cls1[nell1]);
 
   fl=nmt_field_flat_alloc(nx,ny,lx,ly,mask,pol,maps,ntemp,temp,
-			  nell1,larr,beam,pure_e,pure_b);
+			  nell1,larr,beam,pure_e,pure_b,tol_pinv);
 
   if(tmp!=NULL) {
     for(ii=0;ii<ntmp_3;ii++)
@@ -312,7 +313,7 @@ nmt_field_flat *field_alloc_new_notemp_flat(int nx,int ny,double lx,double ly,
 					    int pure_e,int pure_b)
 {
   return field_alloc_new_flat(nx,ny,lx,ly,npix_1,mask,nmap_2,npix_2,mps,
-			      -1,-1,-1,NULL,ncl1,nell1,cls1,pure_e,pure_b);
+			      -1,-1,-1,NULL,ncl1,nell1,cls1,pure_e,pure_b,0.);
 }
 
 void get_map(nmt_field *fl,int imap,double *ldout,long nldout)

@@ -28,6 +28,8 @@ size_t my_fread(void *ptr,size_t size,size_t count,FILE *stream);
 // size (in) : size allocated for thrcof
 int drc3jj(int il2,int il3,int im2, int im3,int *l1min_out,
 	   int *l1max_out,double *thrcof,int size);
+// Moore-penrose pseudo-inverse
+void moore_penrose_pinv(gsl_matrix *M,double threshold);
 
 //Defined in flatsky_utils.c
 void *dftw_malloc(size_t n);
