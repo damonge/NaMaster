@@ -7,133 +7,100 @@ import sys
 
 DTOR=np.pi/180
 
-if len(sys.argv)!=7 :
-    print "python check_sph.py nside w_mask w_cont nsims plotres aposize "
+if len(sys.argv)!=8 :
+    print "python check_sph.py nside w_mask w_cont w_nvar nsims plotres aposize "
     exit(1)
 
 nside  =  int(sys.argv[1])
 w_mask =  int(sys.argv[2])
 w_cont =  int(sys.argv[3])
-nsims  =  int(sys.argv[4])
-plotres=  int(sys.argv[5])
-aposize=float(sys.argv[6])
+w_nvar =  int(sys.argv[4])
+nsims  =  int(sys.argv[5])
+plotres=  int(sys.argv[6])
+aposize=float(sys.argv[7])
 
-alpha_cont_0=0.1
-alpha_cont_2=0.1
+#Switch off contaminants if there's no mask
+if not w_mask :
+    w_cont=False
+    w_nvar=False
+    
 predir="tests_sph"
 os.system("mkdir -p "+predir)
 prefix=predir+"/run_ns%d_mask%d_cont%d_apo%.2lf"%(nside,w_mask,w_cont,aposize)
 fname_mask=prefix+"_mask"
 
-#This just generates the theory power spectra
-if not os.path.isfile('cls_flat.txt') :
-    import pyccl as ccl
-    z=np.linspace(0.2,1.2,256)
-    pz=np.exp(-((z-0.7)/0.1)**2)
-    bz=np.ones_like(z)
-    plt.figure(); plt.plot(z,pz); plt.xlabel('$z$',fontsize=16); plt.ylabel('$p(z)$',fontsize=16)
-    cosmo = ccl.Cosmology(Omega_c=0.27, Omega_b=0.045, h=0.67, A_s=2.1e-9, n_s=0.96)
-    clust=ccl.ClTracerNumberCounts(cosmo,False,False,z=z,n=pz,bias=bz)
-    lens=ccl.ClTracerLensing(cosmo,False,z=z,n=pz)
-    ell=np.arange(40000)
-    cltt=ccl.angular_cl(cosmo,clust,clust,ell)
-    clte=ccl.angular_cl(cosmo,clust,lens,ell)
-    clee=ccl.angular_cl(cosmo,lens,lens,ell)
-    clbb=np.zeros_like(clee)
-
-    np.savetxt("cls_flat.txt",np.transpose([ell,cltt,clee,clbb,clte]))
-ell,cltt,clee,clbb,clte=np.loadtxt("cls_flat.txt",unpack=True)
-ell=ell[:3*nside]; cltt=cltt[:3*nside]; clee=clee[:3*nside]; clbb=clbb[:3*nside]; clte=clte[:3*nside];
-cltt[0]=0; clee[0]=0; clbb[0]=0; clte[0]=0; 
-if plotres :
-    plt.figure()
-    plt.plot(ell,cltt,'r-',label='$\\delta_g-\\delta_g$')
-    plt.plot(ell,clte,'g-',label='$\\delta_g-\\gamma_E$')
-    plt.plot(ell,clee,'b-',label='$\\gamma_E-\\gamma_E$')
-    plt.loglog()
-    plt.xlabel('$\\ell$',fontsize=16)
-    plt.ylabel('$C_\\ell$',fontsize=16)
-    plt.legend(loc='lower left',frameon=False,fontsize=16,labelspacing=0.1)
-
-if w_cont :
-    tilt_fg=-2.0
-    l0_fg=100.
-    clttfg=1E-5*((ell+10.)/(l0_fg+10.))**tilt_fg
-    cleefg=5E-7*((ell+30.)/(l0_fg+30.))**tilt_fg
-    cltefg=0.9*np.sqrt(clttfg*cleefg)
-    clbbfg=0.5*cleefg
-    clttfg[0]=0; cleefg[0]=0; clbbfg[0]=0; cltefg[0]=0; 
-    if plotres :
-        plt.plot(ell,alpha_cont_0*alpha_cont_0*clttfg,'r--',label='${\\rm FG},\\,TT$')
-        plt.plot(ell,alpha_cont_0*alpha_cont_2*cltefg,'g--',label='${\\rm FG},\\,TE$')
-        plt.plot(ell,alpha_cont_2*alpha_cont_2*cleefg,'b--',label='${\\rm FG},\\,EE$')
-        plt.plot(ell,alpha_cont_2*alpha_cont_2*clbbfg,'y--',label='${\\rm FG},\\,BB$')
-
-#This generates the mask with some padding and some holes
+l,cltt,clee,clbb,clte,nltt,nlee,nlbb,nlte=np.loadtxt("data/cls_lss.txt",unpack=True)
+cltt=cltt[:3*nside]; clee=clee[:3*nside]; clbb=clbb[:3*nside]; clte=clte[:3*nside]; 
+nltt=nltt[:3*nside]; nlee=nlee[:3*nside]; nlbb=nlbb[:3*nside]; nlte=nlte[:3*nside]; 
 np.random.seed(1001)
-fsky=0.1
-rholes=1.
+
+
 if not os.path.isfile(fname_mask+'.fits') :
-    print "Generating mask"
+    if w_nvar :
+        depth_nvar=hp.read_map("data/cont_lss_nvar_ns%d.fits"%nside,verbose=False)
+        depth_nvar[depth_nvar<0.8]=0
+    else :
+        depth_nvar=np.ones(hp.nside2npix(nside))
+    
     if w_mask :
-        theta,phi=hp.pix2ang(nside,np.arange(hp.nside2npix(nside))); phi[phi>=np.pi]-=2*np.pi
-        cth0=-np.sqrt(fsky); cthf= np.sqrt(fsky)
-        theta0=np.arccos(cthf); thetaf=np.arccos(cth0)
-        phi0=-np.pi*np.sqrt(fsky); phif=np.pi*np.sqrt(fsky)
-        ids=np.where((theta>theta0) & (theta<thetaf) &
-                     (phi>phi0) & (phi<phif))[0]
-        mask_raw=np.zeros(hp.nside2npix(nside)); mask_raw[ids]=1.
-        nholes=15
-        cths=cth0+(cthf-cth0)*np.random.rand(nholes)
-        phis=phi0+(phif-phi0)*np.random.rand(nholes)
-        ths=np.arccos(cths)
-        vs=np.transpose(np.array([np.sin(ths)*np.cos(phis),np.sin(ths)*np.sin(phis),np.cos(ths)]))
-        for i in np.arange(nholes) :
-            v=vs[i]
-            mask_raw[hp.query_disc(nside,vs[i],rholes*np.pi/180)]=0
+        depth_ivar=np.zeros_like(depth_nvar); depth_ivar[depth_nvar>0.1]=1./depth_nvar[depth_nvar>0.1]
+        mask_raw=hp.read_map("data/mask_lss_ns%d.fits"%nside,verbose=False)
         if aposize>0 :
             mask=nmt.mask_apodization(mask_raw,aposize,apotype='C1')
         else :
             mask=mask_raw
+        mask*=depth_ivar
     else :
         mask=np.ones(hp.nside2npix(nside))
-
-    hp.write_map(fname_mask+".fits",mask)
-mask=hp.read_map(fname_mask+".fits")
+    
+    depth_nvar=np.sqrt(depth_nvar)
+    hp.write_map(fname_mask+".fits",mask,overwrite=True)
+mask=hp.read_map(fname_mask+".fits",verbose=False)
 if plotres :
     hp.mollview(mask)
+fsky=np.mean(mask/np.amax(mask));
 
 if w_cont :
-    if not os.path.isfile(prefix+"_contaminants.fits") :
-        fgt,fgq,fgu=nmt.synfast_spherical(nside,[clttfg,cleefg,clbbfg,cltefg],pol=True)
-        hp.write_map(prefix+"_contaminants.fits",[fgt,fgq,fgu])
-    else :
-        fgt,fgq,fgu=hp.read_map(prefix+"_contaminants.fits",field=[0,1,2],verbose=False)
+    fgt=np.zeros_like(mask); fgq=np.zeros_like(mask); fgu=np.zeros_like(mask)
+    t=hp.read_map("data/cont_lss_star_ns%d.fits"%nside,verbose=False); fgt+=t
+    t=hp.read_map("data/cont_lss_dust_ns%d.fits"%nside,verbose=False); fgt+=t
+    q,u=hp.read_map("data/cont_wl_psf_ns%d.fits"%nside,field=[0,1],verbose=False); fgq+=q; fgu+=u;
+    q,u=hp.read_map("data/cont_wl_ss_ns%d.fits"%nside,field=[0,1],verbose=False); fgq+=q; fgu+=u;
 
 #Binning scheme
 d_ell=int(1./fsky)
 b=nmt.NmtBin(nside,nlb=d_ell)
 
+if plotres :
+    hp.mollview(fgt*mask)
+    hp.mollview(fgq*mask)
+    hp.mollview(fgu*mask)
+
 #Generate some initial fields
 print " - Res: %.3lf arcmin. "%(np.sqrt(4*np.pi*(180*60/np.pi)**2/hp.nside2npix(nside)))
 def get_fields() :
-    mppt,mppq,mppu=nmt.synfast_spherical(nside,[cltt,clee,clbb,clte],pol=True)
+    st,sq,su=nmt.synfast_spherical(nside,[cltt,clee,clbb,clte],pol=True)
+    nt,nq,nu=nmt.synfast_spherical(nside,[nltt,nlee,nlbb,nlte],pol=True)
+    st+=depth_nvar*nt
+    sq+=depth_nvar*nq
+    su+=depth_nvar*nu
     if w_cont :
-        mppt+=alpha_cont_0*fgt
-        mppq+=alpha_cont_2*fgq
-        mppu+=alpha_cont_2*fgu
-        ff0=nmt.NmtField(mask,[mppt],templates=[[fgt]])
-        ff2=nmt.NmtField(mask,[mppq,mppu],[[fgq,fgu]])
+        st+=fgt
+        sq+=fgq
+        su+=fgu
+        ff0=nmt.NmtField(mask,[st],templates=[[fgt]])
+        ff2=nmt.NmtField(mask,[sq,su],[[fgq,fgu]])
     else :
-        ff0=nmt.NmtField(mask,[mppt])
-        ff2=nmt.NmtField(mask,[mppq,mppu])
-    return mppt,mppq,mppu,ff0,ff2
+        ff0=nmt.NmtField(mask,[st])
+        ff2=nmt.NmtField(mask,[sq,su])
+    return st,sq,su,ff0,ff2
 mpt,mpq,mpu,f0,f2=get_fields()
     
 if plotres :
     hp.mollview((mpt*mask).flatten(),title='$\\delta_g$')
     hp.mollview((mpq*mask).flatten(),title='$\\gamma_1$')
     hp.mollview((mpu*mask).flatten(),title='$\\gamma_2$')
+plt.show(); exit(1)
 
 #Compute deprojection bias
 if w_cont :

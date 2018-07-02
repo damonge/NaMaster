@@ -23,6 +23,9 @@ fi
 echo "Generating LSS power spectra"
 python get_lss_cls.py --plot
 
+echo "Generating LSS mask"
+python get_lss_mask.py --plot --nside 512 --nholes 100 --rholes 1.
+
 echo "Generating LSS contaminant templates"
 python get_lss_contaminants.py --plot --nside 512
 

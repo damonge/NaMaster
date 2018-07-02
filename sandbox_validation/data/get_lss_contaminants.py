@@ -8,7 +8,6 @@ import os
 
 def opt_callback(option, opt, value, parser):
     setattr(parser.values, option.dest, value.split(','))
-plot_stuff=True
 parser = OptionParser()
 parser.add_option('--plot', dest='plot_stuff', default=False, action='store_true',
                   help='Set if you want to produce plots')
