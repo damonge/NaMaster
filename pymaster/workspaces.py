@@ -191,6 +191,23 @@ def deprojection_bias(f1,f2,cls_guess) :
 
     return cl2d
 
+def uncorr_noise_deprojection_bias(f1,map_var) :
+    """
+    Computes the bias associated to contaminant removal in the presence of uncorrelated inhomogeneous noise to the auto-pseudo-Cl of a given field f1.
+
+    :param NmtField f1: fields to correlate
+    :param map_cls_guess: array containing a HEALPix map corresponding to the local noise variance (in one sterad).
+    :return: deprojection bias power spectra.
+    """
+    ncls=f1.fl.nmaps*f1.fl.nmaps
+    nells=f1.fl.lmax+1
+    if(len(map_var)!=f1.fl.npix) :
+        raise KeyError("Variance map doesn't match map resolution")
+    cl1d=lib.comp_uncorr_noise_deproj_bias(f1.fl,map_var,ncls*nells)
+    cl2d=np.reshape(cl1d,[ncls,nells])
+
+    return cl2d
+
 def deprojection_bias_flat(f1,f2,b,ells,cls_guess,ell_cut_x=[1.,-1.],ell_cut_y=[1.,-1.]) :
     """
     Computes the bias associated to contaminant removal to the cross-pseudo-Cl of two flat-sky fields. The returned power spectrum is defined at the multipoles returned by the method :func:`get_ell_sampling` of either f1 or f2.

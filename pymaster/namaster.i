@@ -441,6 +441,25 @@ void synfast_new_flat(int nx,int ny,double lx,double ly,int pol,int seed,
   free(larr);
 }
 
+void comp_uncorr_noise_deproj_bias(nmt_field *fl1,
+				   int npix_1,double *mask,
+				   double *dout,int ndout)
+{
+  int i;
+  double **cl_bias;
+  int n_cl1=fl1->nmaps*fl1->nmaps;
+  int n_ell1=fl1->lmax+1;
+  assert(npix_1==fl1->npix);
+  assert(ndout==n_ell1*n_cl1);
+  cl_bias=malloc(n_cl1*sizeof(double *));
+  for(i=0;i<n_cl1;i++)
+    cl_bias[i]=&(dout[n_ell1*i]);
+
+  nmt_compute_uncorr_noise_deprojection_bias(fl1,mask,cl_bias);
+
+  free(cl_bias);
+}
+
 void comp_deproj_bias(nmt_field *fl1,nmt_field *fl2,
 		      int ncl1,int nell1,double *cls1,
 		      double *dout,int ndout)

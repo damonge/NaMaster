@@ -224,6 +224,7 @@ void nmt_workspace_write(nmt_workspace *w,char *fname);
 nmt_workspace *nmt_workspace_read(char *fname);
 void nmt_workspace_free(nmt_workspace *w);
 void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,flouble **cl_proposal,flouble **cl_bias);
+void nmt_compute_uncorr_noise_deprojection_bias(nmt_field *fl1,flouble *map_var,flouble **cl_bias);
 void nmt_couple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_out);
 void nmt_decouple_cl_l(nmt_workspace *w,flouble **cl_in,flouble **cl_noise_in,
 		       flouble **cl_bias,flouble **cl_out);

@@ -3738,6 +3738,25 @@ void synfast_new_flat(int nx,int ny,double lx,double ly,int pol,int seed,
   free(larr);
 }
 
+void comp_uncorr_noise_deproj_bias(nmt_field *fl1,
+				   int npix_1,double *mask,
+				   double *dout,int ndout)
+{
+  int i;
+  double **cl_bias;
+  int n_cl1=fl1->nmaps*fl1->nmaps;
+  int n_ell1=fl1->lmax+1;
+  assert(npix_1==fl1->npix);
+  assert(ndout==n_ell1*n_cl1);
+  cl_bias=malloc(n_cl1*sizeof(double *));
+  for(i=0;i<n_cl1;i++)
+    cl_bias[i]=&(dout[n_ell1*i]);
+
+  nmt_compute_uncorr_noise_deprojection_bias(fl1,mask,cl_bias);
+
+  free(cl_bias);
+}
+
 void comp_deproj_bias(nmt_field *fl1,nmt_field *fl2,
 		      int ncl1,int nell1,double *cls1,
 		      double *dout,int ndout)
@@ -12153,6 +12172,49 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_compute_uncorr_noise_deprojection_bias(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_field *arg1 = (nmt_field *) 0 ;
+  flouble *arg2 = (flouble *) 0 ;
+  flouble **arg3 = (flouble **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:compute_uncorr_noise_deprojection_bias",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "compute_uncorr_noise_deprojection_bias" "', argument " "1"" of type '" "nmt_field *""'"); 
+  }
+  arg1 = (nmt_field *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "compute_uncorr_noise_deprojection_bias" "', argument " "2"" of type '" "flouble *""'"); 
+  }
+  arg2 = (flouble *)(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "compute_uncorr_noise_deprojection_bias" "', argument " "3"" of type '" "flouble **""'"); 
+  }
+  arg3 = (flouble **)(argp3);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_compute_uncorr_noise_deprojection_bias(arg1,arg2,arg3);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_couple_cl_l(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   nmt_workspace *arg1 = (nmt_workspace *) 0 ;
@@ -15800,6 +15862,83 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_comp_uncorr_noise_deproj_bias(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_field *arg1 = (nmt_field *) 0 ;
+  int arg2 ;
+  double *arg3 = (double *) 0 ;
+  double *arg4 = (double *) 0 ;
+  int arg5 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyArrayObject *array2 = NULL ;
+  int is_new_object2 = 0 ;
+  PyObject *array4 = NULL ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOO:comp_uncorr_noise_deproj_bias",&obj0,&obj1,&obj2)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "comp_uncorr_noise_deproj_bias" "', argument " "1"" of type '" "nmt_field *""'"); 
+  }
+  arg1 = (nmt_field *)(argp1);
+  {
+    npy_intp size[1] = {
+      -1
+    };
+    array2 = obj_to_array_contiguous_allow_conversion(obj1,
+      NPY_DOUBLE,
+      &is_new_object2);
+    if (!array2 || !require_dimensions(array2, 1) ||
+      !require_size(array2, size, 1)) SWIG_fail;
+    arg2 = (int) array_size(array2,0);
+    arg3 = (double*) array_data(array2);
+  }
+  {
+    npy_intp dims[1];
+    if (!PyInt_Check(obj2))
+    {
+      const char* typestring = pytype_string(obj2);
+      PyErr_Format(PyExc_TypeError,
+        "Int dimension expected.  '%s' given.",
+        typestring);
+      SWIG_fail;
+    }
+    arg5 = (int) PyInt_AsLong(obj2);
+    dims[0] = (npy_intp) arg5;
+    array4 = PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+    if (!array4) SWIG_fail;
+    arg4 = (double*) array_data(array4);
+  }
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    comp_uncorr_noise_deproj_bias(arg1,arg2,arg3,arg4,arg5);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  {
+    resultobj = SWIG_Python_AppendOutput(resultobj,(PyObject*)array4);
+  }
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return resultobj;
+fail:
+  {
+    if (is_new_object2 && array2)
+    {
+      Py_DECREF(array2); 
+    }
+  }
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_comp_deproj_bias(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   nmt_field *arg1 = (nmt_field *) 0 ;
@@ -17417,6 +17556,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"workspace_read", _wrap_workspace_read, METH_VARARGS, NULL},
 	 { (char *)"workspace_free", _wrap_workspace_free, METH_VARARGS, NULL},
 	 { (char *)"compute_deprojection_bias", _wrap_compute_deprojection_bias, METH_VARARGS, NULL},
+	 { (char *)"compute_uncorr_noise_deprojection_bias", _wrap_compute_uncorr_noise_deprojection_bias, METH_VARARGS, NULL},
 	 { (char *)"couple_cl_l", _wrap_couple_cl_l, METH_VARARGS, NULL},
 	 { (char *)"decouple_cl_l", _wrap_decouple_cl_l, METH_VARARGS, NULL},
 	 { (char *)"compute_coupled_cell", _wrap_compute_coupled_cell, METH_VARARGS, NULL},
@@ -17483,6 +17623,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"apomask_flat", _wrap_apomask_flat, METH_VARARGS, NULL},
 	 { (char *)"synfast_new", _wrap_synfast_new, METH_VARARGS, NULL},
 	 { (char *)"synfast_new_flat", _wrap_synfast_new_flat, METH_VARARGS, NULL},
+	 { (char *)"comp_uncorr_noise_deproj_bias", _wrap_comp_uncorr_noise_deproj_bias, METH_VARARGS, NULL},
 	 { (char *)"comp_deproj_bias", _wrap_comp_deproj_bias, METH_VARARGS, NULL},
 	 { (char *)"comp_deproj_bias_flat", _wrap_comp_deproj_bias_flat, METH_VARARGS, NULL},
 	 { (char *)"comp_gaussian_covariance", _wrap_comp_gaussian_covariance, METH_VARARGS, NULL},

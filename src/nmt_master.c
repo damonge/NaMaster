@@ -336,6 +336,89 @@ nmt_workspace *nmt_compute_coupling_matrix(nmt_field *fl1,nmt_field *fl2,nmt_bin
   return w;
 }
 
+void nmt_compute_uncorr_noise_deprojection_bias(nmt_field *fl1,flouble *map_var,flouble **cl_bias)
+{
+  int ii;
+  long ip;
+  int nspec=fl1->nmaps*fl1->nmaps;
+  int lmax=fl1->lmax;
+
+  for(ii=0;ii<nspec;ii++) {
+    for(ip=0;ip<=lmax;ip++)
+      cl_bias[ii][ip]=0;
+  }
+
+  if(fl1->ntemp>0) {
+    //Allocate dummy maps and alms
+    flouble **map_dum=my_malloc(fl1->nmaps*sizeof(flouble *));
+    fcomplex **alm_dum=my_malloc(fl1->nmaps*sizeof(fcomplex *));
+    for(ii=0;ii<fl1->nmaps;ii++) {
+      map_dum[ii]=my_malloc(fl1->npix*sizeof(flouble));
+      alm_dum[ii]=my_malloc(he_nalms(fl1->lmax)*sizeof(fcomplex));
+    }
+
+    flouble **cl_dum;
+    cl_dum=my_malloc(nspec*sizeof(flouble *));
+    for(ii=0;ii<nspec;ii++)
+      cl_dum[ii]=my_calloc((lmax+1),sizeof(flouble));
+
+    int iti,itj,itp,itq,im1;
+    flouble *mat_prod=my_calloc(fl1->ntemp*fl1->ntemp,sizeof(flouble));
+    for(iti=0;iti<fl1->ntemp;iti++) {
+      for(itj=0;itj<fl1->ntemp;itj++) {
+	double nij=gsl_matrix_get(fl1->matrix_M,iti,itj);
+	for(im1=0;im1<fl1->nmaps;im1++) {
+	  he_map_product(fl1->nside,fl1->temp[itj][im1],map_var,map_dum[im1]); //sigma^2*f^j
+	  he_map_product(fl1->nside,map_dum[im1],fl1->mask,map_dum[im1]); //v*sigma^2*f^j
+	  he_map_product(fl1->nside,map_dum[im1],fl1->mask,map_dum[im1]); //v^2*sigma^2*f^j
+	}
+
+	//Int[v^2*sigma^2*f^j*f^r]
+	for(im1=0;im1<fl1->nmaps;im1++)
+	  mat_prod[iti*fl1->ntemp+itj]+=he_map_dot(fl1->nside,map_dum[im1],fl1->temp[iti][im1]);
+	
+	//SHT[v^2*sigma^2*f^j]
+	he_map2alm(fl1->nside,fl1->lmax,1,2*fl1->pol,map_dum,alm_dum,HE_NITER_DEFAULT);
+	//Sum_m(SHT[v^2*sigma^2*f^j]*f^i)/(2l+1)
+	he_alm2cl(alm_dum,fl1->a_temp[iti],fl1->pol,fl1->pol,cl_dum,lmax);
+	for(im1=0;im1<nspec;im1++) {
+	  for(ip=0;ip<=lmax;ip++)
+	    cl_bias[im1][ip]-=2*cl_dum[im1][ip]*nij;
+	}
+      }
+    }
+
+    for(iti=0;iti<fl1->ntemp;iti++) {
+      for(itp=0;itp<fl1->ntemp;itp++) {
+	//Sum_m(f^i*f^p*)/(2l+1)
+	he_alm2cl(fl1->a_temp[iti],fl1->a_temp[itp],fl1->pol,fl1->pol,cl_dum,lmax);
+	for(itj=0;itj<fl1->ntemp;itj++) {
+	  double mij=gsl_matrix_get(fl1->matrix_M,iti,itj);
+	  for(itq=0;itq<fl1->ntemp;itq++) {
+	    double npq=gsl_matrix_get(fl1->matrix_M,itp,itq);
+	    for(im1=0;im1<nspec;im1++) {
+	      for(ip=0;ip<=lmax;ip++)
+		cl_bias[im1][ip]+=cl_dum[im1][ip]*mat_prod[itj*fl1->ntemp+itq]*mij*npq;
+	    }
+	  }
+	}
+      }
+    }
+
+    free(mat_prod);
+
+    for(ii=0;ii<fl1->nmaps;ii++) {
+      free(map_dum[ii]);
+      free(alm_dum[ii]);
+    }
+    free(map_dum);
+    free(alm_dum);
+    for(ii=0;ii<nspec;ii++)
+      free(cl_dum[ii]);
+    free(cl_dum);
+  }
+}
+
 void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,
 				   flouble **cl_proposal,flouble **cl_bias)
 {

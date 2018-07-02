@@ -723,6 +723,10 @@ def compute_deprojection_bias(fl1, fl2, cl_proposal, cl_bias):
     return _nmtlib.compute_deprojection_bias(fl1, fl2, cl_proposal, cl_bias)
 compute_deprojection_bias = _nmtlib.compute_deprojection_bias
 
+def compute_uncorr_noise_deprojection_bias(fl1, map_var, cl_bias):
+    return _nmtlib.compute_uncorr_noise_deprojection_bias(fl1, map_var, cl_bias)
+compute_uncorr_noise_deprojection_bias = _nmtlib.compute_uncorr_noise_deprojection_bias
+
 def couple_cl_l(w, cl_in, cl_out):
     return _nmtlib.couple_cl_l(w, cl_in, cl_out)
 couple_cl_l = _nmtlib.couple_cl_l
@@ -932,6 +936,10 @@ synfast_new = _nmtlib.synfast_new
 def synfast_new_flat(nx, ny, lx, ly, pol, seed, ncl1, nell3, dout):
     return _nmtlib.synfast_new_flat(nx, ny, lx, ly, pol, seed, ncl1, nell3, dout)
 synfast_new_flat = _nmtlib.synfast_new_flat
+
+def comp_uncorr_noise_deproj_bias(fl1, npix_1, dout):
+    return _nmtlib.comp_uncorr_noise_deproj_bias(fl1, npix_1, dout)
+comp_uncorr_noise_deproj_bias = _nmtlib.comp_uncorr_noise_deproj_bias
 
 def comp_deproj_bias(fl1, fl2, ncl1, dout):
     return _nmtlib.comp_deproj_bias(fl1, fl2, ncl1, dout)
