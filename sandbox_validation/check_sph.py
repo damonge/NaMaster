@@ -48,8 +48,10 @@ fname_mask=prefix+"_mask"
 
 #Read theory power spectra
 l,cltt,clee,clbb,clte,nltt,nlee,nlbb,nlte=np.loadtxt("data/cls_lss.txt",unpack=True)
-cltt=cltt[:3*o.nside_out]; clee=clee[:3*o.nside_out]; clbb=clbb[:3*o.nside_out]; clte=clte[:3*o.nside_out]; 
-nltt=nltt[:3*o.nside_out]; nlee=nlee[:3*o.nside_out]; nlbb=nlbb[:3*o.nside_out]; nlte=nlte[:3*o.nside_out]; 
+cltt=cltt[:3*o.nside_out]; clee=clee[:3*o.nside_out]; clbb=clbb[:3*o.nside_out];
+clte=clte[:3*o.nside_out]; 
+nltt=nltt[:3*o.nside_out]; nlee=nlee[:3*o.nside_out]; nlbb=nlbb[:3*o.nside_out];
+nlte=nlte[:3*o.nside_out]; 
 
 #Read noise variance map
 if w_nvar :
@@ -87,8 +89,10 @@ if w_cont :
     fgt[0,0,:]=hp.read_map("data/cont_lss_star_ns%d.fits"%o.nside_out,verbose=False); #Stars
     fgt[1,0,:]=hp.read_map("data/cont_lss_dust_ns%d.fits"%o.nside_out,verbose=False); #Dust
     fgp=np.zeros([2,2,hp.nside2npix(o.nside_out)]);
-    fgp[0,0,:],fgp[0,1,:]=hp.read_map("data/cont_wl_psf_ns%d.fits"%o.nside_out,field=[0,1],verbose=False); 
-    fgp[1,0,:],fgp[1,1,:]=hp.read_map("data/cont_wl_ss_ns%d.fits"%o.nside_out,field=[0,1],verbose=False);
+    fgp[0,0,:],fgp[0,1,:]=hp.read_map("data/cont_wl_psf_ns%d.fits"%o.nside_out,
+                                      field=[0,1],verbose=False); #PSF
+    fgp[1,0,:],fgp[1,1,:]=hp.read_map("data/cont_wl_ss_ns%d.fits"%o.nside_out,
+                                      field=[0,1],verbose=False); #Small-scales
 
 #Binning scheme
 d_ell=int(1./fsky)
