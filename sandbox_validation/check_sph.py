@@ -93,15 +93,14 @@ if w_cont :
                                       field=[0,1],verbose=False); #PSF
     fgp[1,0,:],fgp[1,1,:]=hp.read_map("data/cont_wl_ss_ns%d.fits"%o.nside_out,
                                       field=[0,1],verbose=False); #Small-scales
+    if o.plot_stuff :
+        hp.mollview(np.sum(fgt,axis=0)[0,:]*mask)
+        hp.mollview(np.sum(fgp,axis=0)[0,:]*mask)
+        hp.mollview(np.sum(fgp,axis=0)[1,:]*mask)
 
 #Binning scheme
 d_ell=int(1./fsky)
 b=nmt.NmtBin(o.nside_out,nlb=d_ell)
-
-if o.plot_stuff :
-    hp.mollview(np.sum(fgt,axis=0)[0,:]*mask)
-    hp.mollview(np.sum(fgp,axis=0)[0,:]*mask)
-    hp.mollview(np.sum(fgp,axis=0)[1,:]*mask)
 
 #Generate some initial fields
 print(" - Res: %.3lf arcmin. "%(np.sqrt(4*np.pi*(180*60/np.pi)**2/hp.nside2npix(o.nside_out))))
@@ -220,11 +219,12 @@ cl22_all=np.array(cl22_all)
 
 #Plot results
 if o.plot_stuff :
+    l_eff=b.get_effective_ells()
     cols=plt.cm.rainbow(np.linspace(0,1,6))
     plt.figure()
-    plt.errorbar(b.get_effective_ells(),np.mean(cl00_all,axis=0)[0]/cl00_th[0]-1,yerr=np.std(cl00_all,axis=0)[0]/cl00_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\delta_g$',fmt='ro')
-    plt.errorbar(b.get_effective_ells(),np.mean(cl02_all,axis=0)[0]/cl02_th[0]-1,yerr=np.std(cl02_all,axis=0)[0]/cl02_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\gamma_E$',fmt='go')
-    plt.errorbar(b.get_effective_ells(),np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),label='$\\gamma_E-\\gamma_E$',fmt='bo')
+    plt.errorbar(l_eff,np.mean(cl00_all,axis=0)[0]/cl00_th[0]-1,yerr=np.std(cl00_all,axis=0)[0]/cl00_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\delta_g$',fmt='ro')
+    plt.errorbar(l_eff,np.mean(cl02_all,axis=0)[0]/cl02_th[0]-1,yerr=np.std(cl02_all,axis=0)[0]/cl02_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\gamma_E$',fmt='go')
+    plt.errorbar(l_eff,np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),label='$\\gamma_E-\\gamma_E$',fmt='bo')
     plt.xlabel('$\\ell$',fontsize=16)
     plt.ylabel('$\\Delta C_\\ell/C_\\ell$',fontsize=16)
     plt.legend(loc='lower right',frameon=False,fontsize=16)
@@ -232,20 +232,20 @@ if o.plot_stuff :
 
     ic=0
     plt.figure()
-    plt.plot(b.get_effective_ells(),np.mean(cl00_all,axis=0)[0],
+    plt.plot(l_eff,np.mean(cl00_all,axis=0)[0],
              label='$\\delta_g-\\delta_g$',c=cols[ic])
-    plt.plot(b.get_effective_ells(),cl00_th[0],'--',c=cols[ic]); ic+=1
-    plt.plot(b.get_effective_ells(),np.mean(cl02_all,axis=0)[0],
+    plt.plot(l_eff,cl00_th[0],'--',c=cols[ic]); ic+=1
+    plt.plot(l_eff,np.mean(cl02_all,axis=0)[0],
              label='$\\delta_g-\\gamma_E$',c=cols[ic]);
-    plt.plot(b.get_effective_ells(),cl02_th[0],'--',c=cols[ic]); ic+=1
-    plt.plot(b.get_effective_ells(),np.mean(cl02_all,axis=0)[1],
+    plt.plot(l_eff,cl02_th[0],'--',c=cols[ic]); ic+=1
+    plt.plot(l_eff,np.mean(cl02_all,axis=0)[1],
              label='$\\delta_g-\\gamma_B$',c=cols[ic]); ic+=1
-    plt.plot(b.get_effective_ells(),np.mean(cl22_all,axis=0)[0],
+    plt.plot(l_eff,np.mean(cl22_all,axis=0)[0],
              label='$\\gamma_E-\\gamma_E$',c=cols[ic]);
-    plt.plot(b.get_effective_ells(),cl22_th[0],'--',c=cols[ic]); ic+=1
-    plt.plot(b.get_effective_ells(),np.mean(cl22_all,axis=0)[1],
+    plt.plot(l_eff,cl22_th[0],'--',c=cols[ic]); ic+=1
+    plt.plot(l_eff,np.mean(cl22_all,axis=0)[1],
              label='$\\gamma_E-\\gamma_B$',c=cols[ic]); ic+=1
-    plt.plot(b.get_effective_ells(),np.mean(cl22_all,axis=0)[3],
+    plt.plot(l_eff,np.mean(cl22_all,axis=0)[3],
              label='$\\gamma_B-\\gamma_B$',c=cols[ic]); ic+=1
     plt.loglog()
     plt.xlabel('$\\ell$',fontsize=16)

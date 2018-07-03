@@ -10,7 +10,7 @@ def mask_apodization(mask_in,aposize,apotype="C1") :
     :param apotype: apodization type. Three methods implemented: "C1", "C2" and "Smooth". See the description of the C-function nmt_apodize_mask in the C API documentation for a full description of these methods.
     :return: apodized mask as a HEALPix map
     """
-    return lib.apomask(mask_in,len(mask_in),aposize,apotype)
+    return lib.apomask(mask_in.astype('float64'),len(mask_in),aposize,apotype)
 
 def mask_apodization_flat(mask_in,lx,ly,aposize,apotype="C1") :
     """
@@ -25,7 +25,7 @@ def mask_apodization_flat(mask_in,lx,ly,aposize,apotype="C1") :
     """
     nx=len(mask_in[0])
     ny=len(mask_in)
-    mask_apo_flat=lib.apomask_flat(nx,ny,lx,ly,mask_in.flatten(),nx*ny,aposize,apotype)
+    mask_apo_flat=lib.apomask_flat(nx,ny,lx,ly,mask_in.flatten().astype('float64'),nx*ny,aposize,apotype)
     return mask_apo_flat.reshape([ny,nx])
 
 def synfast_spherical(nside,cls,pol=False,beam=None) :
