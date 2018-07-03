@@ -210,9 +210,9 @@ if o.plot_stuff :
     hp.mollview(cld*msk,title='Dust contaminant')
     hp.mollview(cls*msk,title='Star contaminant')
 
-    hp.mollview(dw_q*msk,title='True $\\gamma_c$')
-    hp.mollview(tw_q*msk,title='Contaminated $\\gamma_c$')
-    hp.mollview(cwp_q*msk,title='PSF contaminant')
-    hp.mollview(cws_q*msk,title='Small-scale contaminant')
+    hp.mollview(dw_q*msk,title='True $\\gamma_g$ Q')
+    hp.mollview(tw_q*msk,title='Contaminated $\\gamma_g$ Q')
+    hp.mollview(cwp_q*msk,title='PSF contaminant Q')
+    hp.mollview(cws_q*msk,title='Small-scale contaminant Q')
     
     plt.show()

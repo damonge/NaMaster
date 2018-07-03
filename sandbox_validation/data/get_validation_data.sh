@@ -37,3 +37,6 @@ python get_cmb_mask.py --plot --nside ${nside_cmb}
 
 echo "Generating CMB contaminant templates"
 python get_cmb_contaminants.py --plot --nside ${nside_cmb}
+
+echo "Generating flat-sky LSS contaminant templates"
+python get_lss_contaminants_flat.py --plot
