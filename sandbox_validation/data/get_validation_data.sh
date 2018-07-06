@@ -1,7 +1,7 @@
 #!/bin/bash
 
 nside_lss=512
-nside_cmb=256
+nside_cmb=128
 
 if [ ! -f lambda_sfd_ebv.fits ] ; then
     echo "Downloading reddening map"

@@ -56,7 +56,9 @@ if o.plot_stuff :
     plt.plot(l,nlee,'y--',label='$N_\\gamma$')
     plt.loglog(); plt.legend(ncol=2)
     plt.xlabel('$\\ell$',fontsize=16);
-    plt.ylabel('$C_\\ell$',fontsize=16); 
+    plt.ylabel('$C_\\ell$',fontsize=16);
+    plt.savefig(prefix+'_celltheory.png',bbox_inches='tight')
+    plt.savefig(prefix+'_celltheory.pdf',bbox_inches='tight')
 
 #Initialize pixelization from mask
 fmi,mask_hsc=fm.read_flat_map("data/mask_lss_flat.fits")
@@ -74,7 +76,9 @@ if not os.path.isfile(fname_mask+'.fits') :
     fmi.write_flat_map(fname_mask+".fits",mask)
 fdum,mask=fm.read_flat_map(fname_mask+".fits")
 if o.plot_stuff :
-    fmi.view_map(mask)
+    fmi.view_map(mask,title='Mask')
+    plt.savefig(prefix+'_mask.png',bbox_inches='tight')
+    plt.savefig(prefix+'_mask.pdf',bbox_inches='tight')
 fsky=fmi.lx_rad*fmi.ly_rad*np.sum(mask)/(4*np.pi*fmi.nx*fmi.ny)
 
 #Read contaminant maps
@@ -86,9 +90,9 @@ if w_cont :
     dum,[fgp[0,0,:],fgp[0,1,:]]=fm.read_flat_map("data/cont_wl_psf_flat.fits",i_map=-1) #PSF
     dum,[fgp[1,0,:],fgp[1,1,:]]=fm.read_flat_map("data/cont_wl_ss_flat.fits",i_map=-1) #Small-scales
     if o.plot_stuff :
-        fmi.view_map(np.sum(fgt,axis=0)[0,:]*mask)
-        fmi.view_map(np.sum(fgp,axis=0)[0,:]*mask)
-        fmi.view_map(np.sum(fgp,axis=0)[1,:]*mask)
+        fmi.view_map(np.sum(fgt,axis=0)[0,:]*mask,title='Total LSS contaminant')
+        fmi.view_map(np.sum(fgp,axis=0)[0,:]*mask,title='Total WL contaminant (Q)')
+        fmi.view_map(np.sum(fgp,axis=0)[1,:]*mask,title='Total WL contaminant (U)')
 
 #Binning scheme
 ell_min=max(2*np.pi/fmi.lx_rad,2*np.pi/fmi.ly_rad)
@@ -105,6 +109,8 @@ print(" - Res(x): %.3lf arcmin. Res(y): %.3lf arcmin."%(fmi.lx*60/fmi.nx,fmi.ly*
 print(" - lmax = %d, lmin = %d"%(int(ell_max),int(ell_min)))
 def get_fields() :
     st,sq,su=fmi.synfast(l,np.array([cltt+nltt,clee+nlee,clbb+nlbb,clte+nlte]))
+    #st,sq,su=nmt.synfast_flat(int(fmi.nx),int(fmi.ny),fmi.lx_rad,fmi.ly_rad,[cltt+nltt,clee+nlee,clbb+nlbb,clte+nlte],pol=True)
+    #st=st.flatten(); sq=sq.flatten(); su=su.flatten();
     if w_cont :
         st+=np.sum(fgt,axis=0)[0,:]; sq+=np.sum(fgp,axis=0)[0,:]; su+=np.sum(fgp,axis=0)[1,:];
         ff0=nmt.NmtFieldFlat(fmi.lx_rad,fmi.ly_rad,mask.reshape([fmi.ny,fmi.nx]),
@@ -124,7 +130,7 @@ np.random.seed(1000)
 f0,f2=get_fields()
 
 if o.plot_stuff :
-    fmi.view_map(f0.get_maps()[0].flatten()*mask,title='$\\delta_g$')
+    fmi.view_map(f0.get_maps()[0].flatten()*mask,title='$\\delta$')
     fmi.view_map(f2.get_maps()[0].flatten()*mask,title='$\\gamma_1$')
     fmi.view_map(f2.get_maps()[1].flatten()*mask,title='$\\gamma_2$')
 
@@ -210,40 +216,104 @@ for i in np.arange(nsims) :
 cl00_all=np.array(cl00_all)
 cl02_all=np.array(cl02_all)
 cl22_all=np.array(cl22_all)
-print(cl00_all.shape,cl02_all.shape,cl22_all.shape)
 
 #Plot results
 if o.plot_stuff :
     l_eff=b.get_effective_ells()
     cols=plt.cm.rainbow(np.linspace(0,1,6))
     plt.figure()
-    plt.errorbar(l_eff,np.mean(cl00_all,axis=0)[0]/cl00_th[0]-1,yerr=np.std(cl00_all,axis=0)[0]/cl00_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\delta_g$',fmt='ro')
-    plt.errorbar(l_eff,np.mean(cl02_all,axis=0)[0]/cl02_th[0]-1,yerr=np.std(cl02_all,axis=0)[0]/cl02_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\gamma_E$',fmt='go')
-    plt.errorbar(l_eff,np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),label='$\\gamma_E-\\gamma_E$',fmt='bo')
+    plt.errorbar(l_eff,np.mean(cl00_all,axis=0)[0]/cl00_th[0],
+                 yerr=np.std(cl00_all,axis=0)[0]/cl00_th[0]/np.sqrt(nsims+0.),
+                 label='$\\delta\\times\\delta$',fmt='ro')
+    plt.errorbar(l_eff,np.mean(cl02_all,axis=0)[0]/cl02_th[0],
+                 yerr=np.std(cl02_all,axis=0)[0]/cl02_th[0]/np.sqrt(nsims+0.),
+                 label='$\\delta\\times\\gamma_E$',fmt='go')
+    plt.errorbar(l_eff,np.mean(cl22_all,axis=0)[0]/cl22_th[0],
+                 yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),
+                 label='$\\gamma_E\\times\\gamma_E$',fmt='bo')
     plt.xlabel('$\\ell$',fontsize=16)
-    plt.ylabel('$\\Delta C_\\ell/C_\\ell$',fontsize=16)
-    plt.legend(loc='lower right',frameon=False,fontsize=16)
+    plt.ylabel('$\\Delta C_\\ell/\\sigma(C_\\ell)$',fontsize=16)
+    plt.legend(loc='lower left',frameon=False,fontsize=16)
     plt.xscale('log')
+    plt.savefig(prefix+'_celldiff.png',bbox_inches='tight')
+    plt.savefig(prefix+'_celldiff.pdf',bbox_inches='tight')
 
+
+    import scipy.stats as st
+    chi2_00=np.sum(((cl00_all[:,:,:]-cl00_th[None,:,:])/np.std(cl00_all,axis=0)[None,:,:])**2,axis=2)
+    chi2_02=np.sum(((cl02_all[:,:,:]-cl02_th[None,:,:])/np.std(cl02_all,axis=0)[None,:,:])**2,axis=2)
+    chi2_22=np.sum(((cl22_all[:,:,:]-cl22_th[None,:,:])/np.std(cl22_all,axis=0)[None,:,:])**2,axis=2)
+    nsim,nel00,ndof=cl00_all.shape
+    nsim,nel02,ndof=cl02_all.shape
+    nsim,nel22,ndof=cl22_all.shape
+
+    x=np.linspace(ndof-5*np.sqrt(2.*ndof),ndof+5*np.sqrt(2*ndof),256)
+    pdf=st.chi2.pdf(x,ndof)
+
+    
+    plt.figure(figsize=(10,7))
+    ax=[plt.subplot(2,3,i+1) for i in range(6)]
+    plt.subplots_adjust(wspace=0, hspace=0)
+    
+    h,b,p=ax[0].hist(chi2_00[:,0],bins=40,density=True)
+    ax[0].text(0.75,0.9,'$\\delta\\times\\delta$'    ,transform=ax[0].transAxes)
+    ax[0].set_ylabel('$P(\\chi^2)$')
+
+    h,b,p=ax[1].hist(chi2_02[:,0],bins=40,density=True)
+    ax[1].text(0.75,0.9,'$\\delta\\times\\gamma_E$'  ,transform=ax[1].transAxes)
+
+    h,b,p=ax[2].hist(chi2_02[:,1],bins=40,density=True)
+    ax[2].text(0.75,0.9,'$\\delta\\times\\gamma_B$'  ,transform=ax[2].transAxes)
+
+    h,b,p=ax[3].hist(chi2_22[:,0],bins=40,density=True)
+    ax[3].text(0.75,0.9,'$\\gamma_E\\times\\gamma_E$',transform=ax[3].transAxes)
+    ax[3].set_xlabel('$\\chi^2$')
+    ax[3].set_ylabel('$P(\\chi^2)$')
+
+    h,b,p=ax[4].hist(chi2_22[:,1],bins=40,density=True)
+    ax[4].text(0.75,0.9,'$\\gamma_E\\times\\gamma_B$',transform=ax[4].transAxes)
+
+    h,b,p=ax[5].hist(chi2_22[:,3],bins=40,density=True)
+    ax[5].text(0.75,0.9,'$\\gamma_B\\times\\gamma_B$',transform=ax[5].transAxes)
+
+    for a in ax[:3] :
+        a.set_xticklabels([])
+    for a in ax[3:] :
+        a.set_xlabel('$\\chi^2$')
+    ax[1].set_yticklabels([])
+    ax[2].set_yticklabels([])
+    ax[4].set_yticklabels([])
+    ax[5].set_yticklabels([])
+    for a in ax :
+        a.set_xlim([ndof-5*np.sqrt(2.*ndof),ndof+5*np.sqrt(2.*ndof)])
+        a.set_ylim([0,1.4*np.amax(pdf)])
+        a.plot([ndof,ndof],[0,1.4*np.amax(pdf)],'k--',label='$N_{\\rm dof}$')
+        a.plot(x,pdf,'k-',label='$P(\\chi^2,N_{\\rm dof})$')
+    ax[3].legend(loc='upper left',frameon=False)
+    plt.savefig(prefix+'_distributions.png',bbox_inches='tight')
+    plt.savefig(prefix+'_distributions.pdf',bbox_inches='tight')
+    
     ic=0
     plt.figure()
     plt.plot(l_eff,np.mean(cl00_all,axis=0)[0],
-             label='$\\delta_g-\\delta_g$',c=cols[ic])
+             label='$\\delta\\times\\delta$',c=cols[ic])
     plt.plot(l_eff,cl00_th[0],'--',c=cols[ic]); ic+=1
     plt.plot(l_eff,np.mean(cl02_all,axis=0)[0],
-             label='$\\delta_g-\\gamma_E$',c=cols[ic]);
+             label='$\\delta\\times\\gamma_E$',c=cols[ic]);
     plt.plot(l_eff,cl02_th[0],'--',c=cols[ic]); ic+=1
     plt.plot(l_eff,np.mean(cl02_all,axis=0)[1],
-             label='$\\delta_g-\\gamma_B$',c=cols[ic]); ic+=1
+             label='$\\delta\\times\\gamma_B$',c=cols[ic]); ic+=1
     plt.plot(l_eff,np.mean(cl22_all,axis=0)[0],
-             label='$\\gamma_E-\\gamma_E$',c=cols[ic]);
+             label='$\\gamma\\times\\gamma_E$',c=cols[ic]);
     plt.plot(l_eff,cl22_th[0],'--',c=cols[ic]); ic+=1
     plt.plot(l_eff,np.mean(cl22_all,axis=0)[1],
-             label='$\\gamma_E-\\gamma_B$',c=cols[ic]); ic+=1
+             label='$\\gamma_E\\times\\gamma_B$',c=cols[ic]); ic+=1
     plt.plot(l_eff,np.mean(cl22_all,axis=0)[3],
-             label='$\\gamma_B-\\gamma_B$',c=cols[ic]); ic+=1
+             label='$\\gamma_B\\times\\gamma_B$',c=cols[ic]); ic+=1
     plt.loglog()
     plt.xlabel('$\\ell$',fontsize=16)
     plt.ylabel('$C_\\ell$',fontsize=16)
     plt.legend(loc='lower left',frameon=False,fontsize=14,ncol=2)
+    plt.savefig(prefix+'_cellfull.png',bbox_inches='tight')
+    plt.savefig(prefix+'_cellfull.pdf',bbox_inches='tight')
     plt.show()

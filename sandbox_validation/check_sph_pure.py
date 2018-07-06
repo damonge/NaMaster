@@ -1,141 +1,111 @@
+from __future__ import print_function
+from optparse import OptionParser
 import numpy as np
-import matplotlib.pyplot as plt
-import os
 import healpy as hp
+import matplotlib.pyplot as plt
 import pymaster as nmt
+import os
 import sys
 
 DTOR=np.pi/180
 
-def getmaskapoana(ns,aps,fsk=0.1) :
-    #This generates a correctly-apodized mask
-    vv=hp.pix2vec(ns,np.arange(hp.nside2npix(ns)));
-    cth=vv[0]; th=np.arccos(cth); th0=np.arccos(1-2*fsk); th_apo=aps*DTOR
-    print th0/DTOR
-    id0=np.where(th>=th0)[0]
-    id1=np.where(th<=th0-th_apo)[0]
-    idb=np.where((th>th0-th_apo) & (th<th0))[0]
-    x=np.sqrt((1-np.cos(th[idb]-th0))/(1-np.cos(th_apo)))
-    mask_apo=np.zeros(hp.nside2npix(ns))
-    mask_apo[id0]=0.
-    mask_apo[id1]=1.
-    mask_apo[idb]=x-np.sin(2*np.pi*x)/(2*np.pi)
-    return mask_apo
+def opt_callback(option, opt, value, parser):
+    setattr(parser.values, option.dest, value.split(','))
+parser = OptionParser()
+parser.add_option('--nside', dest='nside_out', default=512, type=int,
+                  help='Resolution parameter')
+parser.add_option('--isim-ini', dest='isim_ini', default=1, type=int,
+                  help='Index of first simulation')
+parser.add_option('--isim-end', dest='isim_end', default=100, type=int,
+                  help='Index of last simulation')
+parser.add_option('--wo-contaminants', dest='wo_cont', default=False, action='store_true',
+                  help='Set if you don\'t want to use contaminants')
+parser.add_option('--plot', dest='plot_stuff', default=False, action='store_true',
+                  help='Set if you want to produce plots')
+parser.add_option('--wo-pureb', dest='wo_pureb', default=False, action='store_true',
+                  help='Set if you don\'t want to purify B-modes')
+(o, args) = parser.parse_args()
 
-if len(sys.argv)!=9 :
-    print "python check_sph_pure.py nside w_cont nsims plotres aposize apotype pureE pureB"
-    exit(1)
+nsims=o.isim_end-o.isim_ini+1
+w_cont=not o.wo_cont
+w_pureb=not o.wo_pureb
 
-nside  =  int(sys.argv[1])
-w_cont =  int(sys.argv[2])
-nsims  =  int(sys.argv[3])
-plotres=  int(sys.argv[4])
-aposize=float(sys.argv[5])
-apotype=      sys.argv[6]
-pureE=    int(sys.argv[7])
-pureB=    int(sys.argv[8])
-ispure_e=False
-if pureE!=0 :
-    ispure_e=True
-ispure_b=False
-if pureB!=0 :
-    ispure_b=True
-if w_cont :
-    raise ValueError("Contaminant + purification still not implemented")
-
-#alpha_cont_2=0.1
+#Create output directory
 predir="tests_sph"
 os.system("mkdir -p "+predir)
-prefix=predir+"/run_pure%d%d_ns%d_cont%d_apo%.2lf"%(pureE,pureB,nside,w_cont,aposize)+apotype
-fname_mask=prefix+"_mask"
+prefix=predir+"/run_pure0%d_ns%d_cont%d"%(w_pureb,o.nside_out,w_cont)
 
-#This just generates the theory power spectra
-data=np.loadtxt('planck1_r0p00_lensedtotCls.dat',unpack=True)
+#Read theory power spectra
+def read_cl_camb(fname) :
+    data=np.loadtxt(fname,unpack=True)
+    ll=np.arange(3*o.nside_out,dtype=float)
+    fac=2*np.pi/(ll[2:]*(ll[2:]+1.))
+    cl_tt=np.zeros_like(ll); cl_tt[2:]=data[1,:3*o.nside_out-2]*fac
+    cl_ee=np.zeros_like(ll); cl_ee[2:]=data[2,:3*o.nside_out-2]*fac
+    cl_bb=np.zeros_like(ll); cl_bb[2:]=data[3,:3*o.nside_out-2]*fac
+    cl_te=np.zeros_like(ll); cl_te[2:]=data[4,:3*o.nside_out-2]*fac
 
-ell=np.arange(3*nside)
-cltt=np.zeros(3*nside); clee=np.zeros(3*nside); clbb=np.zeros(3*nside); clte=np.zeros(3*nside); 
-cltt[2:]=data[1,:3*nside-2]*2*np.pi/(data[0,:3*nside-2]*(data[0,:3*nside-2]+1.))
-clee[2:]=data[2,:3*nside-2]*2*np.pi/(data[0,:3*nside-2]*(data[0,:3*nside-2]+1.))
-clbb[2:]=data[3,:3*nside-2]*2*np.pi/(data[0,:3*nside-2]*(data[0,:3*nside-2]+1.))
-clte[2:]=data[4,:3*nside-2]*2*np.pi/(data[0,:3*nside-2]*(data[0,:3*nside-2]+1.))
-if plotres :
+    return ll,cl_tt,cl_ee,cl_bb,cl_te
+l,cltt,clee,clbb,clte=read_cl_camb("data/cls_cmb.txt")
+#Noise power spectrum
+nlev=(1.*np.pi/(180*60))**2 #1 uK-arcmin noise level
+nltt=nlev*(np.ones_like(l)+(10./(l+0.1))**2.4) #1/ell noise with a knee scale of ell=10 (optimistic)
+nlee=2*nltt; nlbb=2*nltt; nlte=0*nltt
+#Beam
+fwhm_amin=25. #Corresponding to 0.5m aperture at 90GHz
+beam=np.exp(-0.5*l*(l+1)*(fwhm_amin*np.pi/(180*60*2.355))**2)
+if o.plot_stuff :
     plt.figure()
-    plt.plot(ell,cltt,'r-',label='$TT$')
-    plt.plot(ell,clee,'b-',label='$EE$')
-    plt.plot(ell,clbb,'g-',label='$BB$')
-    plt.plot(ell,clte,'y-',label='$TE$')
-    plt.loglog()
-    plt.xlabel('$\\ell$',fontsize=16)
-    plt.ylabel('$C_\\ell$',fontsize=16)
-    plt.legend(loc='upper right',frameon=False,fontsize=16,labelspacing=0.1,ncol=2)
+    plt.plot(l,clee,'r-',label='EE signal')
+    plt.plot(l,clbb,'b-',label='BB signal')
+    plt.plot(l,nlee/beam**2,'k--',label='Noise')
+    plt.loglog(); plt.legend()
+    plt.xlabel('$\\ell$',fontsize=16);
+    plt.ylabel('$C_\\ell$',fontsize=16);
 
-if w_cont :
-    '''
-    tilt_fg=-2.0
-    l0_fg=100.
-    clttfg=1E-5*((ell+10.)/(l0_fg+10.))**tilt_fg
-    cleefg=5E-7*((ell+30.)/(l0_fg+30.))**tilt_fg
-    cltefg=0.9*np.sqrt(clttfg*cleefg)
-    clbbfg=0.5*cleefg
-    clttfg[0]=0; cleefg[0]=0; clbbfg[0]=0; cltefg[0]=0; 
-    if plotres :
-        plt.plot(ell,alpha_cont_0*alpha_cont_0*clttfg,'r--',label='${\\rm FG},\\,TT$')
-        plt.plot(ell,alpha_cont_0*alpha_cont_2*cltefg,'g--',label='${\\rm FG},\\,TE$')
-        plt.plot(ell,alpha_cont_2*alpha_cont_2*cleefg,'b--',label='${\\rm FG},\\,EE$')
-        plt.plot(ell,alpha_cont_2*alpha_cont_2*clbbfg,'y--',label='${\\rm FG},\\,BB$')
-    '''
-    raise ValueError("Can't do purification and deprojection yet")
-
-
-np.random.seed(1001)
-fsky=0.2
-rholes=1.
-if not os.path.isfile(fname_mask+'.fits') :
-    print "Generating mask"
-    mask=getmaskapoana(nside,aposize,fsk=fsky)
-    hp.write_map(fname_mask+".fits",mask)
-mask=hp.read_map(fname_mask+".fits")
-if plotres :
+#Read mask
+mask=hp.read_map("data/mask_cmb_ns%d.fits"%o.nside_out,verbose=False)
+if o.plot_stuff :
     hp.mollview(mask)
+fsky=np.mean(mask/np.amax(mask));
 
-if w_cont :  #Not ready yet
-    if not os.path.isfile(prefix+"_contaminants.fits") :
-        fgt,fgq,fgu=nmt.synfast_spherical(nside,[clttfg,cleefg,clbbfg,cltefg],pol=True)
-        hp.write_map(prefix+"_contaminants.fits",[fgt,fgq,fgu])
-    else :
-        fgt,fgq,fgu=hp.read_map(prefix+"_contaminants.fits",field=[0,1,2],verbose=False)
+#Read contaminant maps
+if w_cont :
+    fgp=np.zeros([1,2,hp.nside2npix(o.nside_out)]);
+    fgp[0,0,:],fgp[0,1,:]=hp.read_map("data/cont_cmb_ns%d.fits"%o.nside_out,
+                                      field=[0,1],verbose=False); #Foregrounds
+    if o.plot_stuff :
+        hp.mollview(np.sum(fgp,axis=0)[0,:]*mask)
+        hp.mollview(np.sum(fgp,axis=0)[1,:]*mask)
 
 #Binning scheme
 d_ell=int(1./fsky)
-b=nmt.NmtBin(nside,nlb=d_ell)
+b=nmt.NmtBin(o.nside_out,nlb=d_ell)
 
 #Generate some initial fields
-print " - Res: %.3lf arcmin. "%(np.sqrt(4*np.pi*(180*60/np.pi)**2/hp.nside2npix(nside)))
+print(" - Res: %.3lf arcmin. "%(np.sqrt(4*np.pi*(180*60/np.pi)**2/hp.nside2npix(o.nside_out))))
 def get_fields() :
-    mppt,mppq,mppu=nmt.synfast_spherical(nside,[cltt,clee,clbb,clte],pol=True)
-    if w_cont : #Not ready yet
-        mppq+=alpha_cont_2*fgq
-        mppu+=alpha_cont_2*fgu
-        ff2=nmt.NmtField(mask,[mppq,mppu],[[fgq,fgu]])
+    #Signal
+    st,sq,su=nmt.synfast_spherical(o.nside_out,[cltt+nltt,clee+nlee,clbb+nlbb,clte+nlte],pol=True)
+    if w_cont :
+        sq+=np.sum(fgp,axis=0)[0,:]; su+=np.sum(fgp,axis=0)[1,:]
+        ff2=nmt.NmtField(mask,[sq,su],templates=fgp,
+                         purify_e=False,purify_b=w_pureb,n_iter_mask_purify=10)
     else :
-        ff2=nmt.NmtField(mask,[mppq,mppu],purify_e=ispure_e,purify_b=ispure_b,n_iter_mask_purify=10)
-    return mppq,mppu,ff2
-mpq,mpu,f2=get_fields()
-
-if plotres :
-    hp.mollview((mpq*mask).flatten(),title='$Q$')
-    hp.mollview((mpu*mask).flatten(),title='$U$')
-
-#Compute deprojection bias
-if w_cont : #Not ready yet
-    clb22=nmt.deprojection_bias(f2,f2,[clee,0*clee,0*clbb,clbb])
-else :
-    clb22=None;
+        ff2=nmt.NmtField(mask,[sq,su],
+                         purify_e=False,purify_b=w_pureb,n_iter_mask_purify=10)
+    return ff2
+np.random.seed(1000)
+f2=get_fields()
+    
+if o.plot_stuff :
+    hp.mollview(f2.get_maps()[0]*mask,title='$Q$')
+    hp.mollview(f2.get_maps()[1]*mask,title='$U$')
 
 #Use initial fields to generate coupling matrix
 w22=nmt.NmtWorkspace();
 if not os.path.isfile(prefix+"_w22.dat") :
-    print "Computing 22"
+    print("Computing 22")
     w22.compute_coupling_matrix(f2,f2,b)
     w22.write_to(prefix+"_w22.dat");
 else :
@@ -144,37 +114,46 @@ else :
 #Generate theory prediction
 cl22_th=w22.decouple_cell(w22.couple_cell([clee,0*clee,0*clbb,clbb]))
 np.savetxt(prefix+"_cl_th.txt",
-           np.transpose([b.get_effective_ells(),
-                         cl22_th[0],cl22_th[1],cl22_th[2],cl22_th[3]]))
+           np.transpose([b.get_effective_ells(),cl22_th[0],cl22_th[1],cl22_th[2],cl22_th[3]]))
 
+#Compute noise and deprojection bias
+if not os.path.isfile(prefix+"_clb22.npy") :
+    print("Computing deprojection and noise bias 00")
+    #Compute noise bias
+    clb22=w22.couple_cell([nlee,0*nlee,0*nlbb,nlbb])
+    #Compute deprojection bias
+    if w_cont :
+        #Signal contribution
+        clb22+=nmt.deprojection_bias(f0,f0,[clee,0*clee,0*clbb,clbb])
+    np.save(prefix+"_clb22",clb22)
+else :
+    clb22=np.load(prefix+"_clb22.npy")
+    
 #Compute mean and variance over nsims simulations
 cl22_all=[]
 for i in np.arange(nsims) :
-    if i%100==0 :
-        print "%d-th sim"%i
+    #if i%100==0 :
+    print("%d-th sim"%(i+o.isim_ini))
 
-    if not os.path.isfile(prefix+"_cl_%04d.txt"%i) :
-        mpq,mpu,f2=get_fields()
+    if not os.path.isfile(prefix+"_cl_%04d.txt"%(o.isim_ini+i)) :
+        np.random.seed(1000+o.isim_ini+i)
+        f2=get_fields()
         cl22=w22.decouple_cell(nmt.compute_coupled_cell(f2,f2),cl_bias=clb22)
-        np.savetxt(prefix+"_cl_%04d.txt"%i,
-                   np.transpose([b.get_effective_ells(),
-                                 cl22[0],cl22[1],cl22[2],cl22[3]]))
-    cld=np.loadtxt(prefix+"_cl_%04d.txt"%i,unpack=True)
+        np.savetxt(prefix+"_cl_%04d.txt"%(o.isim_ini+i),
+                   np.transpose([b.get_effective_ells(),cl22[0],cl22[1],cl22[2],cl22[3]]))
+    cld=np.loadtxt(prefix+"_cl_%04d.txt"%(o.isim_ini+i),unpack=True)
     cl22_all.append([cld[1],cld[2],cld[3],cld[4]])
 cl22_all=np.array(cl22_all)
+plt.plot(); exit(1)
 
 #Plot results
-if plotres :
+if o.plot_stuff :
+    l_eff=b.get_effective_ells()
     cols=plt.cm.rainbow(np.linspace(0,1,6))
     plt.figure()
-    plt.errorbar(b.get_effective_ells(),
-                 np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,
-                 yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),
-                 label='$EE$',fmt='bo')
-    plt.errorbar(b.get_effective_ells(),
-                 np.mean(cl22_all,axis=0)[3]/cl22_th[3]-1,
-                 yerr=np.std(cl22_all,axis=0)[3]/cl22_th[3]/np.sqrt(nsims+0.),
-                 label='$BB$',fmt='go')
+    plt.errorbar(l_eff,np.mean(cl00_all,axis=0)[0]/cl00_th[0]-1,yerr=np.std(cl00_all,axis=0)[0]/cl00_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\delta_g$',fmt='ro')
+    plt.errorbar(l_eff,np.mean(cl02_all,axis=0)[0]/cl02_th[0]-1,yerr=np.std(cl02_all,axis=0)[0]/cl02_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\gamma_E$',fmt='go')
+    plt.errorbar(l_eff,np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),label='$\\gamma_E-\\gamma_E$',fmt='bo')
     plt.xlabel('$\\ell$',fontsize=16)
     plt.ylabel('$\\Delta C_\\ell/C_\\ell$',fontsize=16)
     plt.legend(loc='lower right',frameon=False,fontsize=16)
@@ -182,13 +161,21 @@ if plotres :
 
     ic=0
     plt.figure()
-    plt.plot(b.get_effective_ells(),np.mean(cl22_all,axis=0)[0],
-             label='$EE$',c=cols[ic]);
-    plt.plot(b.get_effective_ells(),cl22_th[0],'--',c=cols[ic]); ic+=1
-    plt.plot(b.get_effective_ells(),np.mean(cl22_all,axis=0)[1],
-             label='$EB$',c=cols[ic]); ic+=1
-    plt.plot(b.get_effective_ells(),np.mean(cl22_all,axis=0)[3],
-             label='$BB$',c=cols[ic]); ic+=1
+    plt.plot(l_eff,np.mean(cl00_all,axis=0)[0],
+             label='$\\delta_g-\\delta_g$',c=cols[ic])
+    plt.plot(l_eff,cl00_th[0],'--',c=cols[ic]); ic+=1
+    plt.plot(l_eff,np.mean(cl02_all,axis=0)[0],
+             label='$\\delta_g-\\gamma_E$',c=cols[ic]);
+    plt.plot(l_eff,cl02_th[0],'--',c=cols[ic]); ic+=1
+    plt.plot(l_eff,np.mean(cl02_all,axis=0)[1],
+             label='$\\delta_g-\\gamma_B$',c=cols[ic]); ic+=1
+    plt.plot(l_eff,np.mean(cl22_all,axis=0)[0],
+             label='$\\gamma_E-\\gamma_E$',c=cols[ic]);
+    plt.plot(l_eff,cl22_th[0],'--',c=cols[ic]); ic+=1
+    plt.plot(l_eff,np.mean(cl22_all,axis=0)[1],
+             label='$\\gamma_E-\\gamma_B$',c=cols[ic]); ic+=1
+    plt.plot(l_eff,np.mean(cl22_all,axis=0)[3],
+             label='$\\gamma_B-\\gamma_B$',c=cols[ic]); ic+=1
     plt.loglog()
     plt.xlabel('$\\ell$',fontsize=16)
     plt.ylabel('$C_\\ell$',fontsize=16)
