@@ -74,25 +74,38 @@ if w_cont :
     fgp=np.zeros([1,2,hp.nside2npix(o.nside_out)]);
     fgp[0,0,:],fgp[0,1,:]=hp.read_map("data/cont_cmb_ns%d.fits"%o.nside_out,
                                       field=[0,1],verbose=False); #Foregrounds
+    fgp[0,0,:]=hp.smoothing(fgp[0,0,:],beam=beam,verbose=False)
+    fgp[0,1,:]=hp.smoothing(fgp[0,1,:],beam=beam,verbose=False)
     if o.plot_stuff :
         hp.mollview(np.sum(fgp,axis=0)[0,:]*mask)
         hp.mollview(np.sum(fgp,axis=0)[1,:]*mask)
 
 #Binning scheme
-d_ell=int(1./fsky)
-b=nmt.NmtBin(o.nside_out,nlb=d_ell)
+ls=np.arange(3*o.nside_out,dtype=int)
+bpws=np.zeros(3*o.nside_out,dtype=int)-1
+weights=np.ones(3*o.nside_out)
+bpw_edges=[2,9,17]
+while bpw_edges[-1]<3*o.nside_out :
+    bpw_edges.append(min(bpw_edges[-1]+12,3*o.nside_out))
+bpw_edges=np.array(bpw_edges)
+for ib,b0 in enumerate(bpw_edges[:-1]) :
+    bpws[b0:bpw_edges[ib+1]]=ib
+    weights[b0:bpw_edges[ib+1]]=1./(bpw_edges[ib+1]-b0+0.)
+b=nmt.NmtBin(o.nside_out,ells=ls,bpws=bpws,weights=weights)
 
 #Generate some initial fields
 print(" - Res: %.3lf arcmin. "%(np.sqrt(4*np.pi*(180*60/np.pi)**2/hp.nside2npix(o.nside_out))))
 def get_fields() :
     #Signal
-    st,sq,su=nmt.synfast_spherical(o.nside_out,[cltt+nltt,clee+nlee,clbb+nlbb,clte+nlte],pol=True)
+    st,sq,su=hp.synfast([cltt*beam**2+nltt,clee*beam**2+nlee,
+                         clbb*beam**2+nlbb,clte*beam**2+nlte],
+                        o.nside_out,new=True,verbose=False,pol=True)
     if w_cont :
         sq+=np.sum(fgp,axis=0)[0,:]; su+=np.sum(fgp,axis=0)[1,:]
-        ff2=nmt.NmtField(mask,[sq,su],templates=fgp,
+        ff2=nmt.NmtField(mask,[sq,su],templates=fgp,beam=beam,
                          purify_e=False,purify_b=w_pureb,n_iter_mask_purify=10)
     else :
-        ff2=nmt.NmtField(mask,[sq,su],
+        ff2=nmt.NmtField(mask,[sq,su],beam=beam,
                          purify_e=False,purify_b=w_pureb,n_iter_mask_purify=10)
     return ff2
 np.random.seed(1000)
@@ -124,7 +137,7 @@ if not os.path.isfile(prefix+"_clb22.npy") :
     #Compute deprojection bias
     if w_cont :
         #Signal contribution
-        clb22+=nmt.deprojection_bias(f0,f0,[clee,0*clee,0*clbb,clbb])
+        clb22+=nmt.deprojection_bias(f0,f0,[clee*beam**2+nlee,0*clee,0*clbb,clbb*beam**2+nlbb])
     np.save(prefix+"_clb22",clb22)
 else :
     clb22=np.load(prefix+"_clb22.npy")
@@ -144,40 +157,77 @@ for i in np.arange(nsims) :
     cld=np.loadtxt(prefix+"_cl_%04d.txt"%(o.isim_ini+i),unpack=True)
     cl22_all.append([cld[1],cld[2],cld[3],cld[4]])
 cl22_all=np.array(cl22_all)
-plt.plot(); exit(1)
 
 #Plot results
 if o.plot_stuff :
     l_eff=b.get_effective_ells()
-    cols=plt.cm.rainbow(np.linspace(0,1,6))
+    cols=plt.cm.rainbow(np.linspace(0,1,3))
     plt.figure()
-    plt.errorbar(l_eff,np.mean(cl00_all,axis=0)[0]/cl00_th[0]-1,yerr=np.std(cl00_all,axis=0)[0]/cl00_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\delta_g$',fmt='ro')
-    plt.errorbar(l_eff,np.mean(cl02_all,axis=0)[0]/cl02_th[0]-1,yerr=np.std(cl02_all,axis=0)[0]/cl02_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\gamma_E$',fmt='go')
-    plt.errorbar(l_eff,np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),label='$\\gamma_E-\\gamma_E$',fmt='bo')
+    plt.errorbar(l_eff,np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,
+                 yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),
+                 label='$EE$',fmt='bo')
+    plt.errorbar(l_eff,np.mean(cl22_all,axis=0)[3]/cl22_th[3]-1,
+                 yerr=np.std(cl22_all,axis=0)[3]/cl22_th[3]/np.sqrt(nsims+0.),
+                 label='$BB$',fmt='ro')
     plt.xlabel('$\\ell$',fontsize=16)
     plt.ylabel('$\\Delta C_\\ell/C_\\ell$',fontsize=16)
+    plt.xlim([2,2*o.nside_out])
+    plt.ylim([-0.2,0.2])
     plt.legend(loc='lower right',frameon=False,fontsize=16)
-    plt.xscale('log')
+    plt.savefig(prefix+'_celldiff.png',bbox_inches='tight')
+    plt.savefig(prefix+'_celldiff.pdf',bbox_inches='tight')
+
+    import scipy.stats as st
+    bins_use=np.where(l_eff<2*o.nside_out)[0]; ndof=len(bins_use)
+    res=(cl22_all[:,:,:]-cl22_th[None,:,:])/np.std(cl22_all,axis=0)[None,:,:]
+    chi2_22=np.sum(res[:,:,bins_use]**2,axis=2)
+
+    x=np.linspace(ndof-5*np.sqrt(2.*ndof),ndof+5*np.sqrt(2*ndof),256)
+    pdf=st.chi2.pdf(x,ndof)
+
+    plt.figure(figsize=(10,4))
+    ax=[plt.subplot(1,3,i+1) for i in range(3)]
+    plt.subplots_adjust(wspace=0, hspace=0)
+
+    h,b,p=ax[0].hist(chi2_22[:,0],bins=40,density=True)
+    ax[0].text(0.75,0.9,'$EE$',transform=ax[0].transAxes)
+    ax[0].set_xlabel('$\\chi^2$')
+    ax[0].set_ylabel('$P(\\chi^2)$')
+
+    h,b,p=ax[1].hist(chi2_22[:,1],bins=40,density=True)
+    ax[1].text(0.75,0.9,'$EB$',transform=ax[1].transAxes)
+
+    h,b,p=ax[2].hist(chi2_22[:,3],bins=40,density=True)
+    ax[2].text(0.75,0.9,'$BB$',transform=ax[2].transAxes)
+
+    for a in ax :
+        a.set_xlabel('$\\chi^2$')
+    ax[1].set_yticklabels([])
+    ax[2].set_yticklabels([])
+    for a in ax :
+        a.set_xlim([ndof-5*np.sqrt(2.*ndof),ndof+5*np.sqrt(2.*ndof)])
+        a.set_ylim([0,1.4*np.amax(pdf)])
+        a.plot([ndof,ndof],[0,1.4*np.amax(pdf)],'k--',label='$N_{\\rm dof}$')
+        a.plot(x,pdf,'k-',label='$P(\\chi^2,N_{\\rm dof})$')
+    ax[0].legend(loc='upper left',frameon=False)
+    plt.savefig(prefix+'_distributions.png',bbox_inches='tight')
+    plt.savefig(prefix+'_distributions.pdf',bbox_inches='tight')
 
     ic=0
     plt.figure()
-    plt.plot(l_eff,np.mean(cl00_all,axis=0)[0],
-             label='$\\delta_g-\\delta_g$',c=cols[ic])
-    plt.plot(l_eff,cl00_th[0],'--',c=cols[ic]); ic+=1
-    plt.plot(l_eff,np.mean(cl02_all,axis=0)[0],
-             label='$\\delta_g-\\gamma_E$',c=cols[ic]);
-    plt.plot(l_eff,cl02_th[0],'--',c=cols[ic]); ic+=1
-    plt.plot(l_eff,np.mean(cl02_all,axis=0)[1],
-             label='$\\delta_g-\\gamma_B$',c=cols[ic]); ic+=1
-    plt.plot(l_eff,np.mean(cl22_all,axis=0)[0],
-             label='$\\gamma_E-\\gamma_E$',c=cols[ic]);
+    plt.plot(l_eff,np.mean(cl22_all,axis=0)[0],'.',
+             label='$EE$',c=cols[ic]);
     plt.plot(l_eff,cl22_th[0],'--',c=cols[ic]); ic+=1
-    plt.plot(l_eff,np.mean(cl22_all,axis=0)[1],
-             label='$\\gamma_E-\\gamma_B$',c=cols[ic]); ic+=1
-    plt.plot(l_eff,np.mean(cl22_all,axis=0)[3],
-             label='$\\gamma_B-\\gamma_B$',c=cols[ic]); ic+=1
-    plt.loglog()
+    plt.plot(l_eff,np.mean(cl22_all,axis=0)[1],'.',
+             label='$EB$',c=cols[ic]); ic+=1
+    plt.plot(l_eff,np.mean(cl22_all,axis=0)[3],'.',
+             label='$BB$',c=cols[ic]);
+    plt.plot(l_eff,cl22_th[3],'--',c=cols[ic]); ic+=1
+    plt.yscale('log')
+    plt.xlim([2,2*o.nside_out])
     plt.xlabel('$\\ell$',fontsize=16)
     plt.ylabel('$C_\\ell$',fontsize=16)
     plt.legend(loc='lower left',frameon=False,fontsize=14,ncol=2)
+    plt.savefig(prefix+'_cellfull.png',bbox_inches='tight')
+    plt.savefig(prefix+'_cellfull.pdf',bbox_inches='tight')
     plt.show()

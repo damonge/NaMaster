@@ -106,7 +106,7 @@ b=nmt.NmtBin(o.nside_out,nlb=d_ell)
 print(" - Res: %.3lf arcmin. "%(np.sqrt(4*np.pi*(180*60/np.pi)**2/hp.nside2npix(o.nside_out))))
 def get_fields() :
     #Signal
-    st,sq,su=nmt.synfast_spherical(o.nside_out,[cltt,clee,clbb,clte],pol=True)
+    st,sq,su=hp.synfast([cltt,clee,clbb,clte],o.nside_out,new=True,verbose=False,pol=True)
     #Inhomogeneous white noise
     nt=np.sqrt(depth_nvar_t)*np.random.randn(hp.nside2npix(o.nside_out))
     nq=np.sqrt(depth_nvar_p)*np.random.randn(hp.nside2npix(o.nside_out))
@@ -222,33 +222,100 @@ if o.plot_stuff :
     l_eff=b.get_effective_ells()
     cols=plt.cm.rainbow(np.linspace(0,1,6))
     plt.figure()
-    plt.errorbar(l_eff,np.mean(cl00_all,axis=0)[0]/cl00_th[0]-1,yerr=np.std(cl00_all,axis=0)[0]/cl00_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\delta_g$',fmt='ro')
-    plt.errorbar(l_eff,np.mean(cl02_all,axis=0)[0]/cl02_th[0]-1,yerr=np.std(cl02_all,axis=0)[0]/cl02_th[0]/np.sqrt(nsims+0.),label='$\\delta_g-\\gamma_E$',fmt='go')
-    plt.errorbar(l_eff,np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),label='$\\gamma_E-\\gamma_E$',fmt='bo')
+    plt.errorbar(l_eff,np.mean(cl00_all,axis=0)[0]/cl00_th[0]-1,
+                 yerr=np.std(cl00_all,axis=0)[0]/cl00_th[0]/np.sqrt(nsims+0.),
+                 label='$\\delta\\times\\delta$',fmt='ro')
+    plt.errorbar(l_eff,np.mean(cl02_all,axis=0)[0]/cl02_th[0]-1,
+                 yerr=np.std(cl02_all,axis=0)[0]/cl02_th[0]/np.sqrt(nsims+0.),
+                 label='$\\delta\\times\\gamma_E$',fmt='go')
+    plt.errorbar(l_eff,np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,
+                 yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),
+                 label='$\\gamma_E\\times\\gamma_E$',fmt='bo')
     plt.xlabel('$\\ell$',fontsize=16)
     plt.ylabel('$\\Delta C_\\ell/C_\\ell$',fontsize=16)
+    plt.xlim([2,2*o.nside_out])
     plt.legend(loc='lower right',frameon=False,fontsize=16)
     plt.xscale('log')
+    plt.savefig(prefix+'_celldiff.png',bbox_inches='tight')
+    plt.savefig(prefix+'_celldiff.pdf',bbox_inches='tight')
+
+    import scipy.stats as st
+    bins_use=np.where(l_eff<2*o.nside_out)[0]; ndof=len(bins_use)
+    res=(cl00_all[:,:,:]-cl00_th[None,:,:])/np.std(cl00_all,axis=0)[None,:,:]
+    chi2_00=np.sum(res[:,:,bins_use]**2,axis=2)
+    res=(cl02_all[:,:,:]-cl02_th[None,:,:])/np.std(cl02_all,axis=0)[None,:,:]
+    chi2_02=np.sum(res[:,:,bins_use]**2,axis=2)
+    res=(cl22_all[:,:,:]-cl22_th[None,:,:])/np.std(cl22_all,axis=0)[None,:,:]
+    chi2_22=np.sum(res[:,:,bins_use]**2,axis=2)
+
+    x=np.linspace(ndof-5*np.sqrt(2.*ndof),ndof+5*np.sqrt(2*ndof),256)
+    pdf=st.chi2.pdf(x,ndof)
+
+    
+    plt.figure(figsize=(10,7))
+    ax=[plt.subplot(2,3,i+1) for i in range(6)]
+    plt.subplots_adjust(wspace=0, hspace=0)
+    
+    h,b,p=ax[0].hist(chi2_00[:,0],bins=40,density=True)
+    ax[0].text(0.75,0.9,'$\\delta\\times\\delta$'    ,transform=ax[0].transAxes)
+    ax[0].set_ylabel('$P(\\chi^2)$')
+
+    h,b,p=ax[1].hist(chi2_02[:,0],bins=40,density=True)
+    ax[1].text(0.75,0.9,'$\\delta\\times\\gamma_E$'  ,transform=ax[1].transAxes)
+
+    h,b,p=ax[2].hist(chi2_02[:,1],bins=40,density=True)
+    ax[2].text(0.75,0.9,'$\\delta\\times\\gamma_B$'  ,transform=ax[2].transAxes)
+
+    h,b,p=ax[3].hist(chi2_22[:,0],bins=40,density=True)
+    ax[3].text(0.75,0.9,'$\\gamma_E\\times\\gamma_E$',transform=ax[3].transAxes)
+    ax[3].set_xlabel('$\\chi^2$')
+    ax[3].set_ylabel('$P(\\chi^2)$')
+
+    h,b,p=ax[4].hist(chi2_22[:,1],bins=40,density=True)
+    ax[4].text(0.75,0.9,'$\\gamma_E\\times\\gamma_B$',transform=ax[4].transAxes)
+
+    h,b,p=ax[5].hist(chi2_22[:,3],bins=40,density=True)
+    ax[5].text(0.75,0.9,'$\\gamma_B\\times\\gamma_B$',transform=ax[5].transAxes)
+
+    for a in ax[:3] :
+        a.set_xticklabels([])
+    for a in ax[3:] :
+        a.set_xlabel('$\\chi^2$')
+    ax[1].set_yticklabels([])
+    ax[2].set_yticklabels([])
+    ax[4].set_yticklabels([])
+    ax[5].set_yticklabels([])
+    for a in ax :
+        a.set_xlim([ndof-5*np.sqrt(2.*ndof),ndof+5*np.sqrt(2.*ndof)])
+        a.set_ylim([0,1.4*np.amax(pdf)])
+        a.plot([ndof,ndof],[0,1.4*np.amax(pdf)],'k--',label='$N_{\\rm dof}$')
+        a.plot(x,pdf,'k-',label='$P(\\chi^2,N_{\\rm dof})$')
+    ax[3].legend(loc='upper left',frameon=False)
+    plt.savefig(prefix+'_distributions.png',bbox_inches='tight')
+    plt.savefig(prefix+'_distributions.pdf',bbox_inches='tight')
 
     ic=0
     plt.figure()
     plt.plot(l_eff,np.mean(cl00_all,axis=0)[0],
-             label='$\\delta_g-\\delta_g$',c=cols[ic])
+             label='$\\delta\\times\\delta$',c=cols[ic])
     plt.plot(l_eff,cl00_th[0],'--',c=cols[ic]); ic+=1
     plt.plot(l_eff,np.mean(cl02_all,axis=0)[0],
-             label='$\\delta_g-\\gamma_E$',c=cols[ic]);
+             label='$\\delta\\times\\gamma_E$',c=cols[ic]);
     plt.plot(l_eff,cl02_th[0],'--',c=cols[ic]); ic+=1
     plt.plot(l_eff,np.mean(cl02_all,axis=0)[1],
-             label='$\\delta_g-\\gamma_B$',c=cols[ic]); ic+=1
+             label='$\\delta\\times\\gamma_B$',c=cols[ic]); ic+=1
     plt.plot(l_eff,np.mean(cl22_all,axis=0)[0],
-             label='$\\gamma_E-\\gamma_E$',c=cols[ic]);
+             label='$\\gamma\\times\\gamma_E$',c=cols[ic]);
     plt.plot(l_eff,cl22_th[0],'--',c=cols[ic]); ic+=1
     plt.plot(l_eff,np.mean(cl22_all,axis=0)[1],
-             label='$\\gamma_E-\\gamma_B$',c=cols[ic]); ic+=1
+             label='$\\gamma_E\\times\\gamma_B$',c=cols[ic]); ic+=1
     plt.plot(l_eff,np.mean(cl22_all,axis=0)[3],
-             label='$\\gamma_B-\\gamma_B$',c=cols[ic]); ic+=1
+             label='$\\gamma_B\\times\\gamma_B$',c=cols[ic]); ic+=1
     plt.loglog()
+    plt.xlim([2,2*o.nside_out])
     plt.xlabel('$\\ell$',fontsize=16)
     plt.ylabel('$C_\\ell$',fontsize=16)
     plt.legend(loc='lower left',frameon=False,fontsize=14,ncol=2)
+    plt.savefig(prefix+'_cellfull.png',bbox_inches='tight')
+    plt.savefig(prefix+'_cellfull.pdf',bbox_inches='tight')
     plt.show()

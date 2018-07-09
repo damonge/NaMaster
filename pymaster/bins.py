@@ -25,7 +25,7 @@ class NmtBin(object) :
             if((bpws is None) and (ells is None) and (weights is None)) :
                 raise KeyError("Must provide bpws, ells and weights")
             ell_max=min(3*nside-1,np.amax(ells),lmax_in)
-            self.bin=lib.bins_create_py(bpws,ells,weights,ell_max)
+            self.bin=lib.bins_create_py(bpws.astype(np.int32),ells.astype(np.int32),weights,ell_max)
         else :
             ell_max=min(3*nside-1,lmax_in)
             self.bin=lib.bins_constant(nlb,ell_max)
