@@ -364,6 +364,10 @@ class field_flat(_object):
     __swig_getmethods__["mask"] = _nmtlib.field_flat_mask_get
     if _newclass:
         mask = _swig_property(_nmtlib.field_flat_mask_get, _nmtlib.field_flat_mask_set)
+    __swig_setmethods__["a_mask"] = _nmtlib.field_flat_a_mask_set
+    __swig_getmethods__["a_mask"] = _nmtlib.field_flat_a_mask_get
+    if _newclass:
+        a_mask = _swig_property(_nmtlib.field_flat_a_mask_get, _nmtlib.field_flat_a_mask_set)
     __swig_setmethods__["pol"] = _nmtlib.field_flat_pol_set
     __swig_getmethods__["pol"] = _nmtlib.field_flat_pol_get
     if _newclass:
@@ -424,6 +428,10 @@ field_flat_alloc = _nmtlib.field_flat_alloc
 def synfast_flat(nx, ny, lx, ly, nfields, spin_arr, nl_beam, l_beam, beam_fields, nl_cell, l_cell, cell_fields, seed):
     return _nmtlib.synfast_flat(nx, ny, lx, ly, nfields, spin_arr, nl_beam, l_beam, beam_fields, nl_cell, l_cell, cell_fields, seed)
 synfast_flat = _nmtlib.synfast_flat
+
+def purify_flat(fl, mask, walm0, maps_in, maps_out, alms):
+    return _nmtlib.purify_flat(fl, mask, walm0, maps_in, maps_out, alms)
+purify_flat = _nmtlib.purify_flat
 class field(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, field, name, value)
@@ -454,6 +462,10 @@ class field(_object):
     __swig_getmethods__["mask"] = _nmtlib.field_mask_get
     if _newclass:
         mask = _swig_property(_nmtlib.field_mask_get, _nmtlib.field_mask_set)
+    __swig_setmethods__["a_mask"] = _nmtlib.field_a_mask_set
+    __swig_getmethods__["a_mask"] = _nmtlib.field_a_mask_get
+    if _newclass:
+        a_mask = _swig_property(_nmtlib.field_a_mask_get, _nmtlib.field_a_mask_set)
     __swig_setmethods__["pol"] = _nmtlib.field_pol_set
     __swig_getmethods__["pol"] = _nmtlib.field_pol_get
     if _newclass:
@@ -518,6 +530,10 @@ field_read = _nmtlib.field_read
 def synfast_sph(nside, nfields, spin_arr, lmax, cells, beam_fields, seed):
     return _nmtlib.synfast_sph(nside, nfields, spin_arr, lmax, cells, beam_fields, seed)
 synfast_sph = _nmtlib.synfast_sph
+
+def purify(fl, mask, walm0, maps_in, maps_out, alms):
+    return _nmtlib.purify(fl, mask, walm0, maps_in, maps_out, alms)
+purify = _nmtlib.purify
 
 def apodize_mask(nside, mask_in, mask_out, aposize, apotype):
     return _nmtlib.apodize_mask(nside, mask_in, mask_out, aposize, apotype)

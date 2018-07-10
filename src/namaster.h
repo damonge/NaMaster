@@ -100,6 +100,7 @@ typedef struct {
   int pure_e;
   int pure_b;
   flouble *mask;
+  fcomplex **a_mask;
   int pol;
   int nmaps;
   flouble **maps;
@@ -119,6 +120,8 @@ flouble **nmt_synfast_flat(int nx,int ny,flouble lx,flouble ly,int nfields,int *
 			   int nl_beam,flouble *l_beam,flouble **beam_fields,
 			   int nl_cell,flouble *l_cell,flouble **cell_fields,
 			   int seed);
+void nmt_purify_flat(nmt_field_flat *fl,flouble *mask,fcomplex **walm0,
+		     flouble **maps_in,flouble **maps_out,fcomplex **alms);
 
 //Defined in field.c
 typedef struct {
@@ -128,6 +131,7 @@ typedef struct {
   int pure_e;
   int pure_b;
   flouble *mask;
+  fcomplex **a_mask;
   int pol;
   int nmaps;
   flouble **maps;
@@ -146,6 +150,8 @@ nmt_field *nmt_field_read(char *fname_mask,char *fname_maps,char *fname_temp,cha
 			  int pol,int pure_e,int pure_b,int n_iter_mask_purify,double tol_pinv);
 flouble **nmt_synfast_sph(int nside,int nfields,int *spin_arr,int lmax,
 			  flouble **cells,flouble **beam_fields,int seed);
+void nmt_purify(nmt_field *fl,flouble *mask,fcomplex **walm0,
+		flouble **maps_in,flouble **maps_out,fcomplex **alms);
 
 //Defined in mask.c
 void nmt_apodize_mask(long nside,flouble *mask_in,flouble *mask_out,flouble aposize,char *apotype);

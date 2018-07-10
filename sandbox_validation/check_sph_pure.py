@@ -74,8 +74,8 @@ if w_cont :
     fgp=np.zeros([1,2,hp.nside2npix(o.nside_out)]);
     fgp[0,0,:],fgp[0,1,:]=hp.read_map("data/cont_cmb_ns%d.fits"%o.nside_out,
                                       field=[0,1],verbose=False); #Foregrounds
-    fgp[0,0,:]=hp.smoothing(fgp[0,0,:],beam=beam,verbose=False)
-    fgp[0,1,:]=hp.smoothing(fgp[0,1,:],beam=beam,verbose=False)
+    fgp[0,0,:]=hp.alm2map(hp.almxfl(hp.map2alm(fgp[0,0,:]),beam),o.nside_out,verbose=False)
+    fgp[0,1,:]=hp.alm2map(hp.almxfl(hp.map2alm(fgp[0,1,:]),beam),o.nside_out,verbose=False)
     if o.plot_stuff :
         hp.mollview(np.sum(fgp,axis=0)[0,:]*mask)
         hp.mollview(np.sum(fgp,axis=0)[1,:]*mask)
@@ -131,17 +131,17 @@ np.savetxt(prefix+"_cl_th.txt",
 
 #Compute noise and deprojection bias
 if not os.path.isfile(prefix+"_clb22.npy") :
-    print("Computing deprojection and noise bias 00")
+    print("Computing deprojection and noise bias 22")
     #Compute noise bias
-    clb22=w22.couple_cell([nlee,0*nlee,0*nlbb,nlbb])
+    clb22=w22.couple_cell([nlee/beam**2,0*nlee,0*nlbb,nlbb/beam**2])
     #Compute deprojection bias
     if w_cont :
         #Signal contribution
-        clb22+=nmt.deprojection_bias(f0,f0,[clee*beam**2+nlee,0*clee,0*clbb,clbb*beam**2+nlbb])
+        clb22+=nmt.deprojection_bias(f2,f2,[clee*beam**2+nlee,0*clee,0*clbb,clbb*beam**2+nlbb])
     np.save(prefix+"_clb22",clb22)
 else :
     clb22=np.load(prefix+"_clb22.npy")
-    
+
 #Compute mean and variance over nsims simulations
 cl22_all=[]
 for i in np.arange(nsims) :
@@ -179,8 +179,23 @@ if o.plot_stuff :
 
     import scipy.stats as st
     bins_use=np.where(l_eff<2*o.nside_out)[0]; ndof=len(bins_use)
-    res=(cl22_all[:,:,:]-cl22_th[None,:,:])/np.std(cl22_all,axis=0)[None,:,:]
-    chi2_22=np.sum(res[:,:,bins_use]**2,axis=2)
+    #Nsims, ncl, nell
+    cl22_mean=np.mean(cl22_all,axis=0)
+    dcl=(cl22_all[:,:,bins_use]-cl22_mean[None,:,bins_use]).reshape([nsims,4*ndof])
+    res=(cl22_all[:,:,bins_use]-cl22_th[None,:,bins_use]).reshape([nsims,4*ndof])
+    covar=np.mean(res[:,:,None]*res[:,None,:],axis=0)
+    plt.figure()
+    plt.title('BB correlation matrix')
+    corr_toplot=(covar/np.sqrt(np.diag(covar)[:,None]*np.diag(covar)[None,:]))[3*ndof:,:][:,3*ndof:]
+    plt.imshow(corr_toplot,interpolation='nearest')
+    plt.xlabel('$\\ell_1$',fontsize=16)
+    plt.ylabel('$\\ell_2$',fontsize=16)
+    plt.savefig(prefix+'_covarbb.png',bbox_inches='tight')
+    plt.savefig(prefix+'_covarbb.pdf',bbox_inches='tight')
+    chi2_22=np.transpose(np.array([np.sum(res[:,i*ndof:(i+1)*ndof]*
+                                          np.sum(np.linalg.inv(covar[i*ndof:(i+1)*ndof,:][:,i*ndof:(i+1)*ndof])[None,:,:]*
+                                                 res[:,i*ndof:(i+1)*ndof,None],axis=1),axis=1)
+                                   for i in np.arange(4)]))
 
     x=np.linspace(ndof-5*np.sqrt(2.*ndof),ndof+5*np.sqrt(2*ndof),256)
     pdf=st.chi2.pdf(x,ndof)

@@ -7347,6 +7347,66 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_field_flat_a_mask_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_field_flat *arg1 = (nmt_field_flat *) 0 ;
+  fcomplex **arg2 = (fcomplex **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:field_flat_a_mask_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "field_flat_a_mask_set" "', argument " "1"" of type '" "nmt_field_flat *""'"); 
+  }
+  arg1 = (nmt_field_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_p_double_complex, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "field_flat_a_mask_set" "', argument " "2"" of type '" "fcomplex **""'"); 
+  }
+  arg2 = (fcomplex **)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->a_mask = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_field_flat_a_mask_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_field_flat *arg1 = (nmt_field_flat *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  fcomplex **result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:field_flat_a_mask_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "field_flat_a_mask_get" "', argument " "1"" of type '" "nmt_field_flat *""'"); 
+  }
+  arg1 = (nmt_field_flat *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (fcomplex **) ((arg1)->a_mask);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_double_complex, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_field_flat_pol_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   nmt_field_flat *arg1 = (nmt_field_flat *) 0 ;
@@ -8247,6 +8307,76 @@ fail:
 }
 
 
+SWIGINTERN PyObject *_wrap_purify_flat(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_field_flat *arg1 = (nmt_field_flat *) 0 ;
+  flouble *arg2 = (flouble *) 0 ;
+  fcomplex **arg3 = (fcomplex **) 0 ;
+  flouble **arg4 = (flouble **) 0 ;
+  flouble **arg5 = (flouble **) 0 ;
+  fcomplex **arg6 = (fcomplex **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  void *argp6 = 0 ;
+  int res6 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:purify_flat",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field_flat, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "purify_flat" "', argument " "1"" of type '" "nmt_field_flat *""'"); 
+  }
+  arg1 = (nmt_field_flat *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "purify_flat" "', argument " "2"" of type '" "flouble *""'"); 
+  }
+  arg2 = (flouble *)(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_p_double_complex, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "purify_flat" "', argument " "3"" of type '" "fcomplex **""'"); 
+  }
+  arg3 = (fcomplex **)(argp3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "purify_flat" "', argument " "4"" of type '" "flouble **""'"); 
+  }
+  arg4 = (flouble **)(argp4);
+  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "purify_flat" "', argument " "5"" of type '" "flouble **""'"); 
+  }
+  arg5 = (flouble **)(argp5);
+  res6 = SWIG_ConvertPtr(obj5, &argp6,SWIGTYPE_p_p_double_complex, 0 |  0 );
+  if (!SWIG_IsOK(res6)) {
+    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "purify_flat" "', argument " "6"" of type '" "fcomplex **""'"); 
+  }
+  arg6 = (fcomplex **)(argp6);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_purify_flat(arg1,arg2,arg3,arg4,arg5,arg6);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
 SWIGINTERN PyObject *_wrap_field_nside_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   nmt_field *arg1 = (nmt_field *) 0 ;
@@ -8601,6 +8731,66 @@ SWIGINTERN PyObject *_wrap_field_mask_get(PyObject *SWIGUNUSEDPARM(self), PyObje
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_double, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_field_a_mask_set(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_field *arg1 = (nmt_field *) 0 ;
+  fcomplex **arg2 = (fcomplex **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OO:field_a_mask_set",&obj0,&obj1)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "field_a_mask_set" "', argument " "1"" of type '" "nmt_field *""'"); 
+  }
+  arg1 = (nmt_field *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_p_double_complex, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "field_a_mask_set" "', argument " "2"" of type '" "fcomplex **""'"); 
+  }
+  arg2 = (fcomplex **)(argp2);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    if (arg1) (arg1)->a_mask = arg2;
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_field_a_mask_get(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_field *arg1 = (nmt_field *) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  PyObject * obj0 = 0 ;
+  fcomplex **result = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"O:field_a_mask_get",&obj0)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "field_a_mask_get" "', argument " "1"" of type '" "nmt_field *""'"); 
+  }
+  arg1 = (nmt_field *)(argp1);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    result = (fcomplex **) ((arg1)->a_mask);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_double_complex, 0 |  0 );
   return resultobj;
 fail:
   return NULL;
@@ -9521,6 +9711,76 @@ SWIGINTERN PyObject *_wrap_synfast_sph(PyObject *SWIGUNUSEDPARM(self), PyObject 
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_p_double, 0 |  0 );
+  return resultobj;
+fail:
+  return NULL;
+}
+
+
+SWIGINTERN PyObject *_wrap_purify(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
+  PyObject *resultobj = 0;
+  nmt_field *arg1 = (nmt_field *) 0 ;
+  flouble *arg2 = (flouble *) 0 ;
+  fcomplex **arg3 = (fcomplex **) 0 ;
+  flouble **arg4 = (flouble **) 0 ;
+  flouble **arg5 = (flouble **) 0 ;
+  fcomplex **arg6 = (fcomplex **) 0 ;
+  void *argp1 = 0 ;
+  int res1 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
+  void *argp3 = 0 ;
+  int res3 = 0 ;
+  void *argp4 = 0 ;
+  int res4 = 0 ;
+  void *argp5 = 0 ;
+  int res5 = 0 ;
+  void *argp6 = 0 ;
+  int res6 = 0 ;
+  PyObject * obj0 = 0 ;
+  PyObject * obj1 = 0 ;
+  PyObject * obj2 = 0 ;
+  PyObject * obj3 = 0 ;
+  PyObject * obj4 = 0 ;
+  PyObject * obj5 = 0 ;
+  
+  if (!PyArg_ParseTuple(args,(char *)"OOOOOO:purify",&obj0,&obj1,&obj2,&obj3,&obj4,&obj5)) SWIG_fail;
+  res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_nmt_field, 0 |  0 );
+  if (!SWIG_IsOK(res1)) {
+    SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "purify" "', argument " "1"" of type '" "nmt_field *""'"); 
+  }
+  arg1 = (nmt_field *)(argp1);
+  res2 = SWIG_ConvertPtr(obj1, &argp2,SWIGTYPE_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "purify" "', argument " "2"" of type '" "flouble *""'"); 
+  }
+  arg2 = (flouble *)(argp2);
+  res3 = SWIG_ConvertPtr(obj2, &argp3,SWIGTYPE_p_p_double_complex, 0 |  0 );
+  if (!SWIG_IsOK(res3)) {
+    SWIG_exception_fail(SWIG_ArgError(res3), "in method '" "purify" "', argument " "3"" of type '" "fcomplex **""'"); 
+  }
+  arg3 = (fcomplex **)(argp3);
+  res4 = SWIG_ConvertPtr(obj3, &argp4,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res4)) {
+    SWIG_exception_fail(SWIG_ArgError(res4), "in method '" "purify" "', argument " "4"" of type '" "flouble **""'"); 
+  }
+  arg4 = (flouble **)(argp4);
+  res5 = SWIG_ConvertPtr(obj4, &argp5,SWIGTYPE_p_p_double, 0 |  0 );
+  if (!SWIG_IsOK(res5)) {
+    SWIG_exception_fail(SWIG_ArgError(res5), "in method '" "purify" "', argument " "5"" of type '" "flouble **""'"); 
+  }
+  arg5 = (flouble **)(argp5);
+  res6 = SWIG_ConvertPtr(obj5, &argp6,SWIGTYPE_p_p_double_complex, 0 |  0 );
+  if (!SWIG_IsOK(res6)) {
+    SWIG_exception_fail(SWIG_ArgError(res6), "in method '" "purify" "', argument " "6"" of type '" "fcomplex **""'"); 
+  }
+  arg6 = (fcomplex **)(argp6);
+  {
+    SWIG_PYTHON_THREAD_BEGIN_ALLOW;
+    nmt_purify(arg1,arg2,arg3,arg4,arg5,arg6);
+    SWIG_PYTHON_THREAD_END_ALLOW;
+  }
+  resultobj = SWIG_Py_Void();
   return resultobj;
 fail:
   return NULL;
@@ -17422,6 +17682,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"field_flat_pure_b_get", _wrap_field_flat_pure_b_get, METH_VARARGS, NULL},
 	 { (char *)"field_flat_mask_set", _wrap_field_flat_mask_set, METH_VARARGS, NULL},
 	 { (char *)"field_flat_mask_get", _wrap_field_flat_mask_get, METH_VARARGS, NULL},
+	 { (char *)"field_flat_a_mask_set", _wrap_field_flat_a_mask_set, METH_VARARGS, NULL},
+	 { (char *)"field_flat_a_mask_get", _wrap_field_flat_a_mask_get, METH_VARARGS, NULL},
 	 { (char *)"field_flat_pol_set", _wrap_field_flat_pol_set, METH_VARARGS, NULL},
 	 { (char *)"field_flat_pol_get", _wrap_field_flat_pol_get, METH_VARARGS, NULL},
 	 { (char *)"field_flat_nmaps_set", _wrap_field_flat_nmaps_set, METH_VARARGS, NULL},
@@ -17446,6 +17708,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"field_flat_free", _wrap_field_flat_free, METH_VARARGS, NULL},
 	 { (char *)"field_flat_alloc", _wrap_field_flat_alloc, METH_VARARGS, NULL},
 	 { (char *)"synfast_flat", _wrap_synfast_flat, METH_VARARGS, NULL},
+	 { (char *)"purify_flat", _wrap_purify_flat, METH_VARARGS, NULL},
 	 { (char *)"field_nside_set", _wrap_field_nside_set, METH_VARARGS, NULL},
 	 { (char *)"field_nside_get", _wrap_field_nside_get, METH_VARARGS, NULL},
 	 { (char *)"field_npix_set", _wrap_field_npix_set, METH_VARARGS, NULL},
@@ -17458,6 +17721,8 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"field_pure_b_get", _wrap_field_pure_b_get, METH_VARARGS, NULL},
 	 { (char *)"field_mask_set", _wrap_field_mask_set, METH_VARARGS, NULL},
 	 { (char *)"field_mask_get", _wrap_field_mask_get, METH_VARARGS, NULL},
+	 { (char *)"field_a_mask_set", _wrap_field_a_mask_set, METH_VARARGS, NULL},
+	 { (char *)"field_a_mask_get", _wrap_field_a_mask_get, METH_VARARGS, NULL},
 	 { (char *)"field_pol_set", _wrap_field_pol_set, METH_VARARGS, NULL},
 	 { (char *)"field_pol_get", _wrap_field_pol_get, METH_VARARGS, NULL},
 	 { (char *)"field_nmaps_set", _wrap_field_nmaps_set, METH_VARARGS, NULL},
@@ -17483,6 +17748,7 @@ static PyMethodDef SwigMethods[] = {
 	 { (char *)"field_alloc_sph", _wrap_field_alloc_sph, METH_VARARGS, NULL},
 	 { (char *)"field_read", _wrap_field_read, METH_VARARGS, NULL},
 	 { (char *)"synfast_sph", _wrap_synfast_sph, METH_VARARGS, NULL},
+	 { (char *)"purify", _wrap_purify, METH_VARARGS, NULL},
 	 { (char *)"apodize_mask", _wrap_apodize_mask, METH_VARARGS, NULL},
 	 { (char *)"apodize_mask_flat", _wrap_apodize_mask_flat, METH_VARARGS, NULL},
 	 { (char *)"workspace_flat_ncls_set", _wrap_workspace_flat_ncls_set, METH_VARARGS, NULL},

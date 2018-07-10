@@ -1,5 +1,18 @@
 #include "utils.h"
 
+static void purify_generic(nmt_field *fl,flouble *mask,fcomplex **walm0,flouble **maps_in,fcomplex **alms_out)
+{
+  if(fl->pure_b || fl->pure_e) {
+    nmt_purify(fl,mask,walm0,maps_in,maps_in,alms_out);
+  }
+  else {
+    int im1;
+    for(im1=0;im1<fl->nmaps;im1++)
+      he_map_product(fl->nside,maps_in[im1],mask,maps_in[im1]);
+    he_map2alm(fl->nside,fl->lmax,1,2*fl->pol,maps_in,alms_out,HE_NITER_DEFAULT);
+  }
+}
+
 static flouble weigh_l(int l)
 {
 #ifdef _WEIGH_L2
@@ -471,11 +484,8 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,
 	}
 	//SHT^-1[C^ab*SHT[w*g^j]]
 	he_alm2map(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum);
-	//v*SHT^-1[C^ab*SHT[w*g^j]]
-	for(im1=0;im1<fl1->nmaps;im1++)
-	  he_map_product(fl1->nside,map_1_dum[im1],fl1->mask,map_1_dum[im1]);
 	//SHT[v*SHT^-1[C^ab*SHT[w*g^j]]]
-	he_map2alm(fl1->nside,fl1->lmax,1,2*fl1->pol,map_1_dum,alm_1_dum,HE_NITER_DEFAULT);
+	purify_generic(fl1,fl1->mask,fl1->a_mask,map_1_dum,alm_1_dum);
 	//Sum_m(SHT[v*SHT^-1[C^ab*SHT[w*g^j]]]*g^i*)/(2l+1)
 	he_alm2cl(alm_1_dum,fl2->a_temp[iti],fl1->pol,fl2->pol,cl_dum,lmax);
 	for(im1=0;im1<nspec;im1++) {
@@ -506,11 +516,8 @@ void nmt_compute_deprojection_bias(nmt_field *fl1,nmt_field *fl2,
 	}
 	//SHT^-1[C^abT*SHT[v*f^j]]
 	he_alm2map(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum);
-	//w*SHT^-1[C^abT*SHT[v*f^j]]
-	for(im2=0;im2<fl2->nmaps;im2++)
-	  he_map_product(fl2->nside,map_2_dum[im2],fl2->mask,map_2_dum[im2]);
 	//SHT[w*SHT^-1[C^abT*SHT[v*f^j]]]
-	he_map2alm(fl2->nside,fl2->lmax,1,2*fl2->pol,map_2_dum,alm_2_dum,HE_NITER_DEFAULT);
+	purify_generic(fl2,fl2->mask,fl2->a_mask,map_2_dum,alm_2_dum);
 	//Sum_m(f^i*SHT[w*SHT^-1[C^abT*SHT[v*f^j]]]^*)/(2l+1)
 	he_alm2cl(fl1->a_temp[iti],alm_2_dum,fl1->pol,fl2->pol,cl_dum,lmax);
 	for(im1=0;im1<nspec;im1++) {

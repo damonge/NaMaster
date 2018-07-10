@@ -1,5 +1,18 @@
 #include "utils.h"
 
+static void purify_generic_flat(nmt_field_flat *fl,flouble *mask,fcomplex **walm0,flouble **maps_in,fcomplex **alms_out)
+{
+  if(fl->pure_b || fl->pure_e) {
+    nmt_purify_flat(fl,mask,walm0,maps_in,maps_in,alms_out);
+  }
+  else {
+    int im1;
+    for(im1=0;im1<fl->nmaps;im1++)
+      fs_map_product(fl->fs,maps_in[im1],mask,maps_in[im1]);
+    fs_map2alm(fl->fs,1,2*fl->pol,maps_in,alms_out);
+  }
+}
+
 void nmt_workspace_flat_free(nmt_workspace_flat *w)
 {
   int ii;
@@ -566,11 +579,8 @@ void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 	}
 	//DFT^-1[C^ab*DFT[w*g^j]]
 	fs_alm2map(fl1->fs,1,2*fl1->pol,map_1_dum,alm_1_dum);
-	//v*DFT^-1[C^ab*DFT[w*g^j]]
-	for(im1=0;im1<fl1->nmaps;im1++)
-	  fs_map_product(fl1->fs,map_1_dum[im1],fl1->mask,map_1_dum[im1]);
 	//DFT[v*DFT^-1[C^ab*DFT[w*g^j]]]
-	fs_map2alm(fl1->fs,1,2*fl1->pol,map_1_dum,alm_1_dum);
+	purify_generic_flat(fl1,fl1->mask,fl1->a_mask,map_1_dum,alm_1_dum);
 	//Sum_m(DFT[v*DFT^-1[C^ab*DFT[w*g^j]]]*g^i*)/(2l+1)
 	fs_alm2cl(fl1->fs,bin,alm_1_dum,fl2->a_temp[iti],fl1->pol,fl2->pol,cl_dum,
 		  lmn_x,lmx_x,lmn_y,lmx_y);
@@ -602,11 +612,8 @@ void nmt_compute_deprojection_bias_flat(nmt_field_flat *fl1,nmt_field_flat *fl2,
 	}
 	//DFT^-1[C^abT*DFT[v*f^j]]
 	fs_alm2map(fl2->fs,1,2*fl2->pol,map_2_dum,alm_2_dum);
-	//w*DFT^-1[C^abT*DFT[v*f^j]]
-	for(im2=0;im2<fl2->nmaps;im2++)
-	  fs_map_product(fl2->fs,map_2_dum[im2],fl2->mask,map_2_dum[im2]);
 	//DFT[w*DFT^-1[C^abT*DFT[v*f^j]]]
-	fs_map2alm(fl2->fs,1,2*fl2->pol,map_2_dum,alm_2_dum);
+	purify_generic_flat(fl2,fl2->mask,fl2->a_mask,map_2_dum,alm_2_dum);
 	//Sum_m(f^i*DFT[w*DFT^-1[C^abT*DFT[v*f^j]]]^*)/(2l+1)
 	fs_alm2cl(fl1->fs,bin,fl1->a_temp[iti],alm_2_dum,fl1->pol,fl2->pol,cl_dum,
 		  lmn_x,lmx_x,lmn_y,lmx_y);
