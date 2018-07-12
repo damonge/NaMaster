@@ -40,3 +40,9 @@ python get_cmb_contaminants.py --plot --nside ${nside_cmb}
 
 echo "Generating flat-sky LSS contaminant templates"
 python get_lss_contaminants_flat.py --plot
+
+echo "Generating flat-sky CMB mask"
+python get_cmb_mask_flat.fpy --plot
+
+echo "Generating flat-sky CMB contaminant templates"
+python get_cmb_contaminants_flat.py --plot

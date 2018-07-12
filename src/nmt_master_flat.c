@@ -199,7 +199,7 @@ nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_fie
   w->pb2=fl2->pure_b;
   
   fcomplex *cmask1,*cmask2;
-  flouble *maskprod,*cosarr,*sinarr,*kmodarr;
+  flouble *maskprod,*cosarr,*sinarr,*kmodarr,*beamprod;
   int *i_band,*i_band_nocut,*i_ring;
   cmask1=dftw_malloc(fs->ny*(fs->nx/2+1)*sizeof(fcomplex));
   fs_map2alm(fl1->fs,1,0,&(fl1->mask),&cmask1);
@@ -218,6 +218,7 @@ nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_fie
 #endif //_ENABLE_FLAT_THEORY_ACCURATE
   i_band_nocut=my_malloc(w->fs->npix*sizeof(int));
   kmodarr=dftw_malloc(w->fs->npix*sizeof(flouble));
+  beamprod=dftw_malloc(w->fs->npix*sizeof(flouble));
   if(w->ncls>1) {
     cosarr=dftw_malloc(w->fs->npix*sizeof(flouble));
     sinarr=dftw_malloc(w->fs->npix*sizeof(flouble));
@@ -242,13 +243,15 @@ nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_fie
   }
 
 #pragma omp parallel default(none)					\
-  shared(fs,cmask1,cmask2,w,i_ring,i_band,i_band_nocut)			\
-  shared(cosarr,sinarr,kmodarr,maskprod,x_out_range,y_out_range)
+  shared(fl1,fl2,fs,cmask1,cmask2,w,i_ring,i_band,i_band_nocut)		\
+  shared(cosarr,sinarr,kmodarr,beamprod,maskprod)			\
+  shared(x_out_range,y_out_range)
   {
     flouble dkx=2*M_PI/fs->lx;
     flouble dky=2*M_PI/fs->ly;
     int iy1,ix1;
     int *n_cells_thr=my_calloc(w->bin->n_bands,sizeof(int));
+    gsl_interp_accel *intacc_beam=gsl_interp_accel_alloc();
 
 #pragma omp for
     for(iy1=0;iy1<fs->ny;iy1++) {
@@ -259,7 +262,7 @@ nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_fie
       else
 	ky=-(fs->ny-iy1)*dky;
       for(ix1=0;ix1<fs->nx;ix1++) {
-	flouble kx,kmod;
+	flouble kx,kmod,beam1,beam2;
 	int ix_here,index_here,index;
 	index=ix1+fs->nx*iy1;
 	if(2*ix1<=fs->nx) {
@@ -276,7 +279,10 @@ nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_fie
 			 cimag(cmask1[index_here])*cimag(cmask2[index_here]));
 
 	kmod=sqrt(kx*kx+ky*ky);
+	beam1=nmt_k_function_eval(fl1->beam,kmod,intacc_beam);
+	beam2=nmt_k_function_eval(fl2->beam,kmod,intacc_beam);	
 	kmodarr[index]=kmod;
+	beamprod[index]=beam1*beam2;
 	ik=nmt_bins_flat_search_fast(w->bin,kmod,ik);
 	
 	if(y_out_range[iy1] || x_out_range[ix1])
@@ -315,13 +321,14 @@ nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_fie
 	w->n_cells[iy1]+=n_cells_thr[iy1];
     } //end omp critical
     free(n_cells_thr);
+    gsl_interp_accel_free(intacc_beam);
   } //end omp parallel
   free(x_out_range);
   free(y_out_range);
 
-#pragma omp parallel default(none)		\
-  shared(fs,i_ring,i_band,i_band_nocut,w)	\
-  shared(cosarr,sinarr,kmodarr,maskprod)
+#pragma omp parallel default(none)			\
+  shared(fs,i_ring,i_band,i_band_nocut,w)		\
+  shared(cosarr,sinarr,kmodarr,maskprod,beamprod)
   {
     int iy1,ix1,ix2,iy2;
     int pe1=w->pe1,pe2=w->pe2,pb1=w->pb1,pb2=w->pb2;
@@ -368,7 +375,7 @@ nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_fie
 		  kr=kmodarr[index2]*inv_k1;
 		kr*=kr;
 	      }
-	      mp=maskprod[index];
+	      mp=maskprod[index]*beamprod[index2];
 	      
 	      if(w->ncls==1) {
 		if(ir2>=0)
@@ -513,6 +520,7 @@ nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_fie
   free(i_band);
   free(i_band_nocut);
   dftw_free(kmodarr);
+  dftw_free(beamprod);
 #ifndef _ENABLE_FLAT_THEORY_ACCURATE
   free(maskprod);
 #endif //_ENABLE_FLAT_THEORY_ACCURATE

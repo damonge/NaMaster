@@ -1,7 +1,6 @@
 from __future__ import print_function
 from optparse import OptionParser
 import numpy as np
-import healpy as hp
 import matplotlib.pyplot as plt
 import pymaster as nmt
 import os
@@ -109,8 +108,6 @@ print(" - Res(x): %.3lf arcmin. Res(y): %.3lf arcmin."%(fmi.lx*60/fmi.nx,fmi.ly*
 print(" - lmax = %d, lmin = %d"%(int(ell_max),int(ell_min)))
 def get_fields() :
     st,sq,su=fmi.synfast(l,np.array([cltt+nltt,clee+nlee,clbb+nlbb,clte+nlte]))
-    #st,sq,su=nmt.synfast_flat(int(fmi.nx),int(fmi.ny),fmi.lx_rad,fmi.ly_rad,[cltt+nltt,clee+nlee,clbb+nlbb,clte+nlte],pol=True)
-    #st=st.flatten(); sq=sq.flatten(); su=su.flatten();
     if w_cont :
         st+=np.sum(fgt,axis=0)[0,:]; sq+=np.sum(fgp,axis=0)[0,:]; su+=np.sum(fgp,axis=0)[1,:];
         ff0=nmt.NmtFieldFlat(fmi.lx_rad,fmi.ly_rad,mask.reshape([fmi.ny,fmi.nx]),

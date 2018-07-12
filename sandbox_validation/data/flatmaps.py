@@ -394,6 +394,14 @@ class FlatMapInfo(object) :
 
         return FlatMapInfo(w,nx=nsidex,ny=nsidey)
 
+    def smooth_map(self,map_in,larr,beam) :
+        k_x=np.fft.rfftfreq(self.nx,self.lx_rad/(2*np.pi*self.nx))
+        k_y=np.fft.fftfreq(self.ny,self.ly_rad/(2*np.pi*self.ny))
+        k_mod=np.sqrt(k_x[None,:]**2+k_y[:,None]**2)
+        beamf=interp1d(larr,beam,kind='linear',bounds_error=False,fill_value=0)
+        beam_map=beamf(k_mod)
+        return np.fft.irfft2(beam_map*np.fft.rfft2(map_in.reshape([self.ny,self.nx])),s=[self.ny,self.nx]).flatten()
+        
     def clbin(self,larr,cls) :
         if cls.ndim==1 :
             scalar_input=True
