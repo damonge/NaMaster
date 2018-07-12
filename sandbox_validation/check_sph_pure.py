@@ -67,6 +67,8 @@ if o.plot_stuff :
 mask=hp.read_map("data/mask_cmb_ns%d.fits"%o.nside_out,verbose=False)
 if o.plot_stuff :
     hp.mollview(mask)
+    plt.savefig(prefix+'_mask.png',bbox_inches='tight')
+    plt.savefig(prefix+'_mask.pdf',bbox_inches='tight')
 fsky=np.mean(mask/np.amax(mask));
 
 #Read contaminant maps
@@ -78,7 +80,11 @@ if w_cont :
     fgp[0,1,:]=hp.alm2map(hp.almxfl(hp.map2alm(fgp[0,1,:]),beam),o.nside_out,verbose=False)
     if o.plot_stuff :
         hp.mollview(np.sum(fgp,axis=0)[0,:]*mask)
+        plt.savefig(prefix+'_contq.png',bbox_inches='tight')
+        plt.savefig(prefix+'_contq.pdf',bbox_inches='tight')
         hp.mollview(np.sum(fgp,axis=0)[1,:]*mask)
+        plt.savefig(prefix+'_contu.png',bbox_inches='tight')
+        plt.savefig(prefix+'_contu.pdf',bbox_inches='tight')
 
 #Binning scheme
 ls=np.arange(3*o.nside_out,dtype=int)

@@ -202,7 +202,7 @@
 <p>All sky maps accepted and returned by these functions are in the form of HEALPix maps exclusively with RING ordering.</p>
 <span class="target" id="module-pymaster.field"></span><dl class="class">
 <dt id="pymaster.field.NmtField">
-<em class="property">class </em><code class="descclassname">pymaster.field.</code><code class="descname">NmtField</code><span class="sig-paren">(</span><em>mask</em>, <em>maps</em>, <em>templates=None</em>, <em>beam=None</em>, <em>purify_e=False</em>, <em>purify_b=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.field.NmtField" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pymaster.field.</code><code class="descname">NmtField</code><span class="sig-paren">(</span><em>mask</em>, <em>maps</em>, <em>templates=None</em>, <em>beam=None</em>, <em>purify_e=False</em>, <em>purify_b=False</em>, <em>n_iter_mask_purify=3</em>, <em>tol_pinv=1e-10</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.field.NmtField" title="Permalink to this definition">¶</a></dt>
 <dd><p>An NmtField object contains all the information describing the fields to correlate, including their observed maps, masks and contaminant templates.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -215,6 +215,8 @@
 <li><strong>beam</strong> – spherical harmonic transform of the instrumental beam (assumed to be rotationally symmetric - i.e. no m dependence). If None, no beam will be corrected for. Otherwise, this array should have 3*nside elements, corresponding to multipoles from 0 to 3*nside-1.</li>
 <li><strong>purify_e</strong> – use pure E-modes?</li>
 <li><strong>purify_b</strong> – use pure B-modes?</li>
+<li><strong>n_iter_mask_purify</strong> – number of iterations used to compute an accurate SHT of the mask when using E/B purification</li>
+<li><strong>tol_pinv</strong> – when computing the pseudo-inverse of the contaminant covariance matrix, all eigenvalues below tol_pinv * max_eval will be treated as singular values, where max_eval is the largest eigenvalue. Only relevant if passing contaminant templates that are likely to be highly correlated.</li>
 </ul>
 </td>
 </tr>
@@ -252,7 +254,7 @@
 
 <dl class="class">
 <dt id="pymaster.field.NmtFieldFlat">
-<em class="property">class </em><code class="descclassname">pymaster.field.</code><code class="descname">NmtFieldFlat</code><span class="sig-paren">(</span><em>lx</em>, <em>ly</em>, <em>mask</em>, <em>maps</em>, <em>templates=None</em>, <em>beam=None</em>, <em>purify_e=False</em>, <em>purify_b=False</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.field.NmtFieldFlat" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pymaster.field.</code><code class="descname">NmtFieldFlat</code><span class="sig-paren">(</span><em>lx</em>, <em>ly</em>, <em>mask</em>, <em>maps</em>, <em>templates=None</em>, <em>beam=None</em>, <em>purify_e=False</em>, <em>purify_b=False</em>, <em>tol_pinv=1e-10</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.field.NmtFieldFlat" title="Permalink to this definition">¶</a></dt>
 <dd><p>An NmtFieldFlat object contains all the information describing the flat-sky fields to correlate, including their observed maps, masks and contaminant templates.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -266,6 +268,7 @@
 <li><strong>beam</strong> – 2D array (2,nl) defining the FT of the instrumental beam (assumed to be rotationally symmetric). beam[0] should contain the values of l for which de beam is defined, with beam[1] containing the beam values. If None, no beam will be corrected for.</li>
 <li><strong>purify_e</strong> – use pure E-modes?</li>
 <li><strong>purify_b</strong> – use pure B-modes?</li>
+<li><strong>tol_pinv</strong> – when computing the pseudo-inverse of the contaminant covariance matrix, all eigenvalues below tol_pinv * max_eval will be treated as singular values, where max_eval is the largest eigenvalue. Only relevant if passing contaminant templates that are likely to be highly correlated.</li>
 </ul>
 </td>
 </tr>
@@ -848,6 +851,27 @@
 <li><strong>cls_guess</strong> – set of power spectra corresponding to a best-guess of the true power spectra of f1 and f2.</li>
 <li><strong>ell_cut_x</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – remove all modes with ell_x in the interval [ell_cut_x[0],ell_cut_x[1]] from the calculation.</li>
 <li><strong>ell_cut_y</strong> (<em>float</em><em>(</em><em>2</em><em>)</em>) – remove all modes with ell_y in the interval [ell_cut_y[0],ell_cut_y[1]] from the calculation.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">deprojection bias power spectra.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pymaster.workspaces.uncorr_noise_deprojection_bias">
+<code class="descclassname">pymaster.workspaces.</code><code class="descname">uncorr_noise_deprojection_bias</code><span class="sig-paren">(</span><em>f1</em>, <em>map_var</em><span class="sig-paren">)</span><a class="headerlink" href="#pymaster.workspaces.uncorr_noise_deprojection_bias" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the bias associated to contaminant removal in the presence of uncorrelated inhomogeneous noise to the auto-pseudo-Cl of a given field f1.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>f1</strong> (<a class="reference internal" href="#pymaster.field.NmtField" title="pymaster.field.NmtField"><em>NmtField</em></a>) – fields to correlate</li>
+<li><strong>map_cls_guess</strong> – array containing a HEALPix map corresponding to the local noise variance (in one sterad).</li>
 </ul>
 </td>
 </tr>
