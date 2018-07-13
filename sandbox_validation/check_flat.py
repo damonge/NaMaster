@@ -107,7 +107,8 @@ b=nmt.NmtBinFlat(l_bpw[0,:],l_bpw[1,:])
 print(" - Res(x): %.3lf arcmin. Res(y): %.3lf arcmin."%(fmi.lx*60/fmi.nx,fmi.ly*60/fmi.ny))
 print(" - lmax = %d, lmin = %d"%(int(ell_max),int(ell_min)))
 def get_fields() :
-    st,sq,su=fmi.synfast(l,np.array([cltt+nltt,clee+nlee,clbb+nlbb,clte+nlte]))
+    st,sq,su=nmt.synfast_flat(int(fmi.nx),int(fmi.ny),fmi.lx_rad,fmi.ly_rad,
+                              [cltt+nltt,clee+nlee,clbb+nlbb,clte+nlte],pol=True)
     if w_cont :
         st+=np.sum(fgt,axis=0)[0,:]; sq+=np.sum(fgp,axis=0)[0,:]; su+=np.sum(fgp,axis=0)[1,:];
         ff0=nmt.NmtFieldFlat(fmi.lx_rad,fmi.ly_rad,mask.reshape([fmi.ny,fmi.nx]),
@@ -155,12 +156,19 @@ else :
     w22.read_from(prefix+"_w22.dat")
     
 #Generate theory prediction
-cl00_th=w00.decouple_cell(w00.couple_cell(l,np.array([cltt])))
-cl02_th=w02.decouple_cell(w02.couple_cell(l,np.array([clte,0*clte])))
-cl22_th=w22.decouple_cell(w22.couple_cell(l,np.array([clee,0*clee,0*clbb,clbb])))
-np.savetxt(prefix+"_cl_th.txt",
-           np.transpose([b.get_effective_ells(),cl00_th[0],cl02_th[0],cl02_th[1],
-                         cl22_th[0],cl22_th[1],cl22_th[2],cl22_th[3]]))
+if not os.path.isfile(prefix+'_cl_th.txt') :
+    print("Computing theory prediction")
+    cl00_th=w00.decouple_cell(w00.couple_cell(l,np.array([cltt])))
+    cl02_th=w02.decouple_cell(w02.couple_cell(l,np.array([clte,0*clte])))
+    cl22_th=w22.decouple_cell(w22.couple_cell(l,np.array([clee,0*clee,0*clbb,clbb])))
+    np.savetxt(prefix+"_cl_th.txt",
+               np.transpose([b.get_effective_ells(),cl00_th[0],cl02_th[0],cl02_th[1],
+                             cl22_th[0],cl22_th[1],cl22_th[2],cl22_th[3]]))
+else :
+    cl00_th=np.zeros([1,b.get_n_bands()])
+    cl02_th=np.zeros([2,b.get_n_bands()])
+    cl22_th=np.zeros([4,b.get_n_bands()])
+    dum,cl00_th[0],cl02_th[0],cl02_th[1],cl22_th[0],cl22_th[1],cl22_th[2],cl22_th[3]=np.loadtxt(prefix+"_cl_th.txt",unpack=True)
     
 #Compute noise and deprojection bias
 if not os.path.isfile(prefix+"_clb00.npy") :
@@ -219,17 +227,17 @@ if o.plot_stuff :
     l_eff=b.get_effective_ells()
     cols=plt.cm.rainbow(np.linspace(0,1,6))
     plt.figure()
-    plt.errorbar(l_eff,np.mean(cl00_all,axis=0)[0]/cl00_th[0],
+    plt.errorbar(l_eff+4,np.mean(cl00_all,axis=0)[0]/cl00_th[0]-1,
                  yerr=np.std(cl00_all,axis=0)[0]/cl00_th[0]/np.sqrt(nsims+0.),
                  label='$\\delta\\times\\delta$',fmt='ro')
-    plt.errorbar(l_eff,np.mean(cl02_all,axis=0)[0]/cl02_th[0],
+    plt.errorbar(l_eff+4,np.mean(cl02_all,axis=0)[0]/cl02_th[0]-1,
                  yerr=np.std(cl02_all,axis=0)[0]/cl02_th[0]/np.sqrt(nsims+0.),
                  label='$\\delta\\times\\gamma_E$',fmt='go')
-    plt.errorbar(l_eff,np.mean(cl22_all,axis=0)[0]/cl22_th[0],
+    plt.errorbar(l_eff+8,np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,
                  yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),
                  label='$\\gamma_E\\times\\gamma_E$',fmt='bo')
     plt.xlabel('$\\ell$',fontsize=16)
-    plt.ylabel('$\\Delta C_\\ell/\\sigma(C_\\ell)$',fontsize=16)
+    plt.ylabel('$\\Delta C_\\ell/C_\\ell$',fontsize=16)
     plt.legend(loc='lower left',frameon=False,fontsize=16)
     plt.xscale('log')
     plt.savefig(prefix+'_celldiff.png',bbox_inches='tight')

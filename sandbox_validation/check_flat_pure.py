@@ -48,7 +48,7 @@ def read_cl_camb(fname) :
 l,cltt,clee,clbb,clte=read_cl_camb("data/cls_cmb.txt")
 #Noise power spectrum
 nlev=(0.5*np.pi/(180*60))**2 #1 uK-arcmin noise level
-nltt=nlev*(np.ones_like(l)+(300./(l+0.1))**2.4) #1/ell noise with a knee scale of ell=300 (optimistic)
+nltt=nlev*(np.ones_like(l)+(300./(l+50.))**2.4) #1/ell noise with a knee scale of ell=300 (optimistic)
 nlee=2*nltt; nlbb=2*nltt; nlte=0*nltt
 #Beam
 fwhm_amin=1.4 #Corresponding to 6m aperture at 90GHz
@@ -96,8 +96,9 @@ b=nmt.NmtBinFlat(l_bpw[0,:],l_bpw[1,:])
 print(" - Res(x): %.3lf arcmin. Res(y): %.3lf arcmin."%(fmi.lx*60/fmi.nx,fmi.ly*60/fmi.ny))
 print(" - lmax = %d, lmin = %d"%(int(ell_max),int(ell_min)))
 def get_fields() :
-    st,sq,su=fmi.synfast(l,np.array([cltt*beam**2+nltt,clee*beam**2+nlee,
-                                     clbb*beam**2+nlbb,clte*beam**2+nlte]))
+    st,sq,su=nmt.synfast_flat(int(fmi.nx),int(fmi.ny),fmi.lx_rad,fmi.ly_rad,
+                              [cltt*beam**2+nltt,clee*beam**2+nlee,
+                               clbb*beam**2+nlbb,clte*beam**2+nlte],pol=True)
     if w_cont :
         sq+=np.sum(fgp,axis=0)[0,:]; su+=np.sum(fgp,axis=0)[1,:];
         ff2=nmt.NmtFieldFlat(fmi.lx_rad,fmi.ly_rad,mask.reshape([fmi.ny,fmi.nx]),
@@ -128,9 +129,14 @@ else :
     w22.read_from(prefix+"_w22.dat")
 
 #Generate theory prediction
-cl22_th=w22.decouple_cell(w22.couple_cell(l,np.array([clee,0*clee,0*clbb,clbb])))
-np.savetxt(prefix+"_cl_th.txt",
-           np.transpose([b.get_effective_ells(),cl22_th[0],cl22_th[1],cl22_th[2],cl22_th[3]]))
+if not os.path.isfile(prefix+'_cl_th.txt') :
+    print("Computing theory prediction")
+    cl22_th=w22.decouple_cell(w22.couple_cell(l,np.array([clee,0*clee,0*clbb,clbb])))
+    np.savetxt(prefix+"_cl_th.txt",
+               np.transpose([b.get_effective_ells(),cl22_th[0],cl22_th[1],cl22_th[2],cl22_th[3]]))
+else :
+    cl22_th=np.zeros([4,b.get_n_bands()])
+    dum,cl22_th[0],cl22_th[1],cl22_th[2],cl22_th[3]=np.loadtxt(prefix+"_cl_th.txt",unpack=True)
 
 #Compute noise and deprojection bias
 if not os.path.isfile(prefix+"_clb22.npy") :
