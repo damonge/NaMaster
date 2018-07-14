@@ -66,6 +66,9 @@ if o.plot_stuff :
 fmi,mask=fm.read_flat_map("data/mask_cmb_flat.fits")
 if o.plot_stuff :
     fmi.view_map(mask,title='Mask')
+    plt.savefig(prefix+'_mask.png',bbox_inches='tight')
+    plt.savefig(prefix+'_mask.pdf',bbox_inches='tight')
+    
 
 #Read contaminant maps
 if w_cont :
@@ -99,6 +102,7 @@ def get_fields() :
     st,sq,su=nmt.synfast_flat(int(fmi.nx),int(fmi.ny),fmi.lx_rad,fmi.ly_rad,
                               [cltt*beam**2+nltt,clee*beam**2+nlee,
                                clbb*beam**2+nlbb,clte*beam**2+nlte],pol=True)
+    st=st.flatten(); sq=sq.flatten(); su=su.flatten()
     if w_cont :
         sq+=np.sum(fgp,axis=0)[0,:]; su+=np.sum(fgp,axis=0)[1,:];
         ff2=nmt.NmtFieldFlat(fmi.lx_rad,fmi.ly_rad,mask.reshape([fmi.ny,fmi.nx]),
@@ -181,7 +185,7 @@ if o.plot_stuff :
     plt.xlabel('$\\ell$',fontsize=16)
     plt.ylabel('$\\Delta C_\\ell/C_\\ell$',fontsize=16)
     plt.xlim([2,5000])
-    plt.ylim([-0.2,0.2])
+    plt.ylim([-0.03,0.03])
     plt.legend(loc='lower right',frameon=False,fontsize=16)
     plt.savefig(prefix+'_celldiff.png',bbox_inches='tight')
     plt.savefig(prefix+'_celldiff.pdf',bbox_inches='tight')
