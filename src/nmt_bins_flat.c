@@ -68,27 +68,20 @@ void nmt_bin_cls_flat(nmt_binning_scheme_flat *bin,int nl,flouble *larr,flouble 
 		      flouble **cls_out,int ncls)
 {
   int icl;
-  int *nells=my_malloc(bin->n_bands*sizeof(int));
+  gsl_interp_accel *intacc=gsl_interp_accel_alloc();
 
   for(icl=0;icl<ncls;icl++) {
-    int ib,il;
-    for(ib=0;ib<bin->n_bands;ib++) {
-      cls_out[icl][ib]=0;
-      nells[ib]=0;
+    int il;
+    nmt_k_function *fcl=nmt_k_function_alloc(nl,larr,cls_in[icl],cls_in[icl][0],cls_in[icl][nl-1],0);
+    for(il=0;il<bin->n_bands;il++) {
+      flouble ell=0.5*(bin->ell_0_list[il]+bin->ell_f_list[il]);
+      flouble cell=nmt_k_function_eval(fcl,ell,intacc);
+      cls_out[icl][il]=cell;
     }
-
-    ib=0;
-    for(il=0;il<nl;il++) {
-      ib=nmt_bins_flat_search_fast(bin,larr[il],ib);
-      cls_out[icl][ib]+=cls_in[icl][il];
-      nells[ib]++;
-    }
-
-    for(ib=0;ib<bin->n_bands;ib++) {
-      if(nells[ib]>0)
-	cls_out[icl][ib]/=nells[ib];
-    }
+    nmt_k_function_free(fcl);
   }
+  
+  gsl_interp_accel_free(intacc);
 }
 
 void nmt_unbin_cls_flat(nmt_binning_scheme_flat *bin,flouble **cls_in,

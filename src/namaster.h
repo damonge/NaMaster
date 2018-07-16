@@ -170,6 +170,8 @@ typedef struct {
   int pb1;
   int pb2;
   nmt_flatsky_info *fs;
+  flouble *mask1;
+  flouble *mask2;
 #ifdef _ENABLE_FLAT_THEORY_ACCURATE
   flouble *maskprod;
 #endif //_ENABLE_FLAT_THEORY_ACCURATE
@@ -241,6 +243,28 @@ nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,
 
 //Defined in covar.c
 typedef struct {
+  int ncls_a;
+  int ncls_b;
+  flouble ellcut_x[2];
+  flouble ellcut_y[2];
+  nmt_binning_scheme_flat *bin;
+  flouble **xi_1122;
+  flouble **xi_1221;
+  gsl_matrix *coupling_binned_a;
+  gsl_matrix *coupling_binned_b;
+  gsl_permutation *coupling_binned_perm_a;
+  gsl_permutation *coupling_binned_perm_b;
+} nmt_covar_workspace_flat;
+
+void nmt_covar_workspace_flat_free(nmt_covar_workspace_flat *cw);
+nmt_covar_workspace_flat *nmt_covar_workspace_flat_init(nmt_workspace_flat *wa,nmt_workspace_flat  *wb);
+void nmt_compute_gaussian_covariance_flat(nmt_covar_workspace_flat *cw,
+					  int nl,flouble *larr,flouble *cla1b1,flouble *cla1b2,
+					  flouble *cla2b1,flouble *cla2b2,flouble *covar_out);
+void nmt_covar_workspace_flat_write(nmt_covar_workspace_flat *cw,char *fnane);
+nmt_covar_workspace_flat *nmt_covar_workspace_flat_read(char *fname);
+  
+typedef struct {
   int lmax_a;
   int lmax_b;
   int ncls_a;
@@ -248,8 +272,6 @@ typedef struct {
   nmt_binning_scheme *bin_a;
   nmt_binning_scheme *bin_b;
   int nside;
-  flouble *cl_mask_1122;
-  flouble *cl_mask_1221;
   flouble **xi_1122;
   flouble **xi_1221;
   gsl_matrix *coupling_binned_a;

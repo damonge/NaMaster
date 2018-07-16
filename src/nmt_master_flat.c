@@ -27,6 +27,8 @@ void nmt_workspace_flat_free(nmt_workspace_flat *w)
   free(w->n_cells);
   nmt_bins_flat_free(w->bin);
   nmt_flatsky_info_free(w->fs);
+  free(w->mask1);
+  free(w->mask2);
 #ifdef _ENABLE_FLAT_THEORY_ACCURATE
   free(w->maskprod);
 #endif //_ENABLE_FLAT_THEORY_ACCURATE
@@ -51,6 +53,8 @@ static nmt_workspace_flat *nmt_workspace_flat_new(int ncls,nmt_flatsky_info *fs,
 
   w->fs=nmt_flatsky_info_alloc(fs->nx,fs->ny,fs->lx,fs->ly);
 
+  w->mask1=my_malloc(fs->npix*sizeof(flouble));
+  w->mask2=my_malloc(fs->npix*sizeof(flouble));
 #ifdef _ENABLE_FLAT_THEORY_ACCURATE
   w->maskprod=my_malloc(w->fs->npix*sizeof(flouble));
 #endif //_ENABLE_FLAT_THEORY_ACCURATE
@@ -94,6 +98,10 @@ nmt_workspace_flat *nmt_workspace_flat_read(char *fname)
   my_fread(&ly,sizeof(flouble),1,fi);
   w->fs=nmt_flatsky_info_alloc(nx,ny,lx,ly);
 
+  w->mask1=my_malloc(w->fs->npix*sizeof(flouble));
+  my_fread(w->mask1,sizeof(flouble),w->fs->npix,fi);
+  w->mask2=my_malloc(w->fs->npix*sizeof(flouble));
+  my_fread(w->mask2,sizeof(flouble),w->fs->npix,fi);
 #ifdef _ENABLE_FLAT_THEORY_ACCURATE
   w->maskprod=my_malloc(w->fs->npix*sizeof(flouble));
   my_fread(w->maskprod,sizeof(flouble),w->fs->npix,fi);
@@ -150,6 +158,8 @@ void nmt_workspace_flat_write(nmt_workspace_flat *w,char *fname)
   my_fwrite(&(w->fs->lx),sizeof(flouble),1,fo);
   my_fwrite(&(w->fs->ly),sizeof(flouble),1,fo);
 
+  my_fwrite(w->mask1,sizeof(flouble),w->fs->npix,fo);
+  my_fwrite(w->mask2,sizeof(flouble),w->fs->npix,fo);
 #ifdef _ENABLE_FLAT_THEORY_ACCURATE
   my_fwrite(w->maskprod,sizeof(flouble),w->fs->npix,fo);
 #endif //_ENABLE_FLAT_THEORY_ACCURATE
@@ -197,6 +207,11 @@ nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_fie
   w->pe2=fl2->pure_e;
   w->pb1=fl1->pure_b;
   w->pb2=fl2->pure_b;
+
+  for(ii=0;ii<fl1->fs->npix;ii++)
+    w->mask1[ii]=fl1->mask[ii];
+  for(ii=0;ii<fl2->fs->npix;ii++)
+    w->mask2[ii]=fl2->mask[ii];
   
   fcomplex *cmask1,*cmask2;
   flouble *maskprod,*cosarr,*sinarr,*kmodarr,*beamprod;
@@ -242,9 +257,9 @@ nmt_workspace_flat *nmt_compute_coupling_matrix_flat(nmt_field_flat *fl1,nmt_fie
       y_out_range[ii]=1;
   }
 
-#pragma omp parallel default(none)					\
-  shared(fl1,fl2,fs,cmask1,cmask2,w,i_ring,i_band,i_band_nocut)		\
-  shared(cosarr,sinarr,kmodarr,beamprod,maskprod)			\
+#pragma omp parallel default(none)				\
+  shared(fl1,fl2,fs,cmask1,cmask2,w,i_ring,i_band,i_band_nocut)	\
+  shared(cosarr,sinarr,kmodarr,beamprod,maskprod)		\
   shared(x_out_range,y_out_range)
   {
     flouble dkx=2*M_PI/fs->lx;

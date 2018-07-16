@@ -525,6 +525,21 @@ void comp_gaussian_covariance(nmt_covar_workspace *cw,
   nmt_compute_gaussian_covariance(cw,c11,c12,c21,c22,dout);
 }
 
+void comp_gaussian_covariance_flat(nmt_covar_workspace_flat *cw,
+				   int nell3,double *weights,
+				   int nell11,double *c11,
+				   int nell12,double *c12,
+				   int nell21,double *c21,
+				   int nell22,double *c22,
+				   double *dout,int ndout)
+{
+  assert(nell11==nell3);
+  assert(nell11==nell12);
+  assert(nell11==nell21);
+  assert(nell11==nell22);
+  nmt_compute_gaussian_covariance_flat(cw,nell3,weights,c11,c12,c21,c22,dout);
+}
+
 void comp_pspec_coupled(nmt_field *fl1,nmt_field *fl2,
 			double *dout,int ndout,int iter)
 {

@@ -26,7 +26,7 @@ void nmt_k_function_free(nmt_k_function *f)
 flouble nmt_k_function_eval(nmt_k_function *f,flouble k,gsl_interp_accel *intacc)
 {
   if((f->is_const) || (k<=f->x0))
-      return f->y0;
+    return f->y0;
   else if(k>=f->xf)
     return f->yf;
   else
