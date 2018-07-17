@@ -42,4 +42,4 @@ from utils import mask_apodization, mask_apodization_flat, synfast_spherical, sy
 from field import NmtField, NmtFieldFlat
 from bins import NmtBin, NmtBinFlat
 from workspaces import NmtWorkspace, NmtWorkspaceFlat, deprojection_bias, compute_coupled_cell, compute_full_master, deprojection_bias_flat, compute_coupled_cell_flat, compute_full_master_flat, uncorr_noise_deprojection_bias
-from covariance import NmtCovarianceWorkspace, gaussian_covariance
+from covariance import NmtCovarianceWorkspace, gaussian_covariance, NmtCovarianceWorkspaceFlat, gaussian_covariance_flat

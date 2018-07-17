@@ -13,7 +13,6 @@ static fcomplex *product_and_transform(nmt_flatsky_info *fs,flouble *m1,flouble 
   
 static nmt_binning_scheme_flat *nmt_bins_copy(nmt_binning_scheme_flat *b_or)
 {
-  int ii;
   nmt_binning_scheme_flat *b=my_malloc(sizeof(nmt_binning_scheme_flat));
   b->n_bands=b_or->n_bands;
   b->ell_0_list=my_malloc(b->n_bands*sizeof(flouble));
@@ -40,10 +39,6 @@ nmt_covar_workspace_flat *nmt_covar_workspace_flat_init(nmt_workspace_flat *wa,n
 
   cw->ncls_a=wa->ncls;
   cw->ncls_b=wb->ncls;
-  cw->ellcut_x[0]=wa->ellcut_x[0];
-  cw->ellcut_x[1]=wa->ellcut_x[1];
-  cw->ellcut_y[0]=wa->ellcut_y[0];
-  cw->ellcut_y[1]=wa->ellcut_y[1];
   cw->bin=nmt_bins_copy(wa->bin);
   cw->xi_1122=my_malloc(cw->ncls_a*cw->bin->n_bands*sizeof(flouble *));
   cw->xi_1221=my_malloc(cw->ncls_a*cw->bin->n_bands*sizeof(flouble *));
@@ -74,28 +69,9 @@ nmt_covar_workspace_flat *nmt_covar_workspace_flat_init(nmt_workspace_flat *wa,n
   i_band=my_malloc(fs->npix*sizeof(int));
   i_band_nocut=my_malloc(fs->npix*sizeof(int));
 
-  int *x_out_range,*y_out_range;
-  x_out_range=my_calloc(fs->nx,sizeof(int));
-  y_out_range=my_calloc(fs->ny,sizeof(int));
-  for(ii=0;ii<fs->nx;ii++) {
-    flouble k;
-    if(2*ii<=fs->nx) k=ii*2*M_PI/fs->lx;
-    else k=-(fs->nx-ii)*2*M_PI/fs->lx;
-    if((k<=cw->ellcut_x[1]) && (k>=cw->ellcut_x[0]))
-      x_out_range[ii]=1;
-  }
-  for(ii=0;ii<fs->ny;ii++) {
-    flouble k;
-    if(2*ii<=fs->ny) k=ii*2*M_PI/fs->ly;
-    else k=-(fs->ny-ii)*2*M_PI/fs->ly;
-    if((k<=cw->ellcut_y[1]) && (k>=cw->ellcut_y[0]))
-      y_out_range[ii]=1;
-  }
-
 #pragma omp parallel default(none)			\
   shared(cw,fs,cm_a1b1,cm_a1b2,cm_a2b1,cm_a2b2)		\
-  shared(i_band_nocut,i_band,cl_mask_1122,cl_mask_1221)	\
-  shared(x_out_range,y_out_range)
+  shared(i_band_nocut,i_band,cl_mask_1122,cl_mask_1221)
   {
     flouble dkx=2*M_PI/fs->lx;
     flouble dky=2*M_PI/fs->ly;
@@ -130,14 +106,10 @@ nmt_covar_workspace_flat *nmt_covar_workspace_flat_init(nmt_workspace_flat *wa,n
 
 	kmod=sqrt(kx*kx+ky*ky);
 	ik=nmt_bins_flat_search_fast(cw->bin,kmod,ik);
-	if(y_out_range[iy1] || x_out_range[ix1])
+	if(ik>=0)
+	  i_band[index]=ik;
+	else
 	  i_band[index]=-1;
-	else {
-	  if(ik>=0)
-	    i_band[index]=ik;
-	  else
-	    i_band[index]=-1;
-	}
 	i_band_nocut[index]=ik;
       }
     } //end omp for
@@ -177,8 +149,10 @@ nmt_covar_workspace_flat *nmt_covar_workspace_flat_init(nmt_workspace_flat *wa,n
 	      if(ix<0) ix+=fs->nx;
 	      index=ix+fs->nx*iy;
 
-	      xi_1122[ik1+0][ik2+0]+=cl_mask_1122[index];
-	      xi_1221[ik1+0][ik2+0]+=cl_mask_1221[index];
+	      if(ik2>=0) {
+		xi_1122[ik1+0][ik2+0]+=cl_mask_1122[index];
+		xi_1221[ik1+0][ik2+0]+=cl_mask_1221[index];
+	      }
 	    }
 	  }
 	}
@@ -202,7 +176,7 @@ nmt_covar_workspace_flat *nmt_covar_workspace_flat_init(nmt_workspace_flat *wa,n
     free(xi_1221);
   } //end omp parallel
 
-#pragma omp parallel default(none) \
+#pragma omp parallel default(none)		\
   shared(fs,cw,wa,wb)
   {
     int ib1;
@@ -231,8 +205,6 @@ nmt_covar_workspace_flat *nmt_covar_workspace_flat_init(nmt_workspace_flat *wa,n
     } //end omp for
   } //end omp parallel
     
-  free(x_out_range);
-  free(y_out_range);
   free(i_band);
   free(i_band_nocut);
   free(cl_mask_1122);
@@ -252,7 +224,10 @@ void nmt_covar_workspace_flat_free(nmt_covar_workspace_flat *cw)
     free(cw->xi_1122[ii]);
     free(cw->xi_1221[ii]);
   }
+  free(cw->xi_1122);
+  free(cw->xi_1221);
   nmt_bins_flat_free(cw->bin);
+
   free(cw);
 }
 
@@ -331,17 +306,15 @@ void nmt_covar_workspace_flat_write(nmt_covar_workspace_flat *cw,char *fname)
 
   my_fwrite(&(cw->ncls_a),sizeof(int),1,fo);
   my_fwrite(&(cw->ncls_b),sizeof(int),1,fo);
-  my_fwrite(cw->ellcut_x,sizeof(flouble),2,fo);
-  my_fwrite(cw->ellcut_y,sizeof(flouble),2,fo);
   
+  my_fwrite(&(cw->bin->n_bands),sizeof(int),1,fo);
+  my_fwrite(cw->bin->ell_0_list,sizeof(flouble),cw->bin->n_bands,fo);
+  my_fwrite(cw->bin->ell_f_list,sizeof(flouble),cw->bin->n_bands,fo);
+
   for(ii=0;ii<cw->ncls_a*cw->bin->n_bands;ii++)
     my_fwrite(cw->xi_1122[ii],sizeof(flouble),cw->ncls_b*cw->bin->n_bands,fo);
   for(ii=0;ii<cw->ncls_a*cw->bin->n_bands;ii++)
     my_fwrite(cw->xi_1221[ii],sizeof(flouble),cw->ncls_b*cw->bin->n_bands,fo);
-
-  my_fwrite(&(cw->bin->n_bands),sizeof(int),1,fo);
-  my_fwrite(cw->bin->ell_0_list,sizeof(flouble),cw->bin->n_bands,fo);
-  my_fwrite(cw->bin->ell_f_list,sizeof(flouble),cw->bin->n_bands,fo);
 
   gsl_matrix_fwrite(fo,cw->coupling_binned_a);
   gsl_matrix_fwrite(fo,cw->coupling_binned_b);
@@ -359,8 +332,13 @@ nmt_covar_workspace_flat *nmt_covar_workspace_flat_read(char *fname)
 
   my_fread(&(cw->ncls_a),sizeof(int),1,fi);
   my_fread(&(cw->ncls_b),sizeof(int),1,fi);
-  my_fread(cw->ellcut_x,sizeof(flouble),2,fi);
-  my_fread(cw->ellcut_y,sizeof(flouble),2,fi);
+
+  cw->bin=my_malloc(sizeof(nmt_binning_scheme_flat));
+  my_fread(&(cw->bin->n_bands),sizeof(int),1,fi);
+  cw->bin->ell_0_list=my_malloc(cw->bin->n_bands*sizeof(flouble));
+  cw->bin->ell_f_list=my_malloc(cw->bin->n_bands*sizeof(flouble));
+  my_fread(cw->bin->ell_0_list,sizeof(flouble),cw->bin->n_bands,fi);
+  my_fread(cw->bin->ell_f_list,sizeof(flouble),cw->bin->n_bands,fi);
 
   cw->xi_1122=my_malloc(cw->ncls_a*cw->bin->n_bands*sizeof(flouble *));
   for(ii=0;ii<cw->ncls_a*cw->bin->n_bands;ii++) {
@@ -373,19 +351,16 @@ nmt_covar_workspace_flat *nmt_covar_workspace_flat_read(char *fname)
     my_fread(cw->xi_1221[ii],sizeof(flouble),cw->ncls_b*cw->bin->n_bands,fi);
   }
 
-  cw->bin=my_malloc(sizeof(nmt_binning_scheme_flat));
-  my_fread(&(cw->bin->n_bands),sizeof(int),1,fi);
-  cw->bin->ell_0_list=my_malloc(cw->bin->n_bands*sizeof(flouble));
-  cw->bin->ell_f_list=my_malloc(cw->bin->n_bands*sizeof(flouble));
-  my_fread(cw->bin->ell_0_list,sizeof(flouble),cw->bin->n_bands,fi);
-  my_fread(cw->bin->ell_f_list,sizeof(flouble),cw->bin->n_bands,fi);
-
   cw->coupling_binned_a=gsl_matrix_alloc(cw->ncls_a*cw->bin->n_bands,cw->ncls_a*cw->bin->n_bands);
-  cw->coupling_binned_perm_a=gsl_permutation_alloc(cw->ncls_a*cw->bin->n_bands);
   gsl_matrix_fread(fi,cw->coupling_binned_a);
+  cw->coupling_binned_b=gsl_matrix_alloc(cw->ncls_b*cw->bin->n_bands,cw->ncls_b*cw->bin->n_bands);
+  gsl_matrix_fread(fi,cw->coupling_binned_b);
+  cw->coupling_binned_perm_a=gsl_permutation_alloc(cw->ncls_a*cw->bin->n_bands);
   gsl_permutation_fread(fi,cw->coupling_binned_perm_a);
+  cw->coupling_binned_perm_b=gsl_permutation_alloc(cw->ncls_b*cw->bin->n_bands);
+  gsl_permutation_fread(fi,cw->coupling_binned_perm_b);
 
   fclose(fi);
-
+  
   return cw;
 }

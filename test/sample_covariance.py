@@ -6,12 +6,13 @@ import pymaster as nmt
 #This script showcases the ability of namaster to compute Gaussian
 #estimates of the covariance matrix. This is currently only
 #supported for spin-0 fields
+#A similar example for flat-sky fields can be found in test/sample_covariance_flat.py
 
 #HEALPix map resolution
 nside=256
 
 #We start by creating some synthetic masks and maps with contaminants.
-#Here we will focus on the cross-correlation of a spin-2 and a spin-1 field.
+#Here we will focus on the auto-correlation of a spin-1 field.
 #a) Read and apodize mask
 mask=nmt.mask_apodization(hp.read_map("mask.fits",verbose=False),1.,apotype="Smooth")
 
@@ -43,7 +44,7 @@ w=nmt.NmtWorkspace()
 w.compute_coupling_matrix(f0,f0,b)
 cl_0=compute_master(f0,f0,w)[0]
 
-#Let's now compute the gaussian estimate of the covariance!
+#Let's now compute the Gaussian estimate of the covariance!
 print "Covariance"
 #First we generate a NmtCovarianceWorkspace object to precompute
 #and store the necessary coupling coefficients

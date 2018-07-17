@@ -780,14 +780,6 @@ class covar_workspace_flat(_object):
     __swig_getmethods__["ncls_b"] = _nmtlib.covar_workspace_flat_ncls_b_get
     if _newclass:
         ncls_b = _swig_property(_nmtlib.covar_workspace_flat_ncls_b_get, _nmtlib.covar_workspace_flat_ncls_b_set)
-    __swig_setmethods__["ellcut_x"] = _nmtlib.covar_workspace_flat_ellcut_x_set
-    __swig_getmethods__["ellcut_x"] = _nmtlib.covar_workspace_flat_ellcut_x_get
-    if _newclass:
-        ellcut_x = _swig_property(_nmtlib.covar_workspace_flat_ellcut_x_get, _nmtlib.covar_workspace_flat_ellcut_x_set)
-    __swig_setmethods__["ellcut_y"] = _nmtlib.covar_workspace_flat_ellcut_y_set
-    __swig_getmethods__["ellcut_y"] = _nmtlib.covar_workspace_flat_ellcut_y_get
-    if _newclass:
-        ellcut_y = _swig_property(_nmtlib.covar_workspace_flat_ellcut_y_get, _nmtlib.covar_workspace_flat_ellcut_y_set)
     __swig_setmethods__["bin"] = _nmtlib.covar_workspace_flat_bin_set
     __swig_getmethods__["bin"] = _nmtlib.covar_workspace_flat_bin_get
     if _newclass:

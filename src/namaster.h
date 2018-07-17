@@ -245,8 +245,6 @@ nmt_workspace *nmt_compute_power_spectra(nmt_field *fl1,nmt_field *fl2,
 typedef struct {
   int ncls_a;
   int ncls_b;
-  flouble ellcut_x[2];
-  flouble ellcut_y[2];
   nmt_binning_scheme_flat *bin;
   flouble **xi_1122;
   flouble **xi_1221;

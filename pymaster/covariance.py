@@ -74,7 +74,6 @@ class NmtCovarianceWorkspaceFlat(object) :
 
         :param NmtWorkspaceFlat wa,wb: workspaces used to compute the two power spectra whose covariance matrix you want to compute.
         """
-        ns=wa.wsp.nside;
         if((wa.wsp.fs.nx!=wb.wsp.fs.nx) or (wa.wsp.fs.ny!=wb.wsp.fs.ny)) :
             raise ValueError("Everything should have the same resolution!")
         if((wa.wsp.ncls!=1) or (wb.wsp.ncls!=1)) :
