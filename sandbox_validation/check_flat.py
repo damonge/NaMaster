@@ -25,6 +25,10 @@ parser.add_option('--plot', dest='plot_stuff', default=False, action='store_true
                   help='Set if you want to produce plots')
 parser.add_option('--aposize', dest='aposize', default=0.0, type=float,
                   help='Mask apodization (in degrees)')
+parser.add_option('--no-deproject',dest='no_deproject',default=False,action='store_true',
+                  help='Set if you will include contaminants but won\'t clean them')
+parser.add_option('--no-debias',dest='no_debias',default=False,action='store_true',
+                  help='Set if you will include contaminants, clean them but won\'t correct for the bias')
 (o, args) = parser.parse_args()
 
 nsims=o.isim_end-o.isim_ini+1
@@ -40,6 +44,10 @@ if not w_mask :
 predir="tests_flat"
 os.system("mkdir -p "+predir)
 prefix=predir+"/run_mask%d_cont%d_apo%.2lf"%(w_mask,w_cont,o.aposize)
+if o.no_deproject :
+    prefix+="_no_deproj"
+if o.no_debias :
+    prefix+="_no_debias"
 fname_mask=prefix+"_mask"
 
 #Read theory power spectra
@@ -112,12 +120,18 @@ def get_fields() :
     st=st.flatten(); sq=sq.flatten(); su=su.flatten()
     if w_cont :
         st+=np.sum(fgt,axis=0)[0,:]; sq+=np.sum(fgp,axis=0)[0,:]; su+=np.sum(fgp,axis=0)[1,:];
-        ff0=nmt.NmtFieldFlat(fmi.lx_rad,fmi.ly_rad,mask.reshape([fmi.ny,fmi.nx]),
-                             [st.reshape([fmi.ny,fmi.nx])],
-                             templates=fgt.reshape([2,1,fmi.ny,fmi.nx]))
-        ff2=nmt.NmtFieldFlat(fmi.lx_rad,fmi.ly_rad,mask.reshape([fmi.ny,fmi.nx]),
-                             [sq.reshape([fmi.ny,fmi.nx]),su.reshape([fmi.ny,fmi.nx])],
-                             templates=fgp.reshape([2,2,fmi.ny,fmi.nx]))
+        if o.no_deproject :
+            ff0=nmt.NmtFieldFlat(fmi.lx_rad,fmi.ly_rad,mask.reshape([fmi.ny,fmi.nx]),
+                                 [st.reshape([fmi.ny,fmi.nx])])
+            ff2=nmt.NmtFieldFlat(fmi.lx_rad,fmi.ly_rad,mask.reshape([fmi.ny,fmi.nx]),
+                                 [sq.reshape([fmi.ny,fmi.nx]),su.reshape([fmi.ny,fmi.nx])])
+        else :
+            ff0=nmt.NmtFieldFlat(fmi.lx_rad,fmi.ly_rad,mask.reshape([fmi.ny,fmi.nx]),
+                                 [st.reshape([fmi.ny,fmi.nx])],
+                                 templates=fgt.reshape([2,1,fmi.ny,fmi.nx]))
+            ff2=nmt.NmtFieldFlat(fmi.lx_rad,fmi.ly_rad,mask.reshape([fmi.ny,fmi.nx]),
+                                 [sq.reshape([fmi.ny,fmi.nx]),su.reshape([fmi.ny,fmi.nx])],
+                                 templates=fgp.reshape([2,2,fmi.ny,fmi.nx]))
     else :
         ff0=nmt.NmtFieldFlat(fmi.lx_rad,fmi.ly_rad,mask.reshape([fmi.ny,fmi.nx]),
                              [st.reshape([fmi.ny,fmi.nx])])
@@ -177,7 +191,7 @@ if not os.path.isfile(prefix+"_clb00.npy") :
     #Compute noise bias
     clb00=w00.couple_cell(l,np.array([nltt]))
     #Compute deprojection bias
-    if w_cont :
+    if w_cont and (not o.no_deproject) and (not o.no_debias):
         clb00+=nmt.deprojection_bias_flat(f0,f0,b,l,[cltt])
     np.save(prefix+"_clb00",clb00)
 else :
@@ -185,7 +199,7 @@ else :
 if not os.path.isfile(prefix+"_clb02.npy") :
     print("Computing deprojection and noise bias 02")
     clb02=w02.couple_cell(l,np.array([nlte,0*nlte]))
-    if w_cont :
+    if w_cont and (not o.no_deproject) and (not o.no_debias):
         clb02+=nmt.deprojection_bias_flat(f0,f2,b,l,[clte,0*clte])
     np.save(prefix+"_clb02",clb02)
 else :
@@ -193,7 +207,7 @@ else :
 if not os.path.isfile(prefix+"_clb22.npy") :
     print("Computing deprojection and noise bias 22")
     clb22=w22.couple_cell(l,np.array([nlee,0*nlee,0*nlbb,nlbb]))
-    if w_cont :
+    if w_cont and (not o.no_deproject) and (not o.no_debias):
         clb22+=nmt.deprojection_bias_flat(f2,f2,b,l,[clee,0*clee,0*clbb,clbb])
     np.save(prefix+"_clb22",clb22)
 else :
@@ -228,15 +242,30 @@ if o.plot_stuff :
     l_eff=b.get_effective_ells()
     cols=plt.cm.rainbow(np.linspace(0,1,6))
     plt.figure()
-    plt.errorbar(l_eff+4,np.mean(cl00_all,axis=0)[0]/cl00_th[0]-1,
-                 yerr=np.std(cl00_all,axis=0)[0]/cl00_th[0]/np.sqrt(nsims+0.),
+    mean=np.mean(cl00_all,axis=0)[0]; th=cl00_th[0]
+    std=np.std(cl00_all,axis=0)[0]/np.sqrt(nsims+0.)
+    plt.errorbar(l_eff+4,(mean-th)/std,yerr=std/std,
                  label='$\\delta\\times\\delta$',fmt='ro')
-    plt.errorbar(l_eff+4,np.mean(cl02_all,axis=0)[0]/cl02_th[0]-1,
-                 yerr=np.std(cl02_all,axis=0)[0]/cl02_th[0]/np.sqrt(nsims+0.),
+    mean=np.mean(cl02_all,axis=0)[0]; th=cl02_th[0]
+    std=np.std(cl02_all,axis=0)[0]/np.sqrt(nsims+0.)
+    plt.errorbar(l_eff+4,(mean-th)/std,yerr=std/std,
                  label='$\\delta\\times\\gamma_E$',fmt='go')
-    plt.errorbar(l_eff+8,np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,
-                 yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),
+    mean=np.mean(cl02_all,axis=0)[1]; th=cl02_th[1]
+    std=np.std(cl02_all,axis=0)[1]/np.sqrt(nsims+0.)
+    plt.errorbar(l_eff+4,(mean-th)/std,yerr=std/std,
+                 label='$\\delta\\times\\gamma_B$',fmt='gs')
+    mean=np.mean(cl22_all,axis=0)[0]; th=cl22_th[0]
+    std=np.std(cl22_all,axis=0)[0]/np.sqrt(nsims+0.)
+    plt.errorbar(l_eff+8,(mean-th)/std,yerr=std/std,
                  label='$\\gamma_E\\times\\gamma_E$',fmt='bo')
+    mean=np.mean(cl22_all,axis=0)[1]; th=cl22_th[1]
+    std=np.std(cl22_all,axis=0)[1]/np.sqrt(nsims+0.)
+    plt.errorbar(l_eff+8,(mean-th)/std,yerr=std/std,
+                 label='$\\gamma_E\\times\\gamma_B$',fmt='bs')
+    mean=np.mean(cl22_all,axis=0)[3]; th=cl22_th[3]
+    std=np.std(cl22_all,axis=0)[3]/np.sqrt(nsims+0.)
+    plt.errorbar(l_eff+8,(mean-th)/std,yerr=std/std,
+                 label='$\\gamma_B\\times\\gamma_B$',fmt='bx')
     plt.xlabel('$\\ell$',fontsize=16)
     plt.ylabel('$\\Delta C_\\ell/C_\\ell$',fontsize=16)
     plt.legend(loc='lower left',frameon=False,fontsize=16)

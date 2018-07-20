@@ -3588,8 +3588,14 @@ nmt_field_flat *field_alloc_new_flat(int nx,int ny,double lx,double ly,
   for(ii=0;ii<nmap_2;ii++)
     maps[ii]=mps+npix_2*ii;
 
-  double *larr=&(cls1[0]);
-  double *beam=&(cls1[nell1]);
+  double *larr,*beam;
+  if((nell1==1) && (cls1[0]<0) && (cls1[1]<0)) {
+    larr=NULL; beam=NULL;
+  }
+  else {
+    larr=&(cls1[0]);
+    beam=&(cls1[nell1]);
+  }
 
   fl=nmt_field_flat_alloc(nx,ny,lx,ly,mask,pol,maps,ntemp,temp,
 			  nell1,larr,beam,pure_e,pure_b,tol_pinv);

@@ -146,11 +146,9 @@ class NmtFieldFlat(object) :
         #Form beam
         if isinstance(beam,(list,tuple,np.ndarray)) :
             beam_use=beam
-            lmax=len(beam_use)-1
         else :
             if(beam is None) :
-                lmax=int(np.fmax(self.nx*np.pi/lx,self.ny*np.pi/ly))
-                beam_use=np.array([np.arange(lmax+1),np.ones(lmax+1)])
+                beam_use=np.array([[-1.],[-1.]])
             else :
                 raise KeyError("Input beam can only be an array or None\n")
 

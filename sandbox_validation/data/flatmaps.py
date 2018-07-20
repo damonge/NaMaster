@@ -150,7 +150,7 @@ class FlatMapInfo(object) :
         """
         return np.zeros(self.npix,dtype=float)
 
-    def view_map(self,map_in,ax=None, xlabel='RA', ylabel='Dec',
+    def view_map(self,map_in,ax=None, xlabel='RA', ylabel='Dec',fs=12, tfs=12,
 		 title=None, addColorbar=True,posColorbar= False, cmap = cm.viridis,
                  colorMax= None, colorMin= None,fnameOut=None):
         """
@@ -173,13 +173,13 @@ class FlatMapInfo(object) :
             fig=plt.figure()
             ax=fig.add_subplot(111,projection=self.wcs)
         if title is not None :
-            ax.set_title(title,fontsize=15)
+            ax.set_title(title,fontsize=tfs)
         image= ax.imshow(map_in.reshape([self.ny,self.nx]),
 			origin='lower', interpolation='nearest')
         if addColorbar :
 	    plt.colorbar(image)
-        ax.set_xlabel(xlabel,fontsize=15)
-        ax.set_ylabel(ylabel,fontsize=15)
+        ax.set_xlabel(xlabel,fontsize=fs)
+        ax.set_ylabel(ylabel,fontsize=fs)
         if fnameOut is not None :
             plt.savefig(fnameOut,bbox_inches='tight')
 
