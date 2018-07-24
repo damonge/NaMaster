@@ -49,26 +49,14 @@ def read_cl_camb(fname) :
 l,cltt,clee,clbb,clte=read_cl_camb("data/cls_cmb.txt")
 #Noise power spectrum
 nlev=(1.*np.pi/(180*60))**2 #1 uK-arcmin noise level
-nltt=nlev*(np.ones_like(l)+(10./(l+0.1))**2.4) #1/ell noise with a knee scale of ell=10 (optimistic)
+nltt=nlev*(np.ones_like(l)+(25./(l+0.1))**2.4) #1/ell noise with a knee scale of ell=10 (optimistic)
 nlee=2*nltt; nlbb=2*nltt; nlte=0*nltt
 #Beam
-fwhm_amin=25. #Corresponding to 0.5m aperture at 90GHz
+fwhm_amin=20. #Corresponding to 0.5m aperture at 90GHz
 beam=np.exp(-0.5*l*(l+1)*(fwhm_amin*np.pi/(180*60*2.355))**2)
-if o.plot_stuff :
-    plt.figure()
-    plt.plot(l,clee,'r-',label='EE signal')
-    plt.plot(l,clbb,'b-',label='BB signal')
-    plt.plot(l,nlee/beam**2,'k--',label='Noise')
-    plt.loglog(); plt.legend()
-    plt.xlabel('$\\ell$',fontsize=16);
-    plt.ylabel('$C_\\ell$',fontsize=16);
 
 #Read mask
 mask=hp.read_map("data/mask_cmb_ns%d.fits"%o.nside_out,verbose=False)
-if o.plot_stuff :
-    hp.mollview(mask)
-    plt.savefig(prefix+'_mask.png',bbox_inches='tight')
-    plt.savefig(prefix+'_mask.pdf',bbox_inches='tight')
 fsky=np.mean(mask/np.amax(mask));
 
 #Read contaminant maps
@@ -78,13 +66,6 @@ if w_cont :
                                       field=[0,1],verbose=False); #Foregrounds
     fgp[0,0,:]=hp.alm2map(hp.almxfl(hp.map2alm(fgp[0,0,:]),beam),o.nside_out,verbose=False)
     fgp[0,1,:]=hp.alm2map(hp.almxfl(hp.map2alm(fgp[0,1,:]),beam),o.nside_out,verbose=False)
-    if o.plot_stuff :
-        hp.mollview(np.sum(fgp,axis=0)[0,:]*mask)
-        plt.savefig(prefix+'_contq.png',bbox_inches='tight')
-        plt.savefig(prefix+'_contq.pdf',bbox_inches='tight')
-        hp.mollview(np.sum(fgp,axis=0)[1,:]*mask)
-        plt.savefig(prefix+'_contu.png',bbox_inches='tight')
-        plt.savefig(prefix+'_contu.pdf',bbox_inches='tight')
 
 #Binning scheme
 ls=np.arange(3*o.nside_out,dtype=int)
@@ -117,10 +98,6 @@ def get_fields() :
 np.random.seed(1000)
 f2=get_fields()
     
-if o.plot_stuff :
-    hp.mollview(f2.get_maps()[0]*mask,title='$Q$')
-    hp.mollview(f2.get_maps()[1]*mask,title='$U$')
-
 #Use initial fields to generate coupling matrix
 w22=nmt.NmtWorkspace();
 if not os.path.isfile(prefix+"_w22.dat") :
@@ -166,20 +143,48 @@ cl22_all=np.array(cl22_all)
 
 #Plot results
 if o.plot_stuff :
-    l_eff=b.get_effective_ells()
+    import scipy.stats as st
+    
+    def tickfs(ax,x=True,y=True) :
+        if x :
+            for tick in ax.xaxis.get_major_ticks():
+                tick.label.set_fontsize(12)
+        if y :
+            for tick in ax.yaxis.get_major_ticks():
+                tick.label.set_fontsize(12)
+    
+    l_eff=b.get_effective_ells(); lgood=np.where(l_eff<2*o.nside_out)[0]; l_eff=l_eff[lgood]
     cols=plt.cm.rainbow(np.linspace(0,1,3))
+    hartfac=(nsims-len(l_eff)-2.)/(nsims-1.)
     plt.figure()
-    plt.errorbar(l_eff,np.mean(cl22_all,axis=0)[0]/cl22_th[0]-1,
-                 yerr=np.std(cl22_all,axis=0)[0]/cl22_th[0]/np.sqrt(nsims+0.),
-                 label='$EE$',fmt='bo')
-    plt.errorbar(l_eff,np.mean(cl22_all,axis=0)[3]/cl22_th[3]-1,
-                 yerr=np.std(cl22_all,axis=0)[3]/cl22_th[3]/np.sqrt(nsims+0.),
-                 label='$BB$',fmt='ro')
-    plt.xlabel('$\\ell$',fontsize=16)
-    plt.ylabel('$\\Delta C_\\ell/C_\\ell$',fontsize=16)
-    plt.xlim([2,2*o.nside_out])
-    plt.ylim([-0.2,0.2])
-    plt.legend(loc='lower right',frameon=False,fontsize=16)
+    ax=plt.gca()
+    mean=np.mean(cl22_all,axis=0)[0][lgood]; th=cl22_th[0][lgood]
+    cov=(np.mean(cl22_all[:,0,:,None]*cl22_all[:,0,None,:],axis=0)[lgood,:][:,lgood]-mean[None,:]*mean[:,None])/nsims
+    chi2=np.dot(mean-th,np.linalg.solve(cov,mean-th))*hartfac
+    print('EE: %.1lf %d %.3lE'%(chi2,len(th),1-st.chi2.cdf(chi2,len(th))))
+    std=np.std(cl22_all,axis=0)[0][lgood]/np.sqrt(nsims+0.)
+    ax.errorbar(l_eff  ,(mean-th)/std,yerr=std/std,
+                label='$EE$',fmt='bo')
+    mean=np.mean(cl22_all,axis=0)[1][lgood]; th=cl22_th[1][lgood]
+    cov=(np.mean(cl22_all[:,1,:,None]*cl22_all[:,1,None,:],axis=0)[lgood,:][:,lgood]-mean[None,:]*mean[:,None])/nsims
+    chi2=np.dot(mean-th,np.linalg.solve(cov,mean-th))*hartfac
+    print('EB: %.1lf %d %.3lE'%(chi2,len(th),1-st.chi2.cdf(chi2,len(th))))
+    std=np.std(cl22_all,axis=0)[1][lgood]/np.sqrt(nsims+0.)
+    ax.errorbar(l_eff+4,(mean-th)/std,yerr=std/std,
+                label='$EB$',fmt='bs')
+    mean=np.mean(cl22_all,axis=0)[3][lgood]; th=cl22_th[3][lgood]
+    cov=(np.mean(cl22_all[:,3,:,None]*cl22_all[:,3,None,:],axis=0)[lgood,:][:,lgood]-mean[None,:]*mean[:,None])/nsims
+    chi2=np.dot(mean-th,np.linalg.solve(cov,mean-th))*hartfac
+    print('BB: %.1lf %d %.3lE'%(chi2,len(th),1-st.chi2.cdf(chi2,len(th))))
+    std=np.std(cl22_all,axis=0)[3][lgood]/np.sqrt(nsims+0.)
+    ax.errorbar(l_eff+8,(mean-th)/std,yerr=std/std,
+                label='$BB$',fmt='bx')
+    ax.set_xlabel('$\\ell$',fontsize=15)
+    ax.set_ylabel('$\\Delta C_\\ell/\\sigma_\\ell$',fontsize=15)
+    ax.set_ylim([-6,6])
+    ax.legend(loc='upper left',frameon=False,fontsize=15,ncol=2,labelspacing=0.1)
+    tickfs(ax)
+    ax.set_xlim([0,520])
     plt.savefig(prefix+'_celldiff.png',bbox_inches='tight')
     plt.savefig(prefix+'_celldiff.pdf',bbox_inches='tight')
 
@@ -236,14 +241,14 @@ if o.plot_stuff :
 
     ic=0
     plt.figure()
-    plt.plot(l_eff,np.mean(cl22_all,axis=0)[0],'.',
+    plt.plot(l_eff,np.mean(cl22_all,axis=0)[0][lgood],'.',
              label='$EE$',c=cols[ic]);
-    plt.plot(l_eff,cl22_th[0],'--',c=cols[ic]); ic+=1
-    plt.plot(l_eff,np.mean(cl22_all,axis=0)[1],'.',
+    plt.plot(l_eff,cl22_th[0][lgood],'--',c=cols[ic]); ic+=1
+    plt.plot(l_eff,np.mean(cl22_all,axis=0)[1][lgood],'.',
              label='$EB$',c=cols[ic]); ic+=1
-    plt.plot(l_eff,np.mean(cl22_all,axis=0)[3],'.',
+    plt.plot(l_eff,np.mean(cl22_all,axis=0)[3][lgood],'.',
              label='$BB$',c=cols[ic]);
-    plt.plot(l_eff,cl22_th[3],'--',c=cols[ic]); ic+=1
+    plt.plot(l_eff,cl22_th[3][lgood],'--',c=cols[ic]); ic+=1
     plt.yscale('log')
     plt.xlim([2,2*o.nside_out])
     plt.xlabel('$\\ell$',fontsize=16)

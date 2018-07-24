@@ -6,6 +6,10 @@ import pymaster as nmt
 import os
 import sys
 import data.flatmaps as fm
+from matplotlib import rc
+import matplotlib
+rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+rc('text', usetex=True)
 
 
 DTOR=np.pi/180
@@ -54,18 +58,6 @@ fname_mask=prefix+"_mask"
 l,cltt,clee,clbb,clte,nltt,nlee,nlbb,nlte=np.loadtxt("data/cls_lss.txt",unpack=True)    
 cltt[0]=0; clee[0]=0; clbb[0]=0; clte[0]=0;
 nltt[0]=0; nlee[0]=0; nlbb[0]=0; nlte[0]=0;
-if o.plot_stuff :
-    plt.figure()
-    plt.plot(l,cltt,'r-',label='$\\delta_g\\times\\delta_g$')
-    plt.plot(l,clte,'b-',label='$\\delta_g\\times\\gamma_g$')
-    plt.plot(l,clee,'y-',label='$\\gamma_g\\times\\gamma_g$')
-    plt.plot(l,nltt,'r--',label='$N_\\delta$')
-    plt.plot(l,nlee,'y--',label='$N_\\gamma$')
-    plt.loglog(); plt.legend(ncol=2)
-    plt.xlabel('$\\ell$',fontsize=16);
-    plt.ylabel('$C_\\ell$',fontsize=16);
-    plt.savefig(prefix+'_celltheory.png',bbox_inches='tight')
-    plt.savefig(prefix+'_celltheory.pdf',bbox_inches='tight')
 
 #Initialize pixelization from mask
 fmi,mask_hsc=fm.read_flat_map("data/mask_lss_flat.fits")
@@ -82,10 +74,6 @@ if not os.path.isfile(fname_mask+'.fits') :
 
     fmi.write_flat_map(fname_mask+".fits",mask)
 fdum,mask=fm.read_flat_map(fname_mask+".fits")
-if o.plot_stuff :
-    fmi.view_map(mask,title='Mask')
-    plt.savefig(prefix+'_mask.png',bbox_inches='tight')
-    plt.savefig(prefix+'_mask.pdf',bbox_inches='tight')
 fsky=fmi.lx_rad*fmi.ly_rad*np.sum(mask)/(4*np.pi*fmi.nx*fmi.ny)
 
 #Read contaminant maps
@@ -96,10 +84,6 @@ if w_cont :
     fgp=np.zeros([2,2,len(mask)])
     dum,[fgp[0,0,:],fgp[0,1,:]]=fm.read_flat_map("data/cont_wl_psf_flat.fits",i_map=-1) #PSF
     dum,[fgp[1,0,:],fgp[1,1,:]]=fm.read_flat_map("data/cont_wl_ss_flat.fits",i_map=-1) #Small-scales
-    if o.plot_stuff :
-        fmi.view_map(np.sum(fgt,axis=0)[0,:]*mask,title='Total LSS contaminant')
-        fmi.view_map(np.sum(fgp,axis=0)[0,:]*mask,title='Total WL contaminant (Q)')
-        fmi.view_map(np.sum(fgp,axis=0)[1,:]*mask,title='Total WL contaminant (U)')
 
 #Binning scheme
 ell_min=max(2*np.pi/fmi.lx_rad,2*np.pi/fmi.ly_rad)
@@ -141,11 +125,6 @@ def get_fields() :
 
 np.random.seed(1000)
 f0,f2=get_fields()
-
-if o.plot_stuff :
-    fmi.view_map(f0.get_maps()[0].flatten()*mask,title='$\\delta$')
-    fmi.view_map(f2.get_maps()[0].flatten()*mask,title='$\\gamma_1$')
-    fmi.view_map(f2.get_maps()[1].flatten()*mask,title='$\\gamma_2$')
 
 #Use initial fields to generate coupling matrix
 w00=nmt.NmtWorkspaceFlat();
@@ -239,42 +218,72 @@ cl22_all=np.array(cl22_all)
 
 #Plot results
 if o.plot_stuff :
+    import scipy.stats as st
+    
+    def tickfs(ax,x=True,y=True) :
+        if x :
+            for tick in ax.xaxis.get_major_ticks():
+                tick.label.set_fontsize(12)
+        if y :
+            for tick in ax.yaxis.get_major_ticks():
+                tick.label.set_fontsize(12)
+
     l_eff=b.get_effective_ells()
     cols=plt.cm.rainbow(np.linspace(0,1,6))
+    hartfac=(nsims-len(l_eff)-2.)/(nsims-1.)
     plt.figure()
+    ax=plt.gca()
     mean=np.mean(cl00_all,axis=0)[0]; th=cl00_th[0]
+    cov=(np.mean(cl00_all[:,0,:,None]*cl00_all[:,0,None,:],axis=0)-mean[None,:]*mean[:,None])/nsims
     std=np.std(cl00_all,axis=0)[0]/np.sqrt(nsims+0.)
-    plt.errorbar(l_eff+4,(mean-th)/std,yerr=std/std,
-                 label='$\\delta\\times\\delta$',fmt='ro')
+    chi2=np.dot(mean-th,np.linalg.solve(cov,mean-th))*hartfac
+    print('delta-delta: %.3lE'%(1-st.chi2.cdf(chi2,len(th))))
+    ax.errorbar(l_eff,(mean-th)/std,yerr=std/std,
+                label='$\\delta\\times\\delta$',fmt='ro')
     mean=np.mean(cl02_all,axis=0)[0]; th=cl02_th[0]
+    cov=(np.mean(cl02_all[:,0,:,None]*cl02_all[:,0,None,:],axis=0)-mean[None,:]*mean[:,None])/nsims
+    chi2=np.dot(mean-th,np.linalg.solve(cov,mean-th))*hartfac
+    print('delta-gamma_E: %.3lE'%(1-st.chi2.cdf(chi2,len(th))))
     std=np.std(cl02_all,axis=0)[0]/np.sqrt(nsims+0.)
-    plt.errorbar(l_eff+4,(mean-th)/std,yerr=std/std,
-                 label='$\\delta\\times\\gamma_E$',fmt='go')
+    ax.errorbar(l_eff+2,(mean-th)/std,yerr=std/std,
+                label='$\\delta\\times\\gamma_E$',fmt='go')
     mean=np.mean(cl02_all,axis=0)[1]; th=cl02_th[1]
+    cov=(np.mean(cl02_all[:,1,:,None]*cl02_all[:,1,None,:],axis=0)-mean[None,:]*mean[:,None])/nsims
+    chi2=np.dot(mean-th,np.linalg.solve(cov,mean-th))*hartfac
+    print('delta-gamma_B: %.3lE'%(1-st.chi2.cdf(chi2,len(th))))
     std=np.std(cl02_all,axis=0)[1]/np.sqrt(nsims+0.)
-    plt.errorbar(l_eff+4,(mean-th)/std,yerr=std/std,
-                 label='$\\delta\\times\\gamma_B$',fmt='gs')
+    ax.errorbar(l_eff+4,(mean-th)/std,yerr=std/std,
+                label='$\\delta\\times\\gamma_B$',fmt='gs')
     mean=np.mean(cl22_all,axis=0)[0]; th=cl22_th[0]
+    cov=(np.mean(cl22_all[:,0,:,None]*cl22_all[:,0,None,:],axis=0)-mean[None,:]*mean[:,None])/nsims
+    chi2=np.dot(mean-th,np.linalg.solve(cov,mean-th))*hartfac
+    print('gamma_E-gamma_E: %.1lf %d %.3lE'%(chi2,len(th),1-st.chi2.cdf(chi2,len(th))))
     std=np.std(cl22_all,axis=0)[0]/np.sqrt(nsims+0.)
-    plt.errorbar(l_eff+8,(mean-th)/std,yerr=std/std,
-                 label='$\\gamma_E\\times\\gamma_E$',fmt='bo')
+    ax.errorbar(l_eff+6,(mean-th)/std,yerr=std/std,
+                label='$\\gamma_E\\times\\gamma_E$',fmt='bo')
     mean=np.mean(cl22_all,axis=0)[1]; th=cl22_th[1]
+    cov=(np.mean(cl22_all[:,1,:,None]*cl22_all[:,1,None,:],axis=0)-mean[None,:]*mean[:,None])/nsims
+    chi2=np.dot(mean-th,np.linalg.solve(cov,mean-th))*hartfac
+    print('gamma_E-gamma_B: %.1lf %d %.3lE'%(chi2,len(th),1-st.chi2.cdf(chi2,len(th))))
     std=np.std(cl22_all,axis=0)[1]/np.sqrt(nsims+0.)
-    plt.errorbar(l_eff+8,(mean-th)/std,yerr=std/std,
-                 label='$\\gamma_E\\times\\gamma_B$',fmt='bs')
+    ax.errorbar(l_eff+8,(mean-th)/std,yerr=std/std,
+                label='$\\gamma_E\\times\\gamma_B$',fmt='bs')
     mean=np.mean(cl22_all,axis=0)[3]; th=cl22_th[3]
+    cov=(np.mean(cl22_all[:,3,:,None]*cl22_all[:,3,None,:],axis=0)-mean[None,:]*mean[:,None])/nsims
+    chi2=np.dot(mean-th,np.linalg.solve(cov,mean-th))*hartfac
+    print('gamma_B-gamma_B: %.1lf %d %.3lE'%(chi2,len(th),1-st.chi2.cdf(chi2,len(th))))
     std=np.std(cl22_all,axis=0)[3]/np.sqrt(nsims+0.)
-    plt.errorbar(l_eff+8,(mean-th)/std,yerr=std/std,
-                 label='$\\gamma_B\\times\\gamma_B$',fmt='bx')
-    plt.xlabel('$\\ell$',fontsize=16)
-    plt.ylabel('$\\Delta C_\\ell/C_\\ell$',fontsize=16)
-    plt.legend(loc='lower left',frameon=False,fontsize=16)
-    plt.xscale('log')
+    ax.errorbar(l_eff+10,(mean-th)/std,yerr=std/std,
+                label='$\\gamma_B\\times\\gamma_B$',fmt='bx')
+    ax.set_xlabel('$\\ell$',fontsize=15)
+    ax.set_ylabel('$\\Delta C_\\ell/\\sigma_\\ell$',fontsize=15)
+    ax.set_ylim([-6,6])
+    ax.legend(loc='upper left',frameon=False,fontsize=15,ncol=2,labelspacing=0.1)
+    tickfs(ax)
+    ax.set_xlim([0,18000])
     plt.savefig(prefix+'_celldiff.png',bbox_inches='tight')
     plt.savefig(prefix+'_celldiff.pdf',bbox_inches='tight')
 
-
-    import scipy.stats as st
     chi2_00=np.sum(((cl00_all[:,:,:]-cl00_th[None,:,:])/np.std(cl00_all,axis=0)[None,:,:])**2,axis=2)
     chi2_02=np.sum(((cl02_all[:,:,:]-cl02_th[None,:,:])/np.std(cl02_all,axis=0)[None,:,:])**2,axis=2)
     chi2_22=np.sum(((cl22_all[:,:,:]-cl22_th[None,:,:])/np.std(cl22_all,axis=0)[None,:,:])**2,axis=2)
@@ -284,71 +293,78 @@ if o.plot_stuff :
 
     x=np.linspace(ndof-5*np.sqrt(2.*ndof),ndof+5*np.sqrt(2*ndof),256)
     pdf=st.chi2.pdf(x,ndof)
-
     
     plt.figure(figsize=(10,7))
     ax=[plt.subplot(2,3,i+1) for i in range(6)]
     plt.subplots_adjust(wspace=0, hspace=0)
     
     h,b,p=ax[0].hist(chi2_00[:,0],bins=40,density=True)
-    ax[0].text(0.75,0.9,'$\\delta\\times\\delta$'    ,transform=ax[0].transAxes)
-    ax[0].set_ylabel('$P(\\chi^2)$')
+    ax[0].text(0.7,0.9,'$\\delta\\times\\delta$'    ,transform=ax[0].transAxes,fontsize=14)
+    ax[0].set_ylabel('$P(\\chi^2)$',fontsize=15)
 
     h,b,p=ax[1].hist(chi2_02[:,0],bins=40,density=True)
-    ax[1].text(0.75,0.9,'$\\delta\\times\\gamma_E$'  ,transform=ax[1].transAxes)
+    ax[1].text(0.7,0.9,'$\\delta\\times\\gamma_E$'  ,transform=ax[1].transAxes,fontsize=14)
 
     h,b,p=ax[2].hist(chi2_02[:,1],bins=40,density=True)
-    ax[2].text(0.75,0.9,'$\\delta\\times\\gamma_B$'  ,transform=ax[2].transAxes)
+    ax[2].text(0.7,0.9,'$\\delta\\times\\gamma_B$'  ,transform=ax[2].transAxes,fontsize=14)
 
     h,b,p=ax[3].hist(chi2_22[:,0],bins=40,density=True)
-    ax[3].text(0.75,0.9,'$\\gamma_E\\times\\gamma_E$',transform=ax[3].transAxes)
-    ax[3].set_xlabel('$\\chi^2$')
-    ax[3].set_ylabel('$P(\\chi^2)$')
+    ax[3].text(0.7,0.9,'$\\gamma_E\\times\\gamma_E$',transform=ax[3].transAxes,fontsize=14)
+    ax[3].set_xlabel('$\\chi^2$',fontsize=15)
+    ax[3].set_ylabel('$P(\\chi^2)$',fontsize=15)
 
     h,b,p=ax[4].hist(chi2_22[:,1],bins=40,density=True)
-    ax[4].text(0.75,0.9,'$\\gamma_E\\times\\gamma_B$',transform=ax[4].transAxes)
+    ax[4].text(0.7,0.9,'$\\gamma_E\\times\\gamma_B$',transform=ax[4].transAxes,fontsize=14)
 
     h,b,p=ax[5].hist(chi2_22[:,3],bins=40,density=True)
-    ax[5].text(0.75,0.9,'$\\gamma_B\\times\\gamma_B$',transform=ax[5].transAxes)
+    ax[5].text(0.7,0.9,'$\\gamma_B\\times\\gamma_B$',transform=ax[5].transAxes,fontsize=14)
 
     for a in ax[:3] :
         a.set_xticklabels([])
     for a in ax[3:] :
-        a.set_xlabel('$\\chi^2$')
+        a.set_xlabel('$\\chi^2$',fontsize=15)
     ax[1].set_yticklabels([])
     ax[2].set_yticklabels([])
     ax[4].set_yticklabels([])
     ax[5].set_yticklabels([])
     for a in ax :
+        tickfs(a)
         a.set_xlim([ndof-5*np.sqrt(2.*ndof),ndof+5*np.sqrt(2.*ndof)])
         a.set_ylim([0,1.4*np.amax(pdf)])
         a.plot([ndof,ndof],[0,1.4*np.amax(pdf)],'k--',label='$N_{\\rm dof}$')
         a.plot(x,pdf,'k-',label='$P(\\chi^2,N_{\\rm dof})$')
-    ax[3].legend(loc='upper left',frameon=False)
+    ax[0].legend(loc='upper left',fontsize=12)
     plt.savefig(prefix+'_distributions.png',bbox_inches='tight')
     plt.savefig(prefix+'_distributions.pdf',bbox_inches='tight')
     
     ic=0
     plt.figure()
-    plt.plot(l_eff,np.mean(cl00_all,axis=0)[0],
+    ax=plt.gca()
+    ax.plot(l_eff,np.mean(cl00_all,axis=0)[0],
              label='$\\delta\\times\\delta$',c=cols[ic])
-    plt.plot(l_eff,cl00_th[0],'--',c=cols[ic]); ic+=1
-    plt.plot(l_eff,np.mean(cl02_all,axis=0)[0],
+    ax.plot(l_eff,cl00_th[0],'--',c=cols[ic]); ic+=1
+    ax.plot(l_eff,np.mean(cl02_all,axis=0)[0],
              label='$\\delta\\times\\gamma_E$',c=cols[ic]);
-    plt.plot(l_eff,cl02_th[0],'--',c=cols[ic]); ic+=1
-    plt.plot(l_eff,np.mean(cl02_all,axis=0)[1],
+    ax.plot(l_eff,cl02_th[0],'--',c=cols[ic]); ic+=1
+    ax.plot(l_eff,np.mean(cl02_all,axis=0)[1],
              label='$\\delta\\times\\gamma_B$',c=cols[ic]); ic+=1
-    plt.plot(l_eff,np.mean(cl22_all,axis=0)[0],
+    ax.plot([-1,-1],[-1,-1],'k-' ,label='Sims')
+    ax.plot(l_eff,np.mean(cl22_all,axis=0)[0],
              label='$\\gamma\\times\\gamma_E$',c=cols[ic]);
-    plt.plot(l_eff,cl22_th[0],'--',c=cols[ic]); ic+=1
-    plt.plot(l_eff,np.mean(cl22_all,axis=0)[1],
+    ax.plot(l_eff,cl22_th[0],'--',c=cols[ic]); ic+=1
+    ax.plot(l_eff,np.mean(cl22_all,axis=0)[1],
              label='$\\gamma_E\\times\\gamma_B$',c=cols[ic]); ic+=1
-    plt.plot(l_eff,np.mean(cl22_all,axis=0)[3],
+    ax.plot(l_eff,np.mean(cl22_all,axis=0)[3],
              label='$\\gamma_B\\times\\gamma_B$',c=cols[ic]); ic+=1
-    plt.loglog()
-    plt.xlabel('$\\ell$',fontsize=16)
-    plt.ylabel('$C_\\ell$',fontsize=16)
-    plt.legend(loc='lower left',frameon=False,fontsize=14,ncol=2)
+    ax.plot([-1,-1],[-1,-1],'k--',label='Input')
+    ax.set_xscale('log')
+    ax.set_yscale('log')
+    ax.set_xlabel('$\\ell$',fontsize=15)
+    ax.set_ylabel('$C_\\ell$',fontsize=15)
+    ax.set_ylim([4E-14,4E-6])
+    ax.set_xlim([200,19999])
+    ax.legend(loc='upper right',frameon=False,fontsize=14,ncol=2,labelspacing=0.1)
+    tickfs(ax)
     plt.savefig(prefix+'_cellfull.png',bbox_inches='tight')
     plt.savefig(prefix+'_cellfull.pdf',bbox_inches='tight')
     plt.show()

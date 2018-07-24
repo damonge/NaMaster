@@ -54,7 +54,7 @@ mask_pure=nmt.mask_apodization_flat(mask,Lx,Ly,2.,apotype='C1');
 
 w=WCS(naxis=2)
 w.wcs.cdelt=[-Lx/Nx/DTOR,Ly/Ny/DTOR]
-w.wcs.crval=[0.,0.]
+w.wcs.crval=[0.,-50.]
 w.wcs.ctype=['RA---TAN','DEC--TAN']
 w.wcs.crpix=[Nx*0.5,Ny*0.5]
 fsk=fm.FlatMapInfo(w,nx=Nx,ny=Ny)
