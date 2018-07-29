@@ -8,7 +8,6 @@ rc('text', usetex=True)
 
 nsims=1000
 prefix_clean="tests_flat/run_pure01_cont0"
-#prefix_dirty="tests_flat/run_mask1_cont1_apo0.00_no_deproj"
 
 def tickfs(ax,x=True,y=True) :
     if x :
@@ -26,14 +25,10 @@ ndof=len(l_th)
 
 print "Reading"
 clEE_clean=[]; clEB_clean=[]; clBB_clean=[];
-#clEE_dirty=[]; clEB_dirty=[]; clBB_dirty=[];
 for i in np.arange(nsims) :
     ll,ccee,cceb,ccbe,ccbb=read_cls(prefix_clean+"_cl_%04d.txt"%(i+1))
     clEE_clean.append(ccee); clEB_clean.append(cceb); clBB_clean.append(ccbb);
-    #ll,ccee,cceb,ccbe,ccbb=read_cls(prefix_dirty+"_cl_%04d.txt"%(i+1))
-    #clEE_dirty.append(ccee); clEB_dirty.append(cceb); clBB_dirty.append(ccbb);
 clEE_clean=np.array(clEE_clean); clEB_clean=np.array(clEB_clean); clBB_clean=np.array(clBB_clean); 
-#clEE_dirty=np.array(clEE_dirty); clEB_dirty=np.array(clEB_dirty); clBB_dirty=np.array(clBB_dirty);
 
 print "Computing statistics"
 hartfac=(nsims-ndof-2.)/(nsims-1.)
@@ -41,9 +36,7 @@ def compute_stats(y,y_th) :
     mean=np.mean(y,axis=0)
     cov=np.mean(y[:,:,None]*y[:,None,:],axis=0)-mean[:,None]*mean[None,:]
     icov=hartfac*np.linalg.inv(cov)
-    #chi2_red=np.dot(mean-y_th,np.dot(icov,mean-y_th))*nsims
     chi2_red=np.sum((mean-y_th)**2/np.diag(cov))*nsims
-    #chi2_all=np.sum((y-y_th)*np.sum(icov[None,:,:]*(y-y_th)[:,None,:],axis=2),axis=1)
     chi2_all=np.sum(((y-y_th)**2)/np.diag(cov)[None,:],axis=1)
 
     return mean,cov,icov,chi2_red,chi2_all
@@ -51,9 +44,6 @@ def compute_stats(y,y_th) :
 clEE_clean_mean,clEE_clean_cov,clEE_clean_icov,clEE_clean_chi2r,clEE_clean_chi2all=compute_stats(clEE_clean,clEE_th)
 clEB_clean_mean,clEB_clean_cov,clEB_clean_icov,clEB_clean_chi2r,clEB_clean_chi2all=compute_stats(clEB_clean,clEB_th)
 clBB_clean_mean,clBB_clean_cov,clBB_clean_icov,clBB_clean_chi2r,clBB_clean_chi2all=compute_stats(clBB_clean,clBB_th)
-#clEE_dirty_mean,clEE_dirty_cov,clEE_dirty_icov,clEE_dirty_chi2r,clEE_dirty_chi2all=compute_stats(clEE_dirty,clEE_th)
-#clEB_dirty_mean,clEB_dirty_cov,clEB_dirty_icov,clEB_dirty_chi2r,clEB_dirty_chi2all=compute_stats(clEB_dirty,clEB_th)
-#clBB_dirty_mean,clBB_dirty_cov,clBB_dirty_icov,clBB_dirty_chi2r,clBB_dirty_chi2all=compute_stats(clBB_dirty,clBB_th)
 m,cov,icov,chi2r,chi2all=compute_stats(np.vstack((clEE_clean.T,clEB_clean.T,clBB_clean.T)).T,
                                        np.vstack((clEE_th,clEB_th,clBB_th)).flatten())
 print(chi2r,len(m),1-st.chi2.cdf(chi2r,len(m)))
@@ -78,32 +68,19 @@ plt.savefig("plots_paper/val_covar_cmb_flat.pdf",bbox_inches='tight')
 
 #Plot residuals
 cols=plt.cm.rainbow(np.linspace(0,1,3))
-#plot_dirty=False
 fig=plt.figure()
 ax=fig.add_axes((0.12,0.3,0.78,0.6))
 ic=0
 ax.plot(l_th,clEE_clean_mean,label='$EE$',c=cols[ic])
-#if plot_dirty :
-#    ax.plot(l_th,clEE_dirty_mean,'-.',c=cols[ic]);
 ax.plot(l_th,clEE_th,'--',c=cols[ic]);
 ic+=1
 ax.plot(l_th,clEB_clean_mean,label='$EB$',c=cols[ic]);
-#if plot_dirty :
-#    ax.plot(l_th,clEB_dirty_mean,'-.',c=cols[ic]);
 ic+=1
 ax.plot(l_th,clBB_clean_mean,label='$BB$',c=cols[ic]);
 ax.plot(l_th,clBB_th,'--',c=cols[ic]);
-#if plot_dirty :
-#    ax.plot(l_th,clBB_dirty_mean,'-.',c=cols[ic]);
 ic+=1
 ax.plot([-1,-1],[-1,-1],'k-' ,label='${\\rm Sims}$')
-#if plot_dirty : 
-#    ax.plot([-1,-1],[-1,-1],'k-.' ,label='${\\rm No\\,\\,deproj.}$')
 ax.plot([-1,-1],[-1,-1],'k--',label='${\\rm Input}$')
-#if plot_dirty : 
-#    ax.set_ylim([4E-14,5E-6])
-#    ax.legend(loc='upper right',frameon=False,fontsize=14,ncol=3,labelspacing=0.1)
-#else :
 ax.set_ylim([5E-10,2E-3])
 ax.legend(loc='upper right',frameon=False,fontsize=14,ncol=2,labelspacing=0.1)
 ax.set_xlim([0,5400])
@@ -111,7 +88,7 @@ ax.set_yscale('log');
 tickfs(ax)
 ax.set_xticks([])
 ax.set_yticks([1E-9,1E-7,1E-5,1E-3])
-ax.set_ylabel('$C_\\ell$',fontsize=15)
+ax.set_ylabel('$C_\\ell\\,[\\mu K^2\\,{\\rm srad}]$',fontsize=15)
 ax=fig.add_axes((0.12,0.1,0.78,0.2))
 ic=0
 ax.errorbar(l_th  ,(clEE_clean_mean-clEE_th)*np.sqrt(nsims+0.)/np.sqrt(np.diag(clEE_clean_cov)),
