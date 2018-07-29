@@ -1,4 +1,4 @@
-import nmtlib as lib
+from pymaster import nmtlib as lib
 import numpy as np
 
 class NmtField(object) :

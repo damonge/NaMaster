@@ -1,4 +1,4 @@
-import nmtlib as lib
+from pymaster import nmtlib as lib
 import numpy as np
 
 def mask_apodization(mask_in,aposize,apotype="C1") :

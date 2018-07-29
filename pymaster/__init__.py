@@ -24,6 +24,7 @@ and a number of functions
 - :func:`pymaster.workspaces.deprojection_bias_flat`
 - :func:`pymaster.workspaces.compute_coupled_cell_flat`
 - :func:`pymaster.workspaces.compute_full_master_flat`
+- :func:`pymaster.covariance.gaussian_covariance_flat`
 - :func:`pymaster.utils.mask_apodization_flat`
 - :func:`pymaster.utils.synfast_flat`
 
@@ -36,10 +37,10 @@ Many of these function accept or return sets of power spectra (arrays with one e
 All sky maps accepted and returned by these functions are in the form of HEALPix maps exclusively with RING ordering.
 
 """
-import nmtlib as lib
+from pymaster import nmtlib as lib
 import numpy as np
-from utils import mask_apodization, mask_apodization_flat, synfast_spherical, synfast_flat
-from field import NmtField, NmtFieldFlat
-from bins import NmtBin, NmtBinFlat
-from workspaces import NmtWorkspace, NmtWorkspaceFlat, deprojection_bias, compute_coupled_cell, compute_full_master, deprojection_bias_flat, compute_coupled_cell_flat, compute_full_master_flat, uncorr_noise_deprojection_bias
-from covariance import NmtCovarianceWorkspace, gaussian_covariance, NmtCovarianceWorkspaceFlat, gaussian_covariance_flat
+from pymaster.utils import mask_apodization, mask_apodization_flat, synfast_spherical, synfast_flat
+from pymaster.field import NmtField, NmtFieldFlat
+from pymaster.bins import NmtBin, NmtBinFlat
+from pymaster.workspaces import NmtWorkspace, NmtWorkspaceFlat, deprojection_bias, compute_coupled_cell, compute_full_master, deprojection_bias_flat, compute_coupled_cell_flat, compute_full_master_flat, uncorr_noise_deprojection_bias
+from pymaster.covariance import NmtCovarianceWorkspace, gaussian_covariance, NmtCovarianceWorkspaceFlat, gaussian_covariance_flat
