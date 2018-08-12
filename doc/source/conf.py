@@ -101,12 +101,14 @@ on_rtd = os.environ.get('READTHEDOCS') == 'True'
 
 if on_rtd:
     html_theme='default'
+    import subprocess
+    subprocess.call('cd ../doxygen ; doxygen', shell=True)
 else :  # only import and set the theme if we're building docs locally
+    import subprocess
+    subprocess.call('cd ../doxygen ; doxygen', shell=True)
     import sphinx_rtd_theme
     html_theme = 'sphinx_rtd_theme'
     html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-    import subprocess
-    subprocess.call('cd doxygen ; doxygen', shell=True)
 # otherwise, readthedocs.org uses their theme by default, so no need to specify it
 
 # Theme options are theme-specific and customize the look and feel of a theme
