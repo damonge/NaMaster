@@ -32,6 +32,34 @@ typedef double flouble;
 typedef double complex fcomplex;
 #endif //_SPREC
 
+/*! \mainpage NaMaster C API
+ *
+ * Welcome to the documentation of NaMaster's C API. Navigate through the tabs above to learn more
+ * about the different functionality implemented in the code.
+ * 
+ * \section general_notes General notes
+ *   - Most users will prefer to use the python wrapper "pymaster", which mostly calls the 
+       C-based functions.
+ *   - NaMaster uses a "row-major" order to define the ordering of power spectra into vectors.
+       E.g. the cross-correlation of two spin-2 fields 'a' and 'b' would give rise to 4 power
+       spectra: Ea-Eb, Ea-Bb, Ba-Eb and Ba-Bb. These are stored into 1-dimensional arrays using
+       exactly that order. For the case of a spin-0 - spin-2 correlation, the ordering is
+       [T-E, T-B], where T is the spin-0 field and (E,B) are the harmonic components of the
+       spin-2 field.
+ *   - The abbreviation MCM will often be used instead of "mode-coupling matrix".
+ *   - SHT will sometimes be used for "Spherical Harmonic Transform". In the context of flat-sky
+       fields, this should be understood as a standard Fast Fourier Transform (FFT) (with 
+       appropriate trigonometric factors if dealing with spin-2 fields).
+ *   - FWHM will sometimes be used for "Full-width at half-max".
+ * 
+ * \section more_info More info
+ *
+ * Please refer to the README and LICENSE files for further information on installation,
+ * credits and licensing. Do not hesitate to contact the authors (preferably via github
+ * issues on https://github.com/LSSTDESC/NaMaster) if you encounter any problems using 
+ * the code.
+ */
+
 //Defined in bins_flat.c
 typedef struct {
   int n_bands;
